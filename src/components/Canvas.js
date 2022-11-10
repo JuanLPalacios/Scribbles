@@ -4,28 +4,19 @@ import '../css/Canvas.css';
 const UserContext = createContext();
 
 function Canvas(props) {
-    const [[canvasElement,context],setContext] = useState([null,null]);
-    const {width, height, brush, children} = props
-    useEffect(()=>{
-        if(canvasElement == null){
-            let canvas = document.createElement('canvas');
-            setContext([canvas, canvas.getContext("2d")]);
-        }
-    }, [])
-    useEffect(()=>{
-        canvasElement.width = width
-    }, [width])
-    useEffect(()=>{
-        canvasElement.height = height
-    }, [height])
-    useEffect(()=>{
-
-    }, [brush])
+  const {width, height, brush, children, selectedLayer, color} = props
   return (
-    <UserContext.Provider value={{context, brush}}>
-      {canvasElement}
-      {children}
-    </UserContext.Provider>
+    <div className="scroller">
+      <div
+        onClick={ e => brush.click(e, selectedLayer, color)}
+        onMouseDown={ e => brush.mouseDown(e, selectedLayer, color)}
+        onMouseUp={ e => brush.mouseUp(e, selectedLayer, color)}
+        onMouseMove={ e => brush.mouseMove(e, selectedLayer, color)}
+        style={{width:width+'px',height:height+'px'}}
+      >
+        {children}
+      </div>
+    </div>
   );
 }
 

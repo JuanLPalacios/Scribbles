@@ -1,34 +1,22 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import '../css/Layer.css';
 
 function Layer(props) {
-  const [[canvasElement,layerContext],setContext] = useState([null,null]);
+  const canvasRef = useRef(null)
+  const [layerContext,setContext] = useState(null);
   const {x, y, width, height} = props
   const {brush} = useContext()
-  useEffect(()=>{
-      if(canvasElement == null){
-          let canvas = document.createElement('canvas');
-          setContext([canvas, canvas.getContext("2d")]);
-      }
+  const canvasElement = canvasRef.current
+  
+  useEffect(() => {
+    setContext(canvasElement.getContext('2d'))
   }, [])
   useEffect(()=>{
-    canvasElement.left = x
-}, [x])
-useEffect(()=>{
-    canvasElement.top = y
-}, [y])
-useEffect(()=>{
-  canvasElement.width = width
-}, [width])
-useEffect(()=>{
-  canvasElement.height = height
-}, [height])
-useEffect(()=>{
-  brush.setContext(layerContext)
-  }, [brush])
-return (
-    {canvasElement}
-);
+    brush.setContext(layerContext)
+    }, [brush])
+  return (
+    <canvas ref={canvasRef} {...{width,height}} style={{left:x+'px', top:y+'px'}} />
+  );
 }
 
 export default Layer;

@@ -5,11 +5,12 @@ import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
 import { useState } from 'react';
-import Layer from './abstracts/Layer';
 import Brush from './abstracts/Brush';
+import Layer from './components/Layer';
 
 function App() {
-  const layer = new Layer(0,0, 200, 200);
+  const width = 2200, height = 2200;
+  const layer = {key:0,x:0,y:0, width, height};
   const [state, setState] = useState({
     layers:[layer],
     selectedLayer:layer,
@@ -20,8 +21,8 @@ function App() {
     <div className="App">
       <Menu />
       <div className="content">
-        <Canvas width={200} height={200} selectedLayer={selectedLayer} color={color} brush={new Brush(5)}>
-          {layers.map((layer) => layer.canvasElement)}
+        <Canvas width={width} height={height} selectedLayer={selectedLayer} color={color} brush={new Brush(5)}>
+          {layers.map((layer) => <Layer {...layer} />)}
         </Canvas>
         <div className="tools">
           <Toolbar>

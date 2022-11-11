@@ -1,3 +1,21 @@
 .Canvas {
-    
+    overflow: auto;
+    height: calc(100vh - 23px);
+    width: 100%;
+    scroll-padding: 100px;
+    scroll-snap-type: both mandatory;
+    box-sizing: border-box;
+    background: rgb(128, 128, 128);
+}
+
+.Canvas > * {
+    padding: 100px;
+    transform-origin: top left;
+}
+.Canvas > * > * {
+    background: #ffffff;
+    position: relative;
+}
+.Canvas > * > * > * {
+    position: absolute;
 }

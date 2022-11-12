@@ -18,9 +18,10 @@ function App() {
     ],
     selectedLayer:null,
     color:'#000000ff',
+    alpha:255,
   });
   const layerRef = useRef([]);
-  const {layers, selectedLayer, color} = state;
+  const {layers, selectedLayer, color, alpha} = state;
   const onUpdate = (newLayers) => {
     const selectedLayer = newLayers.find(x=>x.selected)
     setState({...state, layers: [...newLayers] , selectedLayer });
@@ -37,7 +38,11 @@ function App() {
           {layers.map((layer, i) => <Layer {...layer} ref={layer => layerRef.current[i] = layer}/>)}
         </Canvas>
         <div className="tools">
-          <input type="color" value={color} onChange={(e)=>setState({...state, color:e.target.value})} />
+        {color}
+          <div style={{background:color, display:'inline-block', inlineSize: 'fit-content'}}>
+            <input type="color" value={color.substring(0,7)} onChange={(e)=>setState({...state, color:e.target.value+alpha.toString(16)})} style={{opacity:0}} />
+          </div>
+          <input type="range" value={alpha} min="0" max="255" onChange={(e)=>setState({...state, color:color.substring(0,7)+parseInt(e.target.value).toString(16), alpha:parseInt(e.target.value)})} />
           <Toolbar>
           </Toolbar>
           <LayerMenu layers={layers} onUpdate={onUpdate} onAddLayer={()=>setState({...state, layers:[...layers, {key:Date.now(),x:0,y:0, width, height}]})} />

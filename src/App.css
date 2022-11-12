@@ -9,7 +9,7 @@
 }
 
 .App > .content > .tools {
-    width: 100px;
+    width: 200px;
     display: flex;
     flex-direction: column;
 }

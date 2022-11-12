@@ -7,8 +7,8 @@ function Canvas(props) {
   const {width, height, brush, children, selectedLayer, color} = props
   return (
     <CanvasContext.Provider value={{brush}}>
-      <div className="Canvas">
-        <div style={{width:width+'px'}}>
+      <div className="Canvas" >
+        <div>
           <div
             onClick={ e => brush.click(e, selectedLayer, color)}
             onMouseDown={ e => brush.mouseDown(e, selectedLayer, color)}

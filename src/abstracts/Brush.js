@@ -25,33 +25,35 @@ export default class Brush extends Tool {
     }
 
     drawStroke(ctx, point, color) {
+        if(!this.down) return;
         ctx.beginPath();
         ctx.moveTo(...this.lastPoint);
         ctx.strokeStyle = color;
         ctx.lineWidth = this.width;
         ctx.lineCap = "round";
         ctx.lineJoin = "round";
-        ctx.lineTo(point);
+        ctx.lineTo(...point);
         ctx.stroke();
         this.lastPoint = point;
+        console.log(point);
     }
 
     endStroke(ctx) {
         this.down = false;
     }
 
-    mouseDown = (e, layer, color) => {
-        e.preventDefault();
-        this.startStroke(layer.ctx,[e.offsetX, e.offsetY], color);
+    mouseDown = ({nativeEvent}, layer, color) => {
+        nativeEvent.preventDefault();
+        this.startStroke(layer.ctx,[nativeEvent.offsetX, nativeEvent.offsetY], color);
     }
     mouseUp = (e, layer, color) => {
         this.endStroke()
     }
-    mouseMove = (e, layer, color) => {
-        e.preventDefault();
-        this.continueStroke(layer.ctx,[e.offsetX, e.offsetY], color);
+    mouseMove = ({nativeEvent}, layer, color) => {
+        nativeEvent.preventDefault();
+        this.drawStroke(layer.ctx,[nativeEvent.offsetX, nativeEvent.offsetY], color);
     }
-    click = (e, layer, color) => {
-        e.preventDefault();
+    click = ({nativeEvent}, layer, color) => {
+        nativeEvent.preventDefault();
     }
 }

@@ -1,12 +1,12 @@
 .LayerMenu {
-    
+
 }
 
 .LayerMenu > .list {
-    display: flex;
-    flex-direction: column-reverse;    
+  display: flex;
+  flex-direction: column-reverse;
 }
 
 .LayerMenu .selected {
-    background: rgb(214, 240, 255);    
+  background: rgb(214, 240, 255);
 }

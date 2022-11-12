@@ -2,9 +2,7 @@ import '../css/Toolbar.css';
 
 function Toolbar() {
   return (
-    <div className="Toolbar">
-
-    </div>
+    <div className="Toolbar" />
   );
 }
 

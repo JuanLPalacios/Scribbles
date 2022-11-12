@@ -1,16 +1,25 @@
-import { forwardRef, useContext, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import {
+  forwardRef, useContext, useEffect, useRef, useState,
+} from 'react';
 import '../css/Layer.css';
 import { CanvasContext } from './Canvas';
 
 const Layer = forwardRef((props, ref) => {
-  const {x, y, width, height} = props
-  const {brush} = useContext(CanvasContext)
-  useEffect(()=>{
-    //brush.setContext(layerContext)
-    }, [brush])
+  const layerRef = useRef({});
+  const {
+    x, y, width, height,
+  } = props;
+  const { brush } = useContext(CanvasContext);
+  useEffect(() => {
+    const layer = layerRef.current;
+    ref({ ...layer });
+  }, []);
   return (
-    <canvas ref={ref} {...{width,height}} style={{left:x+'px', top:y+'px'}} />
+    <>
+      <canvas ref={(canvas) => layerRef.current.canvas = canvas} {...{ width, height }} style={{ left: `${x}px`, top: `${y}px` }} />
+      <canvas ref={(buffer) => layerRef.current.buffer = buffer} {...{ width, height }} style={{ left: `${x}px`, top: `${y}px` }} />
+    </>
   );
-})
+});
 
 export default Layer;

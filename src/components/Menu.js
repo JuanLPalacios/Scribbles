@@ -2,9 +2,7 @@ import '../css/Menu.css';
 
 function Menu() {
   return (
-    <div className="Menu">
-
-    </div>
+    <div className="Menu" />
   );
 }
 

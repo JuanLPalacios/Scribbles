@@ -1,15 +1,15 @@
 .App {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .App > .content {
-    flex: 1 1 auto;
-    display: flex;
+  flex: 1 1 auto;
+  display: flex;
 }
 
 .App > .content > .tools {
-    width: 200px;
-    display: flex;
-    flex-direction: column;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
 }

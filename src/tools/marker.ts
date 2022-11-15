@@ -2,10 +2,10 @@ import Brush from "../abstracts/Brush";
 import Layer from "../abstracts/Layer";
 
 export default class Marker extends Brush {
-    lastPoint:[number, number];
-    width: number;
-    mode: string;
-    down: boolean;
+    lastPoint:[number, number] = [0,0];
+    width = 4;
+    mode = '';
+    down = false;
   
     renderPreview(layer:Layer, points:[number, number][], color:string) {
         points.forEach((point, i) => {

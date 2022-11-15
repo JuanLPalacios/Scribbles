@@ -1,10 +1,18 @@
-import React from 'react';
-import { createContext, useEffect, useState } from 'react';
+import { createContext } from 'react';
 import '../css/Canvas.css';
 
-export const CanvasContext = createContext();
+export const CanvasContext = createContext({});
 
-function Canvas(props) {
+interface CanvasProps { 
+  width: any;
+  height: any;
+  brush: any;
+  children: any;
+  selectedLayer: any;
+  color: any;
+}
+
+function Canvas(props:CanvasProps) {
   const {
     width, height, brush, children, selectedLayer, color,
   } = props;

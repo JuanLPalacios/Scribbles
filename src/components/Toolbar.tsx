@@ -1,9 +1,17 @@
 import React from 'react';
+import Brush from '../abstracts/Brush';
+import Tool from '../abstracts/Tool';
 import '../css/Toolbar.css';
 
-function Toolbar() {
+interface ToolbarProps {
+  brush:Tool
+}
+
+function Toolbar(props:ToolbarProps) {
   return (
-    <div className="Toolbar" />
+    <div className="Toolbar">
+      <props.brush.Menu {...props.brush} />
+    </div>
   );
 }
 

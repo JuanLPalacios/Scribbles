@@ -8,10 +8,6 @@ interface Rect {
   height:number,
 }
 
-interface from {
-  mixBlendMode:string
-}
-
 export const Drawable = forwardRef((props:Rect, ref:ForwardedRef<HTMLCanvasElement>) => {
   const { x, y, width, height } = props;
   return <canvas ref={ref} width={width} height={height} />;

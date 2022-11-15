@@ -1,14 +1,13 @@
-import logo from './logo.svg';
 import './App.css';
 import Menu from './components/Menu';
 import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
 import { useEffect, useRef, useState } from 'react';
-import Brush from './abstracts/Brush';
 import Layer from './components/Layer';
 import LayerAbtraction from './abstracts/Layer';
 import React from 'react';
+import Marker from './tools/Marker';
 
 function App() {
   const width = 200; const
@@ -17,7 +16,7 @@ function App() {
   document.documentElement.style.setProperty('--doc-height', `${height}px`);
   const layer = new LayerAbtraction(0, 0, width, height, 'Image');
   layer.selected = true;
-  const [state, setState] = useState<{layers:LayerAbtraction[], selectedLayer:LayerAbtraction, color:string, alpha:number}>({
+  const [state, setState] = useState<{layers:LayerAbtraction[], selectedLayer?:LayerAbtraction, color:string, alpha:number}>({
     layers: [
       layer,
     ],
@@ -25,12 +24,13 @@ function App() {
     color: '#000000ff',
     alpha: 255,
   });
-  const layerRef = useRef<{}[]>([]);
+  const brush = new Marker();
+  const layerRef = useRef<any[]>([]);
   const {
     layers, selectedLayer, color, alpha,
   } = state;
-  const onUpdate = (newLayers) => {
-    const selectedLayer = newLayers.find((x) => x.selected);
+  const onUpdate = (newLayers: any[]) => {
+    const selectedLayer = newLayers.find((x: { selected: any; }) => x.selected);
     setState({ ...state, layers: [...newLayers], selectedLayer });
   };
   useEffect(() => {
@@ -42,8 +42,8 @@ function App() {
     <div className="App">
       <Menu />
       <div className="content">
-        <Canvas width={width} height={height} selectedLayer={selectedLayer} color={color} brush={new Brush(5)}>
-          {layers.map((layer, i) => <Layer {...layer} ref={(layer) => layerRef.current[i] = layer} />)}
+        <Canvas width={width} height={height} selectedLayer={selectedLayer} color={color} brush={brush}>
+          {layers.map((layer, i) => <Layer {...layer} key={layer.key} ref={(layer) => layerRef.current[i] = layer} />)}
         </Canvas>
         <div className="tools">
           {color}
@@ -57,7 +57,7 @@ function App() {
             alpha
             <input type="range" value={alpha} min="0" max="255" onChange={(e) => setState({ ...state, color: color.substring(0, 7) + parseInt(e.target.value).toString(16), alpha: parseInt(e.target.value) })} />
           </label>
-          <Toolbar />
+          <Toolbar brush={brush} />
           <LayerMenu layers={layers} onUpdate={onUpdate} onAddLayer={() => setState({ ...state, layers: [...layers, new LayerAbtraction(0, 0, width, height, 'hey')] })} />
         </div>
       </div>

@@ -1,14 +1,20 @@
 import React, { ForwardedRef } from 'react';
 import { forwardRef } from 'react';
+import { Rect } from '../types/Rect';
 
-interface Rect {
-  x:number,
-  y:number,
-  width:number,
-  height:number,
+export interface DrawableState {
+  canvas:HTMLCanvasElement | null,
+  ctx:CanvasRenderingContext2D | null | undefined
 }
 
-export const Drawable = forwardRef((props:Rect, ref:ForwardedRef<HTMLCanvasElement>) => {
-  const { x, y, width, height } = props;
-  return <canvas ref={ref} width={width} height={height} />;
+export const Drawable = forwardRef((props:{rect:Rect}, ref:ForwardedRef<DrawableState>) => {
+  const [,, width, height ] = props.rect;
+  return <canvas
+    ref={(canvas) => {
+      if(typeof ref === 'function')
+        ref({canvas, ctx:canvas?.getContext('2d')})
+    }}
+    width={width}
+    height={height}
+  />;
 });

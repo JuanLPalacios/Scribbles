@@ -1,0 +1,1 @@
+export type RefState<T> = { ref: React.MutableRefObject<T> } & T

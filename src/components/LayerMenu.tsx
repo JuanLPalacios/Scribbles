@@ -1,24 +1,26 @@
 import React from 'react';
 import '../css/LayerMenu.css';
 import Layer from '../abstracts/Layer';
+import { LayerState } from '../types/LayerState';
+import { Drawable } from './Drawable';
 
 interface LayerMenuProps {
-  layers:Layer[],
-  onUpdate:(layers:Layer[])=>void,
+  layers:Array<[LayerState, React.Dispatch<React.SetStateAction<LayerState>> | null]>,
+  onUpdate:(layers:Array<[LayerState, React.Dispatch<React.SetStateAction<LayerState>> | null]>)=>void,
   onAddLayer:()=>void
 }
 
 function LayerMenu({ layers, onUpdate, onAddLayer }:LayerMenuProps) {
   const onSelect = (i:number) => {
-    if (!layers[i].selected) {
-      (layers.find((x) => x.selected) || {selected:true}).selected = false;
-      layers[i].selected = true;
+    if (!layers[i][0].selected) {
+      (layers.find((x) => x[0].selected) || [{selected:true}])[0].selected = false;
+      layers[i][0].selected = true;
       onUpdate([...layers]);
     }
   };
   const onRemoveLayer = () => {
-    const selection = layers.findIndex((x) => x.selected);
-    layers[(selection + 1) % layers.length].selected = true;
+    const selection = layers.findIndex((x) => x[0].selected);
+    layers[(selection + 1) % layers.length][0].selected = true;
     onUpdate([...layers.filter((x, i) => selection !== i)]);
   };
   return (
@@ -27,12 +29,12 @@ function LayerMenu({ layers, onUpdate, onAddLayer }:LayerMenuProps) {
       <button onClick={onRemoveLayer}>-</button>
       <div className="list">
         {layers.map((layer, i) => (
-          <div key={`${layer.key}-item`} className={layer.selected ? 'selected' : ''} onClick={() => onSelect(i)}>
-            <canvas key={`${layer.key}-thumb`} ref={(thumb) => layer.thumbnail = thumb} />
+          <div key={`${layer[0].key}-item`} className={layer[0].selected ? 'selected' : ''} onClick={() => onSelect(i)}>
+            <Drawable {...layer[0].thumbnail} key={`${layer[0].key}-thumb`} />
             <div>
-              {layer.name}
+              {layer[0].name}
             </div>
-            <div>{`${layer.key}-thumb`}</div>
+            <div>{`${layer[0].key}-thumb`}</div>
           </div>
         ))}
 

@@ -1,19 +1,15 @@
 import {
-  forwardRef, useEffect, useRef,useCallback
-} from 'react';
-import { Rect } from '../types/Rect';
+  forwardRef} from 'react';
 import '../css/Layer.css';
-import React from 'react';
 import { Drawable } from './Drawable';
-import { buffer } from 'stream/consumers';
 import { LayerState } from '../types/LayerState';
+import { useLayer } from '../hooks/useLayer';
 
-const Layer = forwardRef<LayerState,LayerState>((props, ref) => {
-  const layerRef = useRef<LayerState>(props);
-  const {key, rect, name, canvas, buffer, thumbnail, selected} = props;
+const Layer = forwardRef<LayerState,LayerState>((props) => {
+  const [state, setState] = useLayer(props);
+  const {rect, canvas, buffer} = state;
   const {
-    position:[x, y],
-    size: [ width, height ]
+    position:[x, y]
   } = rect;
   
 

@@ -1,12 +1,35 @@
 .LayerMenu {
-
+  flex: 1 1 auto;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.LayerMenu > .list {
+.LayerMenu > .scroller {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.LayerMenu .list {
   display: flex;
   flex-direction: column-reverse;
 }
 
-.LayerMenu .selected {
+.LayerMenu > .actions {
+  flex: 0 0 auto;
+}
+
+.LayerMenu .list .layer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 5px;
+}
+
+.LayerMenu .layer > .thumbnail {
+  background: url(Transparency10.png), linear-gradient(0deg, #ffffff, #ffffff);
+}
+
+.LayerMenu .list .selected {
   background: rgb(214, 240, 255);
 }

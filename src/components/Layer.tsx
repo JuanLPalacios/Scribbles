@@ -1,29 +1,37 @@
-import {
-  forwardRef} from 'react';
+import { useEffect } from 'react';
 import '../css/Layer.css';
 import { Drawable } from './Drawable';
 import { LayerState } from '../types/LayerState';
-import { useLayer } from '../hooks/useLayer';
 
-const Layer = forwardRef<[LayerState, React.Dispatch<React.SetStateAction<LayerState>>],LayerState>((props, ref) => {
-  const [state, setState] = useLayer(props);
-  const {rect, canvas, buffer} = state;
+const Layer = ({values}:{values:LayerState}) => {
+  const {rect, canvas, buffer, thumbnail, visible} = values;
   const {
-    position:[x, y]
+    position:[x, y],
+    size: [ width, height ]
   } = rect;
   
-  if(typeof ref == 'function'){
-    ref([state, setState]);
-  }else if(ref){
-    ref.current = [state, setState];
-  }
+  // resizeCanvas
+  useEffect(()=>{
+    if(canvas){
+      canvas.canvas.width = width;
+      canvas.canvas.height =height;
+    }
+    if(buffer){
+      buffer.canvas.width = width;
+      buffer.canvas.height =height;
+    }
+    if(thumbnail){
+      thumbnail.canvas.width = 40;
+      thumbnail.canvas.height = thumbnail.canvas.width * (height / width);
+    }
+  },[width, height]);
 
   return (
-    <div style={{ left: `${x}px`, top: `${y}px` }}>
-      <Drawable {...canvas || {size:[0,0]}} ref={canvas?.ref} />
-      <Drawable {...buffer || {size:[0,0]}} ref={buffer?.ref}/>
+    <div style={{ display:visible?'block':'none', left: `${x}px`, top: `${y}px` }}>
+      <Drawable canvas={canvas?.canvas}/>
+      <Drawable canvas={buffer?.canvas}/>
     </div>
   );
-});
+};
 
 export default Layer;

@@ -22,3 +22,7 @@
 .Canvas > * > * > * {
   position: absolute;
 }
+
+.Canvas > * > * > * > * {
+  position: absolute;
+}

@@ -6,10 +6,11 @@ export interface LayerState {
   key: number;
   rect: Rect;
   name: string;
-  canvas?: RefState<DrawableState>
-  buffer?: RefState<DrawableState>
-  thumbnail?: RefState<DrawableState>
+  canvas?: DrawableState
+  buffer?: DrawableState
+  thumbnail?: DrawableState
   onRenderThumbnail?: () => void
+  visible:boolean
   selected:boolean
 }
 

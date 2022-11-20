@@ -21,10 +21,10 @@ function Canvas(props:CanvasProps) {
       <div className="Canvas">
         <div>
           <div
-            onClick={(e) => brush.click(e, selectedLayer[0], color)}
-            onMouseDown={(e) => brush.mouseDown(e, selectedLayer[0], color)}
-            onMouseUp={(e) => brush.mouseUp(e, selectedLayer[0], color)}
-            onMouseMove={(e) => brush.mouseMove(e, selectedLayer[0], color)}
+            onClick={(e) => brush.click(e, selectedLayer, color)}
+            onMouseDown={(e) => brush.mouseDown(e, selectedLayer, color)}
+            onMouseUp={(e) => brush.mouseUp(e, selectedLayer, color)}
+            onMouseMove={(e) => brush.mouseMove(e, selectedLayer, color)}
             style={{ width: `${width}px`, height: `${height}px` }}
           >
             {children}

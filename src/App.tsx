@@ -8,6 +8,7 @@ import Layer from './components/Layer';
 import React from 'react';
 import Marker from './tools/Marker';
 import { LayerState } from './types/LayerState';
+import { createLayer } from './hooks/createLayer';
 
 function App() {
   const width = 200; const
@@ -21,39 +22,32 @@ function App() {
       size: [width, height]
     }, 
     name:'Image',
+    visible:true,
     selected:true,
   };
   layer.selected = true;
-  const [state, setState] = useState<{layers:Array<[LayerState, React.Dispatch<React.SetStateAction<LayerState>> | null]>, selectedLayer:number, color:string, alpha:number}>({
+  const [state, setState] = useState<{layers:LayerState[], selectedLayer:number, color:string, alpha:number}>({
     layers: [
-      [layer,null],
+      createLayer(layer),
     ],
     selectedLayer: 0,
     color: '#000000ff',
     alpha: 255,
   });
   const brush = new Marker();
-  const layerRef = useRef<any[]>(state.layers);
   const {
     layers, selectedLayer, color, alpha,
   } = state;
-  const onUpdate = (newLayers: [any, any][]) => {
-    const selectedLayer = newLayers.findIndex((x) => x[0].selected);
-    layerRef.current = newLayers;
+  const onUpdate = (newLayers: LayerState[]) => {
+    const selectedLayer = newLayers.findIndex((x) => x.selected);
     setState({ ...state, layers: [...newLayers], selectedLayer });
   };
-  useEffect(() => {
-    if(layers.reduce((total, layer)=>total+(layer[0].canvas?.canvas?1:0),0) === layerRef.current.length) return;
-    
-    const layersStates = layerRef.current;
-    setState({ ...state, layers: layersStates, selectedLayer: layersStates.findIndex((x) => x[0].selected) });
-  }, [layerRef.current]);
   return (
     <div className="App">
       <Menu />
       <div className="content">
         <Canvas width={width} height={height} selectedLayer={layers[selectedLayer]} color={color} brush={brush}>
-          {layers.map((layer, i) => <Layer {...layer[0]} key={layer[0].key} ref={(layer) => layerRef.current = Object.assign([], layerRef.current, {[i]: layer})} />)}
+          {layers.map((layer, i) => <Layer values={layer} key={layer.key} />)}
         </Canvas>
         <div className="tools">
           {color}
@@ -69,18 +63,18 @@ function App() {
           </label>
           <Toolbar brush={brush} />
           <LayerMenu layers={layers} onUpdate={onUpdate} onAddLayer={() => {
-            const newLayers:[LayerState,any][] = [...layers, [
-              {
+            const newLayers:LayerState[] = [...layers,
+              createLayer({
                 key: Date.now(),
                 rect:{
                   position:[0, 0],
                   size: [width, height]
                 },
                 name:'Image',
+                visible:true,
                 selected:false,
-              }, null]
+              })
             ];
-            layerRef.current = newLayers;
             setState({ ...state, layers: newLayers })}} />
         </div>
       </div>

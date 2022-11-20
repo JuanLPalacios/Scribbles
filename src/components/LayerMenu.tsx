@@ -5,43 +5,56 @@ import { LayerState } from '../types/LayerState';
 import { Drawable } from './Drawable';
 
 interface LayerMenuProps {
-  layers:Array<[LayerState, React.Dispatch<React.SetStateAction<LayerState>> | null]>,
-  onUpdate:(layers:Array<[LayerState, React.Dispatch<React.SetStateAction<LayerState>> | null]>)=>void,
+  layers:LayerState[],
+  onUpdate:(layers:LayerState[])=>void,
   onAddLayer:()=>void
 }
 
 function LayerMenu({ layers, onUpdate, onAddLayer }:LayerMenuProps) {
+  
   const onSelect = (i:number) => {
-    if (!layers[i][0].selected) {
-      (layers.find((x) => x[0].selected) || [{selected:true}])[0].selected = false;
-      layers[i][0].selected = true;
+    if (!layers[i].selected) {
+      (layers.find((x) => x.selected) || {selected:true}).selected = false;
+      layers[i].selected = true;
       onUpdate([...layers]);
     }
   };
   const onRemoveLayer = () => {
-    const selection = layers.findIndex((x) => x[0].selected);
-    layers[(selection + 1) % layers.length][0].selected = true;
+    const selection = layers.findIndex((x) => x.selected);
+    layers[(selection + 1) % layers.length].selected = true;
     onUpdate([...layers.filter((x, i) => selection !== i)]);
   };
   return (
     <div className="LayerMenu">
-      <button onClick={onAddLayer}>+</button>
-      <button onClick={onRemoveLayer}>-</button>
-      <div className="list">
-        {layers.map((layer, i) => (
-          <div key={`${layer[0].key}-item`} className={layer[0].selected ? 'selected' : ''} onClick={() => onSelect(i)}>
-            <Drawable {...(layer[0].thumbnail || {size:[0,0]})} key={`${layer[0].key}-thumb`} ref={(thumbnail) => {
-              if(layer[0].thumbnail && thumbnail)
-                layer[0].thumbnail = {...layer[0].thumbnail, ...thumbnail};
-              if(layer[1])layer[1]({...layer[0]});
-            }} />
-            <div>
-              {layer[0].name}
+      <div className="scroller">
+        <div className="list">
+          {layers.map((layer, i) => (
+            <div key={`${layer.key}-item`} className={`layer ${layer.selected ? 'selected' : ''}`} onClick={() => onSelect(i)}>
+              <label>
+                <div className='checkbox'>
+                  visible
+                </div>
+                <input type="checkbox" checked={layer.visible} value="visible" onChange={(e)=>{
+                  layer.visible=!layer.visible;
+                  onUpdate([...layers]);
+                }} />
+              </label>
+              <div className='thumbnail'>
+                <Drawable
+                  canvas={layer.thumbnail?.canvas}
+                  key={`${layer.key}-thumb`}
+                />
+              </div>
+              <div>
+                {layer.name}
+              </div>
             </div>
-            <div>{`${layer[0].key}-thumb`}</div>
-          </div>
-        ))}
-
+          ))}
+        </div>
+      </div>
+      <div className='actions'>
+        <button onClick={onAddLayer}>+</button>
+        <button onClick={onRemoveLayer}>-</button>
       </div>
     </div>
   );

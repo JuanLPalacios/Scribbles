@@ -6,10 +6,15 @@
 .App > .content {
   flex: 1 1 auto;
   display: flex;
+  max-height: calc(100vh - 23px);
 }
 
 .App > .content > .tools {
   width: 200px;
   display: flex;
   flex-direction: column;
+}
+
+.App > .tools > * {
+  flex: 0 0 auto;
 }

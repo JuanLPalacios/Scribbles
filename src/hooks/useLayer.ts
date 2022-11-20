@@ -6,29 +6,40 @@ import { useDrawable } from "./useDrawable";
 export const useLayer:(initial:LayerState)=> [LayerState, React.Dispatch<React.SetStateAction<LayerState>>]
 = (initial) => {
     
-  const [state, setState] = useState({...initial})
-    
-    const {rect, canvas: prevCanvas, buffer: prevBuffer, thumbnail: prevThumbnail} = initial;
-    const [canvas, setCanvas] = useDrawable(prevCanvas);
-    const [buffer, setBuffer] = useDrawable(prevBuffer);
-    const [thumbnail, setThubnail] = useDrawable(prevThumbnail);
-    const {
-      size: [ width, height ]
-    } = rect;
-  
-    // resizeCanvas
-    useEffect(()=>{
-      const size:Point = [width, height];
-      setCanvas({...canvas, size});
-      setBuffer({...buffer, size});
-      setThubnail({...thumbnail,
-        size:[
-          thumbnail.size[0],
-          thumbnail.size[0] * (height / width)
-        ]
-      })
-    },[width, height, setCanvas, canvas, setBuffer, buffer, setThubnail, thumbnail]);
-    
+  const {rect, canvas: prevCanvas, buffer: prevBuffer, thumbnail: prevThumbnail} = initial;
+  const { size} = rect;
+  const [ width, height ] = size;
+  const [canvas, setCanvas] = useDrawable(prevCanvas || {size});
+  const [buffer, setBuffer] = useDrawable(prevBuffer || {size});
+  const [thumbnail, setThubnail] = useDrawable(prevThumbnail || {size:[100, 100 * (height / width)]});
 
-    return [state, setState];
+  const [state, setState] = useState<LayerState>(initial)
+    
+  // resizeCanvas
+  useEffect(()=>{
+    const size:Point = [width, height];
+    setCanvas({...canvas, size});
+    setBuffer({...buffer, size});
+    setThubnail({...thumbnail,
+      size:[
+        thumbnail.size[0],
+        thumbnail.size[0] * (height / width)
+      ]
+    })
+  },[width, height]);
+
+  useEffect(()=>{
+    setCanvas(canvas.ref.current)
+  },[canvas.ref.current.canvas]);
+
+  useEffect(()=>{
+    setBuffer(buffer.ref.current)
+  },[buffer.ref.current.canvas]);
+
+  useEffect(()=>{
+    setThubnail(thumbnail.ref.current)
+  },[thumbnail.ref.current.canvas]);
+  
+    
+    return [{...state, canvas, buffer, thumbnail}, setState];
   }

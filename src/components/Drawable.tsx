@@ -7,8 +7,12 @@ export const Drawable = forwardRef((props:DrawableState, ref:ForwardedRef<Drawab
   const [ width, height ] = props.size;
   return <canvas
     ref={(canvas) => {
+      if(!ref) return;
+      const state = {...props, canvas, ctx:canvas?.getContext('2d')} 
       if(typeof ref === 'function')
-        ref({...props, canvas, ctx:canvas?.getContext('2d')})
+        ref(state);
+      else
+        ref.current = state;
     }}
     width={width}
     height={height}

@@ -30,7 +30,11 @@ function LayerMenu({ layers, onUpdate, onAddLayer }:LayerMenuProps) {
       <div className="list">
         {layers.map((layer, i) => (
           <div key={`${layer[0].key}-item`} className={layer[0].selected ? 'selected' : ''} onClick={() => onSelect(i)}>
-            <Drawable {...layer[0].thumbnail} key={`${layer[0].key}-thumb`} />
+            <Drawable {...(layer[0].thumbnail || {size:[0,0]})} key={`${layer[0].key}-thumb`} ref={(thumbnail) => {
+              if(layer[0].thumbnail && thumbnail)
+                layer[0].thumbnail = {...layer[0].thumbnail, ...thumbnail};
+              if(layer[1])layer[1]({...layer[0]});
+            }} />
             <div>
               {layer[0].name}
             </div>

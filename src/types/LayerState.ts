@@ -1,13 +1,14 @@
 import { DrawableState } from "./DrawableState";
 import { Rect } from "./Rect";
+import { RefState } from "./RefState";
 
 export interface LayerState {
   key: number;
   rect: Rect;
   name: string;
-  canvas:DrawableState
-  buffer: DrawableState;
-  thumbnail: DrawableState;
+  canvas?: RefState<DrawableState>
+  buffer?: RefState<DrawableState>
+  thumbnail?: RefState<DrawableState>
   onRenderThumbnail?: () => void
   selected:boolean
 }

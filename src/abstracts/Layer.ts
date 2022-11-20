@@ -14,7 +14,10 @@ export default class Layer {
 
   constructor(x:number, y:number, width:number, height:number, name:string) {
     this.key = Date.now();
-    this.rect = [x,y,width,height];
+    this.rect = {
+      position: [x,y],
+      size: [width,height]
+    };
     this.name = name;
     this.selected = false;
   }

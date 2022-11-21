@@ -1,15 +1,25 @@
 import { useState, useEffect } from "react";
+import { blendModes } from "../types/BlendMode";
 import { LayerState } from "../types/LayerState";
 import { Point } from "../types/Point";
+import { Rect } from "../types/Rect";
 import { createDrawable } from "./createDrawable";
 
-export const createLayer:(initial:LayerState)=> LayerState = (initial) => {
-    
-  const {rect, canvas: prevCanvas, buffer: prevBuffer, thumbnail: prevThumbnail} = initial;
+export const createLayer = (name:string, rect:Rect):LayerState => {
   const { size} = rect;
   const [ width, height ] = size;
-  const canvas = createDrawable(prevCanvas || {size});
-  const buffer = createDrawable(prevBuffer || {size});
-  const thumbnail = createDrawable(prevThumbnail || {size:[40, 40 * (height / width)]}); 
-    return {...initial, canvas, buffer, thumbnail};
+  const canvas = createDrawable({size});
+  const buffer = createDrawable({size});
+  const thumbnail = createDrawable({size:[40, 40 * (height / width)]}); 
+    return {
+      key: Date.now(),
+      name,
+      rect,
+      canvas,
+      buffer,
+      thumbnail,
+      visible:true,
+      opacity:1,
+      mixBlendMode: blendModes[0]
+    };
   }

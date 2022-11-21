@@ -4,7 +4,7 @@ import { Drawable } from './Drawable';
 import { LayerState } from '../types/LayerState';
 
 const Layer = ({values}:{values:LayerState}) => {
-  const {rect, canvas, buffer, thumbnail, visible} = values;
+  const {rect, canvas, buffer, thumbnail, visible, opacity, mixBlendMode} = values;
   const {
     position:[x, y],
     size: [ width, height ]
@@ -27,7 +27,7 @@ const Layer = ({values}:{values:LayerState}) => {
   },[width, height]);
 
   return (
-    <div style={{ display:visible?'block':'none', left: `${x}px`, top: `${y}px` }}>
+    <div style={{ display:visible?'block':'none', left: `${x}px`, top: `${y}px`, opacity, mixBlendMode }}>
       <Drawable canvas={canvas?.canvas}/>
       <Drawable canvas={buffer?.canvas}/>
     </div>

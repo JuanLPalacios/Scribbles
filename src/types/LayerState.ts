@@ -1,6 +1,6 @@
+import { BlendMode } from "./BlendMode";
 import { DrawableState } from "./DrawableState";
 import { Rect } from "./Rect";
-import { RefState } from "./RefState";
 
 export interface LayerState {
   key: number;
@@ -10,7 +10,8 @@ export interface LayerState {
   buffer?: DrawableState
   thumbnail?: DrawableState
   onRenderThumbnail?: () => void
-  visible:boolean
-  selected:boolean
+  visible: boolean
+  opacity: number
+  mixBlendMode: BlendMode
 }
 

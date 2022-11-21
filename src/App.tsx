@@ -15,20 +15,15 @@ function App() {
     height = 200;
   document.documentElement.style.setProperty('--doc-width', `${width}px`);
   document.documentElement.style.setProperty('--doc-height', `${height}px`);
-  const layer:LayerState = {
-    key: Date.now(),
-    rect:{
-      position:[0, 0],
-      size: [width, height]
-    }, 
-    name:'Image',
-    visible:true,
-    selected:true,
-  };
-  layer.selected = true;
   const [state, setState] = useState<{layers:LayerState[], selectedLayer:number, color:string, alpha:number}>({
     layers: [
-      createLayer(layer),
+      createLayer(
+        'Image',
+        {
+          position:[0, 0],
+          size: [width, height]
+        }
+      ),
     ],
     selectedLayer: 0,
     color: '#000000ff',
@@ -38,9 +33,11 @@ function App() {
   const {
     layers, selectedLayer, color, alpha,
   } = state;
-  const onUpdate = (newLayers: LayerState[]) => {
-    const selectedLayer = newLayers.findIndex((x) => x.selected);
-    setState({ ...state, layers: [...newLayers], selectedLayer });
+  const onUpdate = (newLayers: LayerState[], selectedLayer?: number) => {
+    if(selectedLayer !== undefined)
+      setState({ ...state, layers: [...newLayers], selectedLayer  });
+    else
+      setState({ ...state, layers: [...newLayers]  });
   };
   return (
     <div className="App">
@@ -62,18 +59,15 @@ function App() {
             <input type="range" value={alpha} min="0" max="255" onChange={(e) => setState({ ...state, color: color.substring(0, 7) + parseInt(e.target.value).toString(16), alpha: parseInt(e.target.value) })} />
           </label>
           <Toolbar brush={brush} />
-          <LayerMenu layers={layers} onUpdate={onUpdate} onAddLayer={() => {
+          <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
             const newLayers:LayerState[] = [...layers,
-              createLayer({
-                key: Date.now(),
-                rect:{
+              createLayer(
+                'Image',
+                {
                   position:[0, 0],
                   size: [width, height]
-                },
-                name:'Image',
-                visible:true,
-                selected:false,
-              })
+                }
+              )
             ];
             setState({ ...state, layers: newLayers })}} />
         </div>

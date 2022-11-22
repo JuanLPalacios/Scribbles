@@ -1,6 +1,6 @@
-import { BlendMode } from "./BlendMode";
-import { DrawableState } from "./DrawableState";
-import { Rect } from "./Rect";
+import { BlendMode } from './BlendMode';
+import { DrawableState } from './DrawableState';
+import { Rect } from './Rect';
 
 export interface LayerState {
   key: number;

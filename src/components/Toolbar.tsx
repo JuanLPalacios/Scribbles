@@ -8,11 +8,10 @@ interface ToolbarProps {
 }
 
 function Toolbar(props:ToolbarProps) {
-  return (
-    <div className="Toolbar">
-      <props.brush.Menu {...props.brush} />
-    </div>
-  );
+    return (
+        <div className="Toolbar">
+        </div>
+    );
 }
 
 export default Toolbar;

@@ -21,7 +21,19 @@
     "no-underscore-dangle": "off",
     "import/no-unresolved": "off",
     "import/extensions": "off",
-    "no-shadow": "off"
+    "no-shadow": "off",
+    "indent": [
+      "error",
+      4
+    ],
+    "quotes": [
+        "error",
+        "single"
+    ],
+    "semi": [
+        "error",
+        "always"
+    ]
   },
   "ignorePatterns": [
     "dist/",

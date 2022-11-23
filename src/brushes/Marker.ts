@@ -1,37 +1,33 @@
 import Brush from '../abstracts/Brush';
-import { LayerState } from '../types/LayerState';
+import { createDrawable } from '../hooks/createDrawable';
+import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
 export default class Marker extends Brush {
     lastPoint: Point = [0,0];
-    down = false;
     
-    startStroke(layer:LayerState, point:Point, color:string, width:number) {
-        this.down = true;
+    startStroke(drawable:DrawableState, point:Point, color:string, width:number) {
         this.lastPoint = point;
-    }
-  
-    drawStroke(layer:LayerState, point:Point, color:string, width:number) {
-        const ctx = layer.canvas?.ctx;
+        const {ctx} = drawable;
         if (!ctx) return;
-        if (!this.down) return;
-        ctx.beginPath();
-        ctx.moveTo(...this.lastPoint);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = width;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width;
+    }
+  
+    drawStroke(drawable:DrawableState, point:Point, color:string, width:number) {
+        const ctx = drawable.ctx;
+        if (!ctx) return;
+        if (!ctx) return;
+        ctx.beginPath();
+        ctx.moveTo(...this.lastPoint);
         ctx.lineTo(...point);
         ctx.stroke();
         this.lastPoint = point;
-        console.log(point);
     }
   
-    endStroke(layer:LayerState, point:Point, color:string, width:number) {
-        this.down = false;
-        if (!layer.thumbnail?.canvas) return;
-        if (!layer.canvas?.canvas) return;
-        layer.thumbnail.ctx?.drawImage(layer.canvas.canvas, 0, 0, layer.thumbnail.canvas.width, layer.thumbnail.canvas.height);
-    }
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    endStroke(drawable:DrawableState, point:Point, color:string, width:number) {}
 }
   

@@ -6,9 +6,9 @@ export interface LayerState {
   key: number;
   rect: Rect;
   name: string;
-  canvas?: DrawableState
-  buffer?: DrawableState
-  thumbnail?: DrawableState
+  canvas: DrawableState
+  buffer: DrawableState
+  thumbnail: DrawableState
   onRenderThumbnail?: () => void
   visible: boolean
   opacity: number

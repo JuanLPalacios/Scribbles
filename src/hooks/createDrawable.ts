@@ -1,6 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
 import { DrawableState } from '../types/DrawableState';
-import { RefStateHook } from '../types/RefStateHook';
 
 export const createDrawable = (initial:DrawableState | {size:[number,number]}) => {
     let  {canvas, ctx} = initial as DrawableState;

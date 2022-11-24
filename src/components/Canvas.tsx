@@ -20,7 +20,7 @@ function Canvas(props:CanvasProps) {
     const {
         width, height, tool, children, selectedLayer, color,brush
     } = props;
-    const brushWidth = 5;
+    const brushWidth = 20;
     return (
         <CanvasContext.Provider value={{ brush: tool }}>
             <div className="Canvas">

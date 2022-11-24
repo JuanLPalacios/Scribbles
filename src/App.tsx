@@ -8,16 +8,16 @@ import Layer from './components/Layer';
 import Marker from './brushes/Marker';
 import { LayerState } from './types/LayerState';
 import { createLayer } from './hooks/createLayer';
-import Brush from './abstracts/Brush';
-import Tool from './abstracts/Tool';
 import { draw } from './tools/Draw';
+import { MenuOptions } from './types/MenuOptions';
+import { erase } from './tools/Erase';
 
 function App() {
     const width = 200; const
         height = 200;
     document.documentElement.style.setProperty('--doc-width', `${width}px`);
     document.documentElement.style.setProperty('--doc-height', `${height}px`);
-    const [state, setState] = useState<{layers:LayerState[], selectedLayer:number, color:string, alpha:number, brushes:Brush[], selectedBrush:number, tools:{tool:Tool}[], selectedTool:number}>({
+    const [state, setState] = useState<MenuOptions>({
         layers: [
             createLayer(
                 'Image',
@@ -30,7 +30,10 @@ function App() {
         selectedLayer: 0,
         brushes:[new Marker()],
         selectedBrush: 0,
-        tools:[{tool:draw}],
+        tools:[
+            {key:Date.now(),tool:draw, name:'draw'},
+            {key:Date.now(),tool:erase, name:'erase'}
+        ],
         selectedTool: 0,
         color: '#000000ff',
         alpha: 255,
@@ -56,16 +59,16 @@ function App() {
                 <div className="tools">
                     {color}
                     <label>
-            color
+                        color
                         <div style={{ background: color, display: 'inline-block', inlineSize: 'fit-content' }}>
                             <input type="color" value={color.substring(0, 7)} onChange={(e) => setState({ ...state, color: e.target.value + alpha.toString(16) })} style={{ opacity: 0 }} />
                         </div>
                     </label>
                     <label>
-            alpha
+                        alpha
                         <input type="range" value={alpha} min="0" max="255" onChange={(e) => setState({ ...state, color: color.substring(0, 7) + parseInt(e.target.value).toString(16), alpha: parseInt(e.target.value) })} />
                     </label>
-                    <Toolbar brush={tool} />
+                    <Toolbar toolButtons={tools}  selectedTool={selectedTool} onSelect={(selectedTool)=>setState({...state, selectedTool})} />
                     <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
                         const newLayers:LayerState[] = [...layers,
                             createLayer(

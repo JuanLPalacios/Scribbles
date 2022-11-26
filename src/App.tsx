@@ -11,6 +11,8 @@ import { createLayer } from './hooks/createLayer';
 import { draw } from './tools/Draw';
 import { MenuOptions } from './types/MenuOptions';
 import { erase } from './tools/Erase';
+import { fill } from './tools/Fill';
+import { transform } from './tools/Transform';
 
 function App() {
     const width = 200; const
@@ -32,7 +34,9 @@ function App() {
         selectedBrush: 0,
         tools:[
             {key:Date.now(),tool:draw, name:'draw'},
-            {key:Date.now(),tool:erase, name:'erase'}
+            {key:Date.now(),tool:erase, name:'erase'},
+            {key:Date.now(),tool:fill, name:'fill'},
+            {key:Date.now(),tool:transform, name:'transform'}
         ],
         selectedTool: 0,
         color: '#000000ff',

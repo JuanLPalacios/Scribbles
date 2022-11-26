@@ -31,6 +31,7 @@ const Layer = ({values}:{values:LayerState}) => {
         <div style={{ display:visible?'block':'none', left: `${x}px`, top: `${y}px`, opacity, mixBlendMode }}>
             <Drawable canvas={canvas?.canvas}/>
             <Drawable canvas={buffer?.canvas}/>
+            <div style={{top:'-70px', background:'#ff0000', width:'50px', height:'50px'}}></div>
         </div>
     );
 };

@@ -6,6 +6,7 @@ import { Point } from '../types/Point';
 export const transform = new (class Transform extends Tool {
     center: Point = [0,0];
     rotation = 0;
+    axis: [boolean,boolean] = [false,false];
 
 
 
@@ -79,30 +80,62 @@ export const transform = new (class Transform extends Tool {
     }
 
     startSkewering(e:React.MouseEvent){
-        throw new Error('Method not implemented.');
+        const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
+        const drawnRect = currentTarget.getBoundingClientRect();
+        this.center = [
+            drawnRect.left + ((Math.abs(drawnRect.left - e.clientX) > drawnRect.width/2) ? drawnRect.width : 0),
+            drawnRect.top + ((Math.abs(drawnRect.top - e.clientY) > drawnRect.height/2) ? drawnRect.height : 0)
+        ];
+        this.axis = [
+            (Math.abs(drawnRect.left + drawnRect.width/2 - e.clientX) > drawnRect.width/3),
+            (Math.abs(drawnRect.top + drawnRect.height/2 - e.clientY) > drawnRect.height/3)
+        ];
     }
 
-    skew(e:React.MouseEvent){
-        throw new Error('Method not implemented.');
+    skew(e:React.MouseEvent, layer:LayerState){
+        const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
+        const drawnRect = currentTarget.getBoundingClientRect();
+        layer.buffer.ctx?.transform( 
+            1,
+            this.axis[0] ? (e.clientX-this.center[0])/drawnRect.height : 1,
+            this.axis[1] ? (e.clientY-this.center[1])/drawnRect.width : 1,
+            1,0,0
+        );
+        this.render(layer);
     }
 
     startScaling(e:React.MouseEvent){
-        throw new Error('Method not implemented.');
+        const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
+        const drawnRect = currentTarget.getBoundingClientRect();
+        this.center = [
+            drawnRect.left + ((Math.abs(drawnRect.left - e.clientX) > drawnRect.width/2) ? drawnRect.width : 0),
+            drawnRect.top + ((Math.abs(drawnRect.top - e.clientY) > drawnRect.height/2) ? drawnRect.height : 0)
+        ];
+        this.axis = [
+            (Math.abs(drawnRect.left + drawnRect.width/2 - e.clientX) > drawnRect.width/3),
+            (Math.abs(drawnRect.top + drawnRect.height/2 - e.clientY) > drawnRect.height/3)
+        ];
     }
 
-    scale(e:React.MouseEvent){
-        throw new Error('Method not implemented.');
+    scale(e:React.MouseEvent, layer:LayerState){
+        const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
+        const drawnRect = currentTarget.getBoundingClientRect();
+        layer.buffer.ctx?.scale(
+            this.axis[0] ? (e.clientX-this.center[0])/drawnRect.width : 1,
+            this.axis[1] ? (e.clientY-this.center[1])/drawnRect.height : 1
+        );
+        this.render(layer);
     }
 
     startRotation(e:React.MouseEvent, layer:LayerState){
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
-        const arrowRects = currentTarget.getBoundingClientRect();
-        this.center = [arrowRects.left + arrowRects.width / 2, arrowRects.top + arrowRects.height / 2];
-        layer.buffer.ctx?.rotate();;
+        const drawnRect = currentTarget.getBoundingClientRect();
+        this.center = [drawnRect.left + drawnRect.width / 2, drawnRect.top + drawnRect.height / 2];
+        this.rotation = Math.atan2(e.clientY - this.center[1], e.clientX - this.center[0]) + Math.PI / 2;
     }
 
     rotate(e:React.MouseEvent, layer:LayerState){
-        const angle = Math.atan2(e.clientY - this.center[1], e.clientX - this.center[0]) + Math.PI / 2;
+        const angle = Math.atan2(e.clientY - this.center[1], e.clientX - this.center[0]) + Math.PI / 2 - this.rotation;
         layer.buffer.ctx?.rotate(angle * 180 / Math.PI);
         this.render(layer);
     }

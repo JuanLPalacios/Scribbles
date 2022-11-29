@@ -1,6 +1,7 @@
 import { BlendMode } from './BlendMode';
 import { DrawableState } from './DrawableState';
 import { Rect } from './Rect';
+import { Handle } from './Handle';
 
 export interface LayerState {
   key: number;
@@ -9,9 +10,9 @@ export interface LayerState {
   canvas: DrawableState
   buffer: DrawableState
   thumbnail: DrawableState
-  onRenderThumbnail?: () => void
   visible: boolean
   opacity: number
   mixBlendMode: BlendMode
+  handles: Handle[]
 }
 

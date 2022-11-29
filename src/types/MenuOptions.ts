@@ -9,7 +9,8 @@ export type MenuOptions<T = any> = {
     alpha:number,
     brushes:Brush[],
     selectedBrush:number,
+    brushWidth:number,
     tools:ToolButton[],
-    toolsOptions?:T,
     selectedTool:number
+    toolsOptions?:T,
 }

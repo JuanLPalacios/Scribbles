@@ -1,4 +1,5 @@
 import { LayerState } from '../types/LayerState';
+import { MenuOptions } from '../types/MenuOptions';
 import Brush from './Brush';
 
 export default abstract class Tool {
@@ -9,8 +10,10 @@ export default abstract class Tool {
             thumbnail.ctx.drawImage(canvas.canvas, 0, 0, thumbnail.canvas.width, thumbnail.canvas.height);
         }
     } 
-  abstract mouseDown(brush:Brush, e:React.MouseEvent, layer:LayerState, color:string, width:number):void;
-  abstract mouseUp(brush:Brush, e:React.MouseEvent, layer:LayerState, color:string, width:number):void;
-  abstract mouseMove(brush:Brush, e:React.MouseEvent, layer:LayerState, color:string, width:number):void;
-  abstract click(brush:Brush, e:React.MouseEvent, layer:LayerState, color:string, width:number):void;
+    abstract setup(options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
+    abstract dispose(options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
+    abstract mouseDown(e:React.MouseEvent, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
+    abstract mouseUp(e:React.MouseEvent, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
+    abstract mouseMove(e:React.MouseEvent, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
+    abstract click(e:React.MouseEvent, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
 }

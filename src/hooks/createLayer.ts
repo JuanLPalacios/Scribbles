@@ -18,6 +18,7 @@ export const createLayer = (name:string, rect:Rect):LayerState => {
         thumbnail,
         visible:true,
         opacity:1,
-        mixBlendMode: blendModes[0]
+        mixBlendMode: blendModes[0],
+        handles: []
     };
 };

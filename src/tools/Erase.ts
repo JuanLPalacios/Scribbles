@@ -1,8 +1,8 @@
-import Brush from '../abstracts/Brush';
+import { MouseEvent } from 'react';
 import Tool from '../abstracts/Tool';
 import { createDrawable } from '../hooks/createDrawable';
-import { LayerState } from '../types/LayerState';
 import { DrawableState } from '../types/DrawableState';
+import { MenuOptions } from '../types/MenuOptions';
 
 export const erase = new (class Erase extends Tool {
     mask: DrawableState;
@@ -21,31 +21,37 @@ export const erase = new (class Erase extends Tool {
             buffer.ctx.drawImage(this.mask.canvas, 0, 0);
         }
     }
-
-    mouseDown(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
+    
+    setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        throw new Error('Method not implemented.');
+    }
+    
+    dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        throw new Error('Method not implemented.');
+    }
+    
+    mouseDown({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
+        const brush = brushes[selectedBrush];
+        const layer = layers[selectedLayer];
         nativeEvent.preventDefault();
         const {canvas, buffer} = layer;
         this.mask.canvas.width = layer.canvas.canvas.width;
         this.mask.canvas.height = layer.canvas.canvas.height;
         layer.canvas.canvas.style.display = 'none';
         this.renderMask(canvas, buffer);
-        brush.startStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, width);
+        brush.startStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
         this.down = true;
     }
-
-    mouseMove(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
-        nativeEvent.preventDefault();
-        if (!this.down) return;
-        const {canvas, buffer} = layer;
-        brush.drawStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, width);
-        this.renderMask(canvas, buffer);
-    }
     
-    mouseUp(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
+    mouseUp({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
+        const brush = brushes[selectedBrush];
+        const layer = layers[selectedLayer];
         nativeEvent.preventDefault();
         if (!this.down) return;
         const {canvas, buffer} = layer;
-        brush.endStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, width);
+        brush.endStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
         this.renderMask(canvas, buffer);
         if(canvas.ctx){
             canvas.ctx.globalCompositeOperation = 'copy';
@@ -58,7 +64,18 @@ export const erase = new (class Erase extends Tool {
         this.down = false;
     }
     
-    click(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
+    mouseMove({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
+        const brush = brushes[selectedBrush];
+        const layer = layers[selectedLayer];
+        nativeEvent.preventDefault();
+        if (!this.down) return;
+        const {canvas, buffer} = layer;
+        brush.drawStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
+        this.renderMask(canvas, buffer);
+    }
+    
+    click({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         nativeEvent.preventDefault();
     }
 })();

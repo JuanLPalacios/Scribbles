@@ -4,12 +4,12 @@ import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
 import { useState } from 'react';
-import Layer from './components/Layer';
 import Marker from './brushes/Marker';
 import { LayerState } from './types/LayerState';
 import { createLayer } from './hooks/createLayer';
-import { draw } from './tools/Draw';
 import { MenuOptions } from './types/MenuOptions';
+
+import { draw } from './tools/Draw';
 import { erase } from './tools/Erase';
 import { fill } from './tools/Fill';
 import { transform } from './tools/Transform';
@@ -32,10 +32,11 @@ function App() {
         selectedLayer: 0,
         brushes:[new Marker()],
         selectedBrush: 0,
+        brushWidth:20,
         tools:[
-            {key:Date.now(),tool:draw, name:'draw'},
-            {key:Date.now(),tool:erase, name:'erase'},
-            {key:Date.now(),tool:fill, name:'fill'},
+            {key:Date.now()-3,tool:draw, name:'draw'},
+            {key:Date.now()-2,tool:erase, name:'erase'},
+            {key:Date.now()-1,tool:fill, name:'fill'},
             {key:Date.now(),tool:transform, name:'transform'}
         ],
         selectedTool: 0,
@@ -57,9 +58,7 @@ function App() {
         <div className="App">
             <Menu />
             <div className="content">
-                <Canvas width={width} height={height} selectedLayer={layers[selectedLayer]} color={color} brush={brush} tool={tool}>
-                    {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
-                </Canvas>
+                <Canvas width={width} height={height} options={state} onChange={setState} />
                 <div className="tools">
                     {color}
                     <label>

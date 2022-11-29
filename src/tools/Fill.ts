@@ -1,23 +1,36 @@
+import { MouseEvent } from 'react';
 import Brush from '../abstracts/Brush';
 import Tool from '../abstracts/Tool';
 import { DrawableState } from '../types/DrawableState';
 import { LayerState } from '../types/LayerState';
+import { MenuOptions } from '../types/MenuOptions';
 import { Point } from '../types/Point';
   
 export const fill = new (class Fill extends Tool {
-    mouseDown(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
-        nativeEvent.preventDefault();
+    
+    setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        throw new Error('Method not implemented.');
     }
-
-    mouseMove(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
+    
+    dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        throw new Error('Method not implemented.');
+    }
+    
+    mouseDown({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         nativeEvent.preventDefault();
     }
     
-    mouseUp(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
+    mouseUp({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         nativeEvent.preventDefault();
     }
     
-    click(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, bwidth:number) {
+    mouseMove({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        nativeEvent.preventDefault();
+    }
+    
+    click({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        const { layers, selectedLayer, color } = options;
+        const layer = layers[selectedLayer];
         nativeEvent.preventDefault();
         const {canvas, buffer} = layer;
         if(!buffer.ctx) return;
@@ -38,6 +51,7 @@ export const fill = new (class Fill extends Tool {
         buffer.ctx.clearRect(0,0,buffer.canvas.width,buffer.canvas.height);
         this,this.renderThumbnail(layer);
     }
+    
     fill(canvas: DrawableState, buffer: DrawableState, tolerance:number, ox: number, oy: number, color: Uint8ClampedArray | number[], oColor: Uint8ClampedArray | number[]) {
         
         const canvasWidth = canvas.canvas.width;

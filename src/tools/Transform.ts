@@ -10,16 +10,19 @@ export const transform = new (class Transform extends Tool {
     rotation = 0;
     handles:DOMPoint[] = [];
     matrix = new DOMMatrix();
-    pivot = new DOMMatrix();
-    ipivot = new DOMMatrix();
+    pivot = new DOMPoint();
+    prevMatrix = new DOMMatrix();
     axis: [boolean,boolean] = [false,false];
-    action: 'none' | 'scale' | 'rotate' = 'none';
+    skewMode = false;
+    action: 'none' | 'scale' | 'rotate' | 'skew' = 'none';
+    drawnRect: { left: number; top: number; width: number; height: number; } = {left:0,top:0,height:0, width:0};
     
     setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         //throw new Error('Method not implemented.');
         const { layers, selectedLayer, brushes, selectedBrush } = options;
         const layer = layers[selectedLayer];
-        const {canvas} = layer;
+        const {canvas, buffer} = layer;
+
         const mw = canvas.canvas.width/2;
         const mh = canvas.canvas.height/2;
         this.handles = [
@@ -32,6 +35,11 @@ export const transform = new (class Transform extends Tool {
             new DOMPoint(2*mw,0),
             new DOMPoint(mw,0)
         ];
+        if(buffer.ctx){
+            buffer.ctx.globalCompositeOperation = 'copy';
+            buffer.ctx.drawImage(canvas.canvas, 0, 0);
+            canvas.canvas.style.display = 'none';
+        }
         this.render(layer);
         setOptions({...options});
     }
@@ -45,116 +53,129 @@ export const transform = new (class Transform extends Tool {
         const {nativeEvent} = e;
         const layer = layers[selectedLayer];
         nativeEvent.preventDefault();
-        this.startScaling(e, layer);
+        console.log(e.currentTarget.id);
+        
+        if(this.skewMode)
+            this.startScaling(e, layer);
+        else 
+            this.startSkewering(e, layer);
+        //this.startTranslation(e, layer);
+        e.stopPropagation();
     }
     
     mouseUp(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, brushes, selectedBrush } = options;
         //throw new Error('Method not implemented.');
         this.action = 'none';
+        e.stopPropagation();
     }
     
     mouseMove(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        e.preventDefault();
+        e.stopPropagation();
         const { layers, selectedLayer, brushes, selectedBrush } = options;
         const layer = layers[selectedLayer];
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
         const {nativeEvent} = e;
         nativeEvent.preventDefault();
         
-        this.scale(e, layer);
+        switch(this.action){
+        case 'scale':
+            this.scale(e, layer);
+            break;
+        case 'skew':
+            this.skew(e, layer);
+            break;
+        }
         
         setOptions({...options});
-        /*console.log(
-            'currentTarget',
-            currentTarget.offsetLeft,
-            currentTarget.offsetTop
-        );
-        console.log(
-            'page',
-            e.pageX,
-            e.pageY
-        );
-        console.log(
-            'client',
-            e.clientX,
-            e.clientY
-        );
-        console.log(
-            'screen',
-            e.screenX,
-            e.screenY
-        );
-        console.log(
-            'movement',
-            e.movementX,
-            e.movementY
-        );
-        console.log(
-            'plane',
-            nativeEvent.x,
-            nativeEvent.y
-        );
-        console.log(
-            'offset',
-            nativeEvent.offsetX,
-            nativeEvent.offsetY
-        );*/
     }
     
     click(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, brushes, selectedBrush } = options;
-        const {nativeEvent} = e;
-        nativeEvent.preventDefault();
-        console.log(
-            nativeEvent.offsetX,
-            nativeEvent.offsetY
-        );
+        const layer = layers[selectedLayer];
+        this.skewMode = !this.skewMode;
+        this.render(layer);
+        setOptions({...options});
     }
 
-    startTranslation(){
+    startTranslation(e:React.MouseEvent , layer:LayerState){
         throw new Error('Method not implemented.');
     }
 
-    translate(){
+    translate(e:React.MouseEvent , layer:LayerState){
         throw new Error('Method not implemented.');
     }
 
-    startSkewering(e:React.MouseEvent){
+    startSkewering(e:React.MouseEvent, layer:LayerState){
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
-        const drawnRect = currentTarget.getBoundingClientRect();
+        const canvasRect = currentTarget.getBoundingClientRect();
+        const 
+            minX = Math.min(this.handles[0].matrixTransform(this.matrix).x, this.handles[2].matrixTransform(this.matrix).x, this.handles[4].matrixTransform(this.matrix).x, this.handles[6].matrixTransform(this.matrix).x),
+            minY = Math.min(this.handles[0].matrixTransform(this.matrix).y, this.handles[2].matrixTransform(this.matrix).y, this.handles[4].matrixTransform(this.matrix).y, this.handles[6].matrixTransform(this.matrix).y),
+            maxX = Math.max(this.handles[0].matrixTransform(this.matrix).x, this.handles[2].matrixTransform(this.matrix).x, this.handles[4].matrixTransform(this.matrix).x, this.handles[6].matrixTransform(this.matrix).x),
+            maxY = Math.max(this.handles[0].matrixTransform(this.matrix).y, this.handles[2].matrixTransform(this.matrix).y, this.handles[4].matrixTransform(this.matrix).y, this.handles[6].matrixTransform(this.matrix).y);
+        this.drawnRect = {
+            left:minX + canvasRect.left,
+            top:minY + canvasRect.top,
+            width:maxX - minX,
+            height:maxY - minY
+        };
+        const drawnRect = this.drawnRect;
         this.center = [
-            drawnRect.left + ((Math.abs(drawnRect.left - e.clientX) > drawnRect.width/2) ? drawnRect.width : 0),
-            drawnRect.top + ((Math.abs(drawnRect.top - e.clientY) > drawnRect.height/2) ? drawnRect.height : 0)
+            drawnRect.left + ((Math.abs(drawnRect.left - e.clientX) < drawnRect.width/2) ? drawnRect.width : 0),
+            drawnRect.top + ((Math.abs(drawnRect.top - e.clientY) < drawnRect.height/2) ? drawnRect.height : 0)
         ];
+        console.log(this.center);
+        
         this.axis = [
-            (Math.abs(drawnRect.left + drawnRect.width/2 - e.clientX) > drawnRect.width/3),
-            (Math.abs(drawnRect.top + drawnRect.height/2 - e.clientY) > drawnRect.height/3)
+            (Math.abs(drawnRect.top + drawnRect.height/2 - e.clientY) > drawnRect.height/3),
+            (Math.abs(drawnRect.left + drawnRect.width/2 - e.clientX) > drawnRect.width/3)
         ];
+        this.prevMatrix = this.matrix;
+        this.pivot = new DOMPoint(this.center[0] - canvasRect.left, this.center[1] - canvasRect.top)
+            .matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()))
+        ;
+        this.action = 'skew';
     }
     
     skew(e:React.MouseEvent, layer:LayerState){
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
-        const drawnRect = currentTarget.getBoundingClientRect();
-        layer.buffer.ctx?.transform( 
-            1,
-            this.axis[0] ? (e.clientX-this.center[0])/drawnRect.height : 1,
-            this.axis[1] ? (e.clientY-this.center[1])/drawnRect.width : 1,
-            1,0,0
+        const drawnRect = this.drawnRect;
+        console.log(
+            (e.clientX-this.center[0])/2,
+            (e.clientY-this.center[1])/2
         );
+        
+        if(this.axis[0])
+            this.matrix = this.prevMatrix.skewX( 
+                (e.clientX-this.center[0])*drawnRect.height/(drawnRect.width*drawnRect.width*2)
+            );
+        else 
+            this.matrix = this.prevMatrix.skewY( 
+                (e.clientY-this.center[1])/2
+            );
         this.render(layer);
     }
         
     startScaling(e:React.MouseEvent, layer:LayerState){
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
-        const canvasRect = layer.canvas.canvas.getBoundingClientRect();
-        const drawnRect = {
-            left:this.handles[0].matrixTransform(this.matrix).x + canvasRect.left,
-            top:this.handles[0].matrixTransform(this.matrix).y + canvasRect.top,
-            width:this.handles[4].matrixTransform(this.matrix).x - this.handles[0].matrixTransform(this.matrix).x,
-            height:this.handles[4].matrixTransform(this.matrix).y - this.handles[0].matrixTransform(this.matrix).y
+        const canvasRect = currentTarget.getBoundingClientRect();
+        const 
+            minX = Math.min(this.handles[0].matrixTransform(this.matrix).x, this.handles[2].matrixTransform(this.matrix).x, this.handles[4].matrixTransform(this.matrix).x, this.handles[6].matrixTransform(this.matrix).x),
+            minY = Math.min(this.handles[0].matrixTransform(this.matrix).y, this.handles[2].matrixTransform(this.matrix).y, this.handles[4].matrixTransform(this.matrix).y, this.handles[6].matrixTransform(this.matrix).y),
+            maxX = Math.max(this.handles[0].matrixTransform(this.matrix).x, this.handles[2].matrixTransform(this.matrix).x, this.handles[4].matrixTransform(this.matrix).x, this.handles[6].matrixTransform(this.matrix).x),
+            maxY = Math.max(this.handles[0].matrixTransform(this.matrix).y, this.handles[2].matrixTransform(this.matrix).y, this.handles[4].matrixTransform(this.matrix).y, this.handles[6].matrixTransform(this.matrix).y);
+        this.drawnRect = {
+            left:minX + canvasRect.left,
+            top:minY + canvasRect.top,
+            width:maxX - minX,
+            height:maxY - minY
         };
+        const drawnRect = this.drawnRect;
+        console.log(canvasRect);
         console.log(drawnRect);
-        console.log(this.handles);
+        console.log(this.handles.map((x)=>x.matrixTransform(this.matrix)));
         this.center = [
             drawnRect.left + ((Math.abs(drawnRect.left - e.clientX) < drawnRect.width/2) ? drawnRect.width : 0),
             drawnRect.top + ((Math.abs(drawnRect.top - e.clientY) < drawnRect.height/2) ? drawnRect.height : 0)
@@ -163,33 +184,40 @@ export const transform = new (class Transform extends Tool {
             (Math.abs(drawnRect.left + drawnRect.width/2 - e.clientX) > drawnRect.width/3),
             (Math.abs(drawnRect.top + drawnRect.height/2 - e.clientY) > drawnRect.height/3)
         ];
-        this.ipivot = this.matrix.translate(this.center[0]-drawnRect.left,this.center[1]-drawnRect.top)
+        this.prevMatrix = this.matrix;
+        this.pivot = new DOMPoint(this.center[0] - canvasRect.left, this.center[1] - canvasRect.top)
+            .matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()))
+        ;
+        console.log(this.pivot);
+        this.matrix = this.prevMatrix
             .scale(
-                this.axis[0] ? (e.clientX-this.center[0])/Math.abs(e.clientX-this.center[0]) : 1,
-                this.axis[1] ? (e.clientY-this.center[1])/Math.abs(e.clientY-this.center[1]) : 1
-            );
-        this.pivot = new DOMMatrix().translate(-this.center[0]+drawnRect.left,-this.center[1]+drawnRect.top);
-        this.matrix = this.ipivot
-            .multiply(this.pivot)
-            .scale(
-                this.axis[0] ? (e.clientX-this.center[0])/drawnRect.width : 1,
-                this.axis[1] ? (e.clientY-this.center[1])/drawnRect.height : 1
-            );
+                this.axis[0] ? Math.abs(e.clientX-this.center[0])/drawnRect.width : 1,
+                this.axis[1] ? Math.abs(e.clientY-this.center[1])/drawnRect.height : 1,
+                1,
+                this.pivot.x,
+                this.pivot.y,
+                0
+            )
+        ;
         this.action = 'scale';
     }
     
     scale(e:React.MouseEvent, layer:LayerState){
-        if(this.action !== 'scale') return;
+        //if(this.action !== 'scale') return;
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
-        const drawnRect = currentTarget.getBoundingClientRect();
+
+        const drawnRect = this.drawnRect;
         this.matrix =
         //new DOMMatrix()
-        this.ipivot
+        this.prevMatrix
             .scale(
-                this.axis[0] ? (e.clientX-this.center[0])/drawnRect.width : 1,
-                this.axis[1] ? (e.clientY-this.center[1])/drawnRect.height : 1
+                this.axis[0] ? Math.abs(e.clientX-this.center[0])/drawnRect.width : 1,
+                this.axis[1] ? Math.abs(e.clientY-this.center[1])/drawnRect.height : 1,
+                1,
+                this.pivot.x,
+                this.pivot.y,
+                0
             )
-            .multiply(this.pivot)
             //.translate(this.center[0]-drawnRect.left,this.center[1]-drawnRect.top)
         ;
         this.render(layer);
@@ -210,6 +238,8 @@ export const transform = new (class Transform extends Tool {
 
     render(layer: LayerState) {
         //console.log(this.matrix);
-        layer.handles = this.handles.map((pos,i)=>({key:565616651651+i, icon:''+i, position:pos.matrixTransform(this.matrix), rotation:new DOMMatrix()}));
+        layer.handles = this.handles.map((pos,i)=>({key:565616651651+i, icon:(this.skewMode?'sk':'sc')+i, position:pos.matrixTransform(this.matrix), rotation:new DOMMatrix()}));
+        layer.buffer.canvas.style.transform = this.matrix.toString();
+        layer.buffer.canvas.style.transformOrigin = 'top left';
     }
 })();

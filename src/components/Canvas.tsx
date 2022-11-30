@@ -32,13 +32,17 @@ function Canvas(props:CanvasProps) {
     },[tool]);
     return (
         <CanvasContext.Provider value={{ brush: tool }}>
-            <div className="Canvas">
+            <div className="Canvas" 
+                onMouseMove={(e) => tool.mouseMove(e, options, onChange)}
+                onMouseDown={(e) => tool.mouseDown(e, options, onChange)}
+                onMouseUp={(e) => tool.mouseUp(e, options, onChange)}
+            >
                 <div>
                     <div
+                        onMouseMove={(e) => tool.mouseMove(e, options, onChange)}
                         onClick={(e) => tool.click(e, options, onChange)}
                         onMouseDown={(e) => tool.mouseDown(e, options, onChange)}
                         onMouseUp={(e) => tool.mouseUp(e, options, onChange)}
-                        onMouseMove={(e) => tool.mouseMove(e, options, onChange)}
                         style={{ width: `${width}px`, height: `${height}px` }}
                     >
                         {layers.map((layer) => <Layer values={layer} key={layer.key} />)}

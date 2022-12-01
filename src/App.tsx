@@ -13,6 +13,7 @@ import { draw } from './tools/Draw';
 import { erase } from './tools/Erase';
 import { fill } from './tools/Fill';
 import { transform } from './tools/Transform';
+import { uid } from './lib/uid';
 
 function App() {
     const width = 200; const
@@ -34,10 +35,10 @@ function App() {
         selectedBrush: 0,
         brushWidth:20,
         tools:[
-            {key:Date.now()-3,tool:draw, name:'draw'},
-            {key:Date.now()-2,tool:erase, name:'erase'},
-            {key:Date.now()-1,tool:fill, name:'fill'},
-            {key:Date.now(),tool:transform, name:'transform'}
+            {key:uid(),tool:draw, name:'draw'},
+            {key:uid(),tool:erase, name:'erase'},
+            {key:uid(),tool:fill, name:'fill'},
+            {key:uid(),tool:transform, name:'transform'}
         ],
         selectedTool: 0,
         color: '#000000ff',

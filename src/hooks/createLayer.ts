@@ -1,3 +1,4 @@
+import { uid } from '../lib/uid';
 import { blendModes } from '../types/BlendMode';
 import { LayerState } from '../types/LayerState';
 import { Rect } from '../types/Rect';
@@ -10,7 +11,7 @@ export const createLayer = (name:string, rect:Rect):LayerState => {
     const buffer = createDrawable({size});
     const thumbnail = createDrawable({size:[40, 40 * (height / width)]}); 
     return {
-        key: Date.now(),
+        key: uid(),
         name,
         rect,
         canvas,

@@ -54,7 +54,7 @@ function Canvas(props:CanvasProps) {
                                 background:'#ff0000',
                                 width:'50px',
                                 height:'50px',
-                                transform:`${rotation} translate(${-25}px, ${-25}px)`
+                                transform:`translate(${-25}px, ${-25}px) ${rotation}`
                             }}
                             onMouseDown={e => onMouseDown(e,options,onChange)}
                         >{icon}</div>)}

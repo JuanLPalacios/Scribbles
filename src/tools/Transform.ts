@@ -20,17 +20,31 @@ export const transform = new (class Transform extends Tool {
     matrix = new DOMMatrix();
     axis: [boolean,boolean] = [false,false];
     skewMode = false;
-    action: 'none' | 'scale' | 'rotate' | 'skew' = 'none';
+    action: 'none' | 'scale' | 'rotate' | 'skew' | 'translate' = 'none';
     drawnRect: { left: number; top: number; width: number; height: number; } = {left:0,top:0,height:0, width:0};
     
     setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         //throw new Error('Method not implemented.');
+        
         const { layers, selectedLayer, brushes, selectedBrush } = options;
         const layer = layers[selectedLayer];
         const {canvas, buffer} = layer;
-
+        
         const mw = canvas.canvas.width/2;
         const mh = canvas.canvas.height/2;
+        
+        this.center = new DOMPoint();
+        this.pivot = new DOMPoint();
+        this.rotation = 0;
+        this.initAngle = 0;
+        this.prevMatrix = new DOMMatrix();
+        this.inverseMatrix = new DOMMatrix();
+        this.matrix = new DOMMatrix().translate(layer.rect.position[0],layer.rect.position[1]);
+        this.axis = [false,false];
+        this.skewMode = false;
+        this.action = 'none';
+        layer.rect.position = [0,0];
+        
         this.handles = [
             new DOMPoint(0,0),
             new DOMPoint(0,mh),
@@ -41,7 +55,8 @@ export const transform = new (class Transform extends Tool {
             new DOMPoint(2*mw,0),
             new DOMPoint(mw,0)
         ];
-        const sideHandle = (position: DOMPoint, i: number):Handle => ({
+        layer.buffer.canvas.style.transformOrigin = 'top left';
+        const createHandle = (position: DOMPoint, i: number):Handle => ({
             key:uid(),
             icon:'',
             position,
@@ -54,7 +69,7 @@ export const transform = new (class Transform extends Tool {
                 const layer = layers[selectedLayer];
                 this.axis = [ true, true ];
                 if(this.skewMode){
-                    this.pivot = scale(sum(this.handles[0], this.handles[4]), .5);
+                    this.pivot = scale(this.handles[4], .5);
                     this.startRotation(e, layer);
                 }
                 else{
@@ -79,7 +94,7 @@ export const transform = new (class Transform extends Tool {
                 setOptions({...options});
             }
         });
-        this.handleH = this.handles.map(sideHandle);
+        this.handleH = this.handles.map(createHandle);
         if(buffer.ctx){
             buffer.ctx.globalCompositeOperation = 'copy';
             buffer.ctx.drawImage(canvas.canvas, 0, 0);
@@ -90,21 +105,50 @@ export const transform = new (class Transform extends Tool {
     }
     
     dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        //throw new Error('Method not implemented.');
+        const { layers, selectedLayer, brushes, selectedBrush } = options;
+        const layer = layers[selectedLayer];
+        const {canvas, buffer} = layers[selectedLayer];
+        const finalCords = this.handles.map(cord => cord.matrixTransform(this.matrix)),
+            minX = Math.min(...finalCords.map(cord => cord.x)),
+            minY = Math.min(...finalCords.map(cord => cord.y)),
+            maxX = Math.max(...finalCords.map(cord => cord.x)),
+            maxY = Math.max(...finalCords.map(cord => cord.y));
+        canvas.canvas.width = maxX - minX;
+        canvas.canvas.height = maxY - minY;
+        layer.rect.size = [maxX - minX, maxY - minY];
+        layer.rect.position = [layer.rect.position[0]+minX, layer.rect.position[1]+minY];
+        //this.matrix.translateSelf(-minX,-minY);
+        //this.matrix.e = 0;
+        //this.matrix.f = 0;
+        //this.matrix.e = 0;
+        //this.matrix.f = 0;
+        const p = new DOMPoint(minX,minY).matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()));
+        const p2 = new DOMPoint(0,0).matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()));
+        this.matrix.translateSelf(-p.x+p2.x,-p.y+p2.y);
+        
+        if(canvas.ctx){
+            canvas.ctx.globalCompositeOperation = 'copy';
+            canvas.ctx.globalAlpha = 1;
+            canvas.ctx.setTransform(this.matrix);
+            canvas.ctx.drawImage(buffer.canvas, 0, 0);
+            canvas.ctx.resetTransform();
+            canvas.canvas.style.display = 'inline';
+            buffer.canvas.style.transform = '';
+            buffer.canvas.style.transformOrigin = 'top left';
+            buffer.ctx?.clearRect(0,0,buffer.canvas.width, buffer.canvas.width);
+        }
+        layer.handles = [];
+
+        setOptions({...options});
     }
     
     mouseDown(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer } = options;
-        const {nativeEvent} = e;
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
-        console.log(e.currentTarget.id);
+        e.preventDefault();
         
-        // if(this.skewMode)
-        //     this.startSkewering(e, layer);
-        // else 
-        //     this.startScaling(e, layer);
-        //this.startTranslation(e, layer);
+        this.startTranslation(e, layer);
+
         e.stopPropagation();
     }
     
@@ -131,6 +175,12 @@ export const transform = new (class Transform extends Tool {
         case 'skew':
             this.skew(e, layer);
             break;
+        case 'rotate':
+            this.rotate(e, layer);
+            break;
+        case 'translate':
+            this.translate(e, layer);
+            break;
         }
         
         setOptions({...options});
@@ -148,16 +198,30 @@ export const transform = new (class Transform extends Tool {
     }
 
     startTranslation(e:React.MouseEvent , layer:LayerState){
-        throw new Error('Method not implemented.');
+        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
+        this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
+        this.center = new DOMPoint(e.clientX,e.clientY);
+        this.pivot = new DOMPoint(0, 0).matrixTransform(this.inverseMatrix);
+        this.prevMatrix = this.matrix;
+        this.action = 'translate';
     }
 
     translate(e:React.MouseEvent , layer:LayerState){
-        throw new Error('Method not implemented.');
+        const movement = 
+        sub(
+            this.pivot,
+            new DOMPoint(
+                e.clientX - this.center.x,
+                e.clientY - this.center.y
+            ).matrixTransform(this.inverseMatrix)
+        );
+        this.matrix =this.prevMatrix.translate(movement.x,movement.y);
+        this.render(layer);
     }
 
     startSkewering(e:React.MouseEvent, layer:LayerState){
-        if(!layer.canvas.canvas.parentElement) throw new Error('unable to get bounding client rect');
-        const canvasRect = layer.canvas.canvas.parentElement.getBoundingClientRect();
+        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
+        const canvasRect = layer.canvas.canvas.parentElement.parentElement.parentElement.getBoundingClientRect();
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         this.center = sum(this.pivot.matrixTransform(this.matrix), new DOMPoint(canvasRect.left,canvasRect.top));
         this.prevMatrix = this.matrix;
@@ -181,15 +245,16 @@ export const transform = new (class Transform extends Tool {
         this.render(layer);
     }
         
-    startScaling(f:React.MouseEvent, layer:LayerState){
-        if(!layer.canvas.canvas.parentElement) throw new Error('unable to get bounding client rect');
-        const canvasRect = layer.canvas.canvas.parentElement.getBoundingClientRect();
+    startScaling(e:React.MouseEvent, layer:LayerState){
+        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
+        const canvasRect = layer.canvas.canvas.parentElement.parentElement.parentElement.getBoundingClientRect();
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
-        const p0 = this.handles[0];
         this.center = sum(this.pivot.matrixTransform(this.matrix), new DOMPoint(canvasRect.left,canvasRect.top));
-        const dv = new DOMPoint(f.clientX -this.center.x, f.clientY -this.center.y).matrixTransform(this.inverseMatrix);
+        const dv = sub(
+            new DOMPoint(0, 0).matrixTransform(this.inverseMatrix),
+            new DOMPoint(e.clientX -this.center.x, e.clientY -this.center.y).matrixTransform(this.inverseMatrix)
+        );
         this.prevMatrix = this.matrix;
-        console.log(this.pivot);
         this.matrix = this.prevMatrix
             .scale(
                 this.axis[0] ? Math.abs(dv.x/canvasRect.width) : 1,
@@ -198,8 +263,8 @@ export const transform = new (class Transform extends Tool {
                 this.pivot.x,
                 this.pivot.y,
                 0
-            )
-        ;
+            );
+        this.render(layer);
         this.action = 'scale';
     }
     
@@ -207,7 +272,10 @@ export const transform = new (class Transform extends Tool {
         //if(this.action !== 'scale') return;
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
         const canvasRect = layer.canvas.canvas;
-        const dv = new DOMPoint(e.clientX -this.center.x, e.clientY -this.center.y).matrixTransform(this.inverseMatrix);
+        const dv = sub(
+            new DOMPoint(0, 0).matrixTransform(this.inverseMatrix),
+            new DOMPoint(e.clientX -this.center.x, e.clientY -this.center.y).matrixTransform(this.inverseMatrix)
+        );
         this.matrix = this.prevMatrix
             .scale(
                 this.axis[0] ? Math.abs(dv.x/canvasRect.width) : 1,
@@ -222,23 +290,45 @@ export const transform = new (class Transform extends Tool {
     }
             
     startRotation(e:React.MouseEvent, layer:LayerState){
-        const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
-        const drawnRect = currentTarget.getBoundingClientRect();
-        this.center = new DOMPoint( drawnRect.left + drawnRect.width / 2, drawnRect.top + drawnRect.height / 2 );
-        this.rotation = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x) + Math.PI / 2;
+        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
+        const canvasRect = layer.canvas.canvas.parentElement.parentElement.parentElement.getBoundingClientRect();
+        this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
+        this.center = sum(this.pivot.matrixTransform(this.matrix), new DOMPoint(canvasRect.left,canvasRect.top));
+        this.prevMatrix = this.matrix;
+        
+        this.initAngle = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x);
+        
+        this.action = 'rotate';
     }
             
     rotate(e:React.MouseEvent, layer:LayerState){
-        const angle = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x) + Math.PI / 2 - this.rotation;
-        layer.buffer.ctx?.rotate(angle * 180 / Math.PI);
+        const angle = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x) - this.initAngle;
+        const subPivot = this.pivot.matrixTransform(this.prevMatrix);
+        
+        this.matrix = new DOMMatrix().translate(subPivot.x,subPivot.y).rotate( 
+            angle * 180 / Math.PI
+        ).translate(-subPivot.x,-subPivot.y).multiply(this.prevMatrix);
         this.render(layer);
     }
 
     render(layer: LayerState) {
         //console.log(this.matrix);
-        layer.handles = this.handleH.map((handle,i)=>({...handle,icon:(this.handles[i]==this.pivot? '[P]':'')+(this.skewMode?'sk':'sc')+i, position:this.handles[i].matrixTransform(this.matrix), rotation:new DOMMatrix()}));
+        const angle = Math.atan2(this.matrix.b,this.matrix.a);
+        const angle2 = Math.atan2(this.matrix.d,this.matrix.c);
+        const hx = Math.sqrt(this.matrix.b*this.matrix.b+this.matrix.a*this.matrix.a);
+        const hy = Math.sqrt(this.matrix.d*this.matrix.d+this.matrix.c*this.matrix.c);
+        const handleMatrix = new DOMMatrix([
+            this.matrix.a, this.matrix.b,
+            this.matrix.c, this.matrix.d,
+            0,0
+        ]).scale(1/hx,1/hy);
+        layer.handles = this.handleH.map((handle,i)=>({
+            ...handle,
+            //icon:(this.handles[i]==this.pivot? '[P]':'('+(angle*180/Math.PI).toFixed(0)+', '+(angle2*180/Math.PI).toFixed(0)+')')+(this.skewMode?'sk':'sc')+i,
+            icon:(this.handles[i]==this.pivot? '[P]':'')+(this.skewMode?'sk':'sc')+i,
+            position:this.handles[i].matrixTransform(this.matrix),
+            rotation:handleMatrix}));
         layer.buffer.canvas.style.transform = this.matrix.toString();
-        layer.buffer.canvas.style.transformOrigin = 'top left';
     }
 })();
 

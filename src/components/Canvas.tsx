@@ -46,18 +46,19 @@ function Canvas(props:CanvasProps) {
                         style={{ width: `${width}px`, height: `${height}px` }}
                     >
                         {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
-                        {layers[selectedLayer].handles.map(({ key, icon, position, rotation, onMouseDown }) => <div
+                        {layers[selectedLayer].handles.map(({ key, icon, position, rotation, onMouseDown }) => <img
                             key={key}
+                            src={icon}
                             style={{
                                 left:`${position.x}px`,
                                 top:`${position.y}px`,
-                                background:'#ff0000',
-                                width:'50px',
-                                height:'50px',
-                                transform:`translate(${-25}px, ${-25}px) ${rotation}`
+                                width:'24px',
+                                height:'24px',
+                                transform:`translate(${-12}px, ${-12}px) ${rotation}`
                             }}
+                            alt=""
                             onMouseDown={e => onMouseDown(e,options,onChange)}
-                        >{icon}</div>)}
+                        />)}
                     </div>
                 </div>
             </div>

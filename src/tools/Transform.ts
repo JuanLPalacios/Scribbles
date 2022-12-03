@@ -1,12 +1,28 @@
 import { MouseEvent } from 'react';
 import Tool from '../abstracts/Tool';
-import Layer from '../components/Layer';
 import { uid } from '../lib/uid';
 import { Handle } from '../types/Handle';
 import { LayerState } from '../types/LayerState';
 import { MenuOptions } from '../types/MenuOptions';
-import { Point } from '../types/Point';
+import square from '../icons/square-svgrepo-com.svg';
+import hSkew from '../icons/arrows-h-alt-svgrepo-com.svg';
+import vSkew from '../icons/arrows-v-alt-svgrepo-com.svg';
+import rotateBottomLeft from '../icons/corner-double-bottom-left-svgrepo-com.svg';
+import rotateBottomRight from '../icons/corner-double-bottom-right-svgrepo-com.svg';
+import rotateTopLeft from '../icons/corner-double-top-left-svgrepo-com.svg';
+import rotateTopRight from '../icons/corner-double-top-right-svgrepo-com.svg';
   
+const SKEW_ICONS = [
+    rotateTopLeft,
+    vSkew,
+    rotateBottomLeft,
+    hSkew,
+    rotateBottomRight,
+    vSkew,
+    rotateTopRight,
+    hSkew
+];
+
 export const transform = new (class Transform extends Tool {
     lastclickTime = 0;
     center = new DOMPoint();
@@ -312,9 +328,6 @@ export const transform = new (class Transform extends Tool {
     }
 
     render(layer: LayerState) {
-        //console.log(this.matrix);
-        const angle = Math.atan2(this.matrix.b,this.matrix.a);
-        const angle2 = Math.atan2(this.matrix.d,this.matrix.c);
         const hx = Math.sqrt(this.matrix.b*this.matrix.b+this.matrix.a*this.matrix.a);
         const hy = Math.sqrt(this.matrix.d*this.matrix.d+this.matrix.c*this.matrix.c);
         const handleMatrix = new DOMMatrix([
@@ -325,7 +338,7 @@ export const transform = new (class Transform extends Tool {
         layer.handles = this.handleH.map((handle,i)=>({
             ...handle,
             //icon:(this.handles[i]==this.pivot? '[P]':'('+(angle*180/Math.PI).toFixed(0)+', '+(angle2*180/Math.PI).toFixed(0)+')')+(this.skewMode?'sk':'sc')+i,
-            icon:(this.handles[i]==this.pivot? '[P]':'')+(this.skewMode?'sk':'sc')+i,
+            icon:this.skewMode? SKEW_ICONS[i] : square,
             position:this.handles[i].matrixTransform(this.matrix),
             rotation:handleMatrix}));
         layer.buffer.canvas.style.transform = this.matrix.toString();

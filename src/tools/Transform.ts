@@ -1,6 +1,7 @@
 import { MouseEvent } from 'react';
 import Tool from '../abstracts/Tool';
 import { uid } from '../lib/uid';
+import { scalePoint, sub, sum } from '../lib/DOMMath';
 import { Handle } from '../types/Handle';
 import { LayerState } from '../types/LayerState';
 import { MenuOptions } from '../types/MenuOptions';
@@ -85,7 +86,7 @@ export const transform = new (class Transform extends Tool {
                 const layer = layers[selectedLayer];
                 this.axis = [ true, true ];
                 if(this.skewMode){
-                    this.pivot = scale(this.handles[4], .5);
+                    this.pivot = scalePoint(this.handles[4], .5);
                     this.startRotation(e, layer);
                 }
                 else{
@@ -133,11 +134,6 @@ export const transform = new (class Transform extends Tool {
         canvas.canvas.height = maxY - minY;
         layer.rect.size = [maxX - minX, maxY - minY];
         layer.rect.position = [layer.rect.position[0]+minX, layer.rect.position[1]+minY];
-        //this.matrix.translateSelf(-minX,-minY);
-        //this.matrix.e = 0;
-        //this.matrix.f = 0;
-        //this.matrix.e = 0;
-        //this.matrix.f = 0;
         const p = new DOMPoint(minX,minY).matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()));
         const p2 = new DOMPoint(0,0).matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()));
         this.matrix.translateSelf(-p.x+p2.x,-p.y+p2.y);
@@ -344,11 +340,3 @@ export const transform = new (class Transform extends Tool {
         layer.buffer.canvas.style.transform = this.matrix.toString();
     }
 })();
-
-
-const sum = (a:DOMPoint, b:DOMPoint) => new DOMPoint(a.x+b.x, a.y+b.y, a.z+b.z);
-const sub = (a:DOMPoint, b:DOMPoint) => new DOMPoint(b.x-a.x, b.y-a.y, b.z-a.z);
-const scale = (a:DOMPoint, b:DOMPoint|number) =>
-    (typeof b == 'number')?
-        new DOMPoint(b*a.x, b*a.y, b*a.z)
-        : new DOMPoint(b.x*a.x, b.y*a.y, b.z*a.z);

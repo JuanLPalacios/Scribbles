@@ -5,7 +5,7 @@ import { Rect } from '../types/Rect';
 import { createDrawable } from './createDrawable';
 
 export const createLayer = (name:string, rect:Rect):LayerState => {
-    const { size} = rect;
+    const { size } = rect;
     const [ width, height ] = size;
     const canvas = createDrawable({size});
     const buffer = createDrawable({size});

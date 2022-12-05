@@ -164,8 +164,6 @@ export const transform = new (class Transform extends Tool {
     }
     
     mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { layers, selectedLayer, brushes, selectedBrush } = options;
-        //throw new Error('Method not implemented.');
         this.action = 'none';
         
     }
@@ -196,8 +194,17 @@ export const transform = new (class Transform extends Tool {
     }
     
     click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { layers, selectedLayer, brushes, selectedBrush } = options;
+        const { layers, selectedLayer } = options;
         const layer = layers[selectedLayer];
+        this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
+        const {x:projectionX,y:projectionY} = point.matrixTransform(this.inverseMatrix);
+        const {rect:{size:[width, height]}} = layer;
+        if(
+            (projectionX<0)
+            ||(projectionY<0)
+            ||(projectionX>width)
+            ||(projectionY>height)
+        ) return;
         const dt = Date.now() - this.lastclickTime;
         this.lastclickTime += dt;
         if(dt > 500) return;
@@ -207,8 +214,15 @@ export const transform = new (class Transform extends Tool {
     }
 
     startTranslation(e: DOMPoint , layer:LayerState){
-        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
+        const {x:projectionX,y:projectionY} = e.matrixTransform(this.inverseMatrix);
+        const {rect:{size:[width, height]}} = layer;
+        if(
+            (projectionX<0)
+            ||(projectionY<0)
+            ||(projectionX>width)
+            ||(projectionY>height)
+        ) return;
         this.center = new DOMPoint(e.x,e.y);
         this.pivot = new DOMPoint(0, 0).matrixTransform(this.inverseMatrix);
         this.prevMatrix = this.matrix;

@@ -16,17 +16,21 @@ import { transform } from './tools/Transform';
 import { uid } from './lib/uid';
 
 function App() {
-    const width = 200; const
-        height = 200;
-    document.documentElement.style.setProperty('--doc-width', `${width}px`);
-    document.documentElement.style.setProperty('--doc-height', `${height}px`);
+    const prevWidth = 200;
+    const prevHeight = 200;
+    const prevName = 'Drawing';
+    document.documentElement.style.setProperty('--doc-width', `${prevWidth}px`);
+    document.documentElement.style.setProperty('--doc-height', `${prevHeight}px`);
     const [state, setState] = useState<MenuOptions>({
+        name: prevName,
+        width: prevWidth,
+        height: prevHeight,
         layers: [
             createLayer(
                 'Image',
                 {
                     position:[0, 0],
-                    size: [width, height]
+                    size: [prevWidth, prevHeight]
                 }
             ),
         ],
@@ -45,7 +49,7 @@ function App() {
         alpha: 255,
     });
     const {
-        layers, selectedLayer, color, alpha, brushes, selectedBrush, tools, selectedTool
+        layers, selectedLayer, color, alpha, brushes, selectedBrush, tools, selectedTool, width, height
     } = state;
     const brush = brushes[selectedBrush];
     const {tool} = tools[selectedTool];
@@ -57,7 +61,7 @@ function App() {
     };
     return (
         <div className="App">
-            <Menu />
+            <Menu options={state} onChange={setState} />
             <div className="content">
                 <Canvas width={width} height={height} options={state} onChange={setState} />
                 <div className="tools">
@@ -79,7 +83,7 @@ function App() {
                                 'Image',
                                 {
                                     position:[0, 0],
-                                    size: [width, height]
+                                    size: [prevWidth, prevHeight]
                                 }
                             )
                         ];

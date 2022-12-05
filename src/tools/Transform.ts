@@ -1,4 +1,3 @@
-import { MouseEvent } from 'react';
 import Tool from '../abstracts/Tool';
 import { uid } from '../lib/uid';
 import { scalePoint, sub, sum } from '../lib/DOMMath';
@@ -80,8 +79,8 @@ export const transform = new (class Transform extends Tool {
             rotation:new DOMMatrix(),
             onMouseDown:(i%2 === 0)?(e, options, setOptions) => {
                 //tl
-                e.preventDefault();
-                e.stopPropagation();
+                
+                
                 const { layers, selectedLayer } = options;
                 const layer = layers[selectedLayer];
                 this.axis = [ true, true ];
@@ -96,8 +95,8 @@ export const transform = new (class Transform extends Tool {
                 setOptions({...options});
             }:(e, options, setOptions) => {
                 //cl
-                e.preventDefault();
-                e.stopPropagation();
+                
+                
                 const { layers, selectedLayer } = options;
                 const layer = layers[selectedLayer];
                 this.axis = [ (i%4 === 1), (i%4 !== 1) ];
@@ -154,31 +153,29 @@ export const transform = new (class Transform extends Tool {
         setOptions({...options});
     }
     
-    mouseDown(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseDown(e: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer } = options;
         const layer = layers[selectedLayer];
-        e.preventDefault();
+        
         
         this.startTranslation(e, layer);
 
-        e.stopPropagation();
+        
     }
     
-    mouseUp(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, brushes, selectedBrush } = options;
         //throw new Error('Method not implemented.');
         this.action = 'none';
-        e.stopPropagation();
+        
     }
     
-    mouseMove(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        e.preventDefault();
-        e.stopPropagation();
+    mouseMove(e: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+        
+        
         const { layers, selectedLayer, brushes, selectedBrush } = options;
         const layer = layers[selectedLayer];
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
-        const {nativeEvent} = e;
-        nativeEvent.preventDefault();
         
         switch(this.action){
         case 'scale':
@@ -198,7 +195,7 @@ export const transform = new (class Transform extends Tool {
         setOptions({...options});
     }
     
-    click(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, brushes, selectedBrush } = options;
         const layer = layers[selectedLayer];
         const dt = Date.now() - this.lastclickTime;
@@ -209,42 +206,40 @@ export const transform = new (class Transform extends Tool {
         setOptions({...options});
     }
 
-    startTranslation(e:React.MouseEvent , layer:LayerState){
+    startTranslation(e: DOMPoint , layer:LayerState){
         if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
-        this.center = new DOMPoint(e.clientX,e.clientY);
+        this.center = new DOMPoint(e.x,e.y);
         this.pivot = new DOMPoint(0, 0).matrixTransform(this.inverseMatrix);
         this.prevMatrix = this.matrix;
         this.action = 'translate';
     }
 
-    translate(e:React.MouseEvent , layer:LayerState){
+    translate(e: DOMPoint , layer:LayerState){
         const movement = 
         sub(
             this.pivot,
             new DOMPoint(
-                e.clientX - this.center.x,
-                e.clientY - this.center.y
+                e.x - this.center.x,
+                e.y - this.center.y
             ).matrixTransform(this.inverseMatrix)
         );
         this.matrix =this.prevMatrix.translate(movement.x,movement.y);
         this.render(layer);
     }
 
-    startSkewering(e:React.MouseEvent, layer:LayerState){
-        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
-        const canvasRect = layer.canvas.canvas.parentElement.parentElement.parentElement.getBoundingClientRect();
+    startSkewering(e: DOMPoint, layer:LayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
-        this.center = sum(this.pivot.matrixTransform(this.matrix), new DOMPoint(canvasRect.left,canvasRect.top));
+        this.center = this.pivot.matrixTransform(this.matrix);
         this.prevMatrix = this.matrix;
         
-        this.initAngle = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x);
+        this.initAngle = Math.atan2(e.y - this.center.y, e.x - this.center.x);
         
         this.action = 'skew';
     }
     
-    skew(e:React.MouseEvent, layer:LayerState){
-        const angle = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x) - this.initAngle;
+    skew(e: DOMPoint, layer:LayerState){
+        const angle = Math.atan2(e.y - this.center.y, e.x - this.center.x) - this.initAngle;
         
         if(this.axis[0])
             this.matrix = this.prevMatrix.translate(this.pivot.x,this.pivot.y).skewY( 
@@ -257,20 +252,18 @@ export const transform = new (class Transform extends Tool {
         this.render(layer);
     }
         
-    startScaling(e:React.MouseEvent, layer:LayerState){
-        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
-        const canvasRect = layer.canvas.canvas.parentElement.parentElement.parentElement.getBoundingClientRect();
+    startScaling(e: DOMPoint, layer:LayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
-        this.center = sum(this.pivot.matrixTransform(this.matrix), new DOMPoint(canvasRect.left,canvasRect.top));
+        this.center = this.pivot.matrixTransform(this.matrix);
         const dv = sub(
             new DOMPoint(0, 0).matrixTransform(this.inverseMatrix),
-            new DOMPoint(e.clientX -this.center.x, e.clientY -this.center.y).matrixTransform(this.inverseMatrix)
+            new DOMPoint(e.x -this.center.x, e.y -this.center.y).matrixTransform(this.inverseMatrix)
         );
         this.prevMatrix = this.matrix;
         this.matrix = this.prevMatrix
             .scale(
-                this.axis[0] ? Math.abs(dv.x/canvasRect.width) : 1,
-                this.axis[1] ? Math.abs(dv.y/canvasRect.height) : 1,
+                this.axis[0] ? Math.abs(dv.x/layer.rect.size[0]) : 1,
+                this.axis[1] ? Math.abs(dv.y/layer.rect.size[1]) : 1,
                 1,
                 this.pivot.x,
                 this.pivot.y,
@@ -280,13 +273,13 @@ export const transform = new (class Transform extends Tool {
         this.action = 'scale';
     }
     
-    scale(e:React.MouseEvent, layer:LayerState){
+    scale(e: DOMPoint, layer:LayerState){
         //if(this.action !== 'scale') return;
         const {currentTarget} = <{currentTarget:HTMLElement}><unknown>e;
         const canvasRect = layer.canvas.canvas;
         const dv = sub(
             new DOMPoint(0, 0).matrixTransform(this.inverseMatrix),
-            new DOMPoint(e.clientX -this.center.x, e.clientY -this.center.y).matrixTransform(this.inverseMatrix)
+            new DOMPoint(e.x -this.center.x, e.y -this.center.y).matrixTransform(this.inverseMatrix)
         );
         this.matrix = this.prevMatrix
             .scale(
@@ -301,20 +294,18 @@ export const transform = new (class Transform extends Tool {
         this.render(layer);
     }
             
-    startRotation(e:React.MouseEvent, layer:LayerState){
-        if(!layer.canvas.canvas.parentElement?.parentElement?.parentElement) throw new Error('unable to get bounding client rect');
-        const canvasRect = layer.canvas.canvas.parentElement.parentElement.parentElement.getBoundingClientRect();
+    startRotation(e: DOMPoint, layer:LayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
-        this.center = sum(this.pivot.matrixTransform(this.matrix), new DOMPoint(canvasRect.left,canvasRect.top));
+        this.center = this.pivot.matrixTransform(this.matrix);
         this.prevMatrix = this.matrix;
         
-        this.initAngle = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x);
+        this.initAngle = Math.atan2(e.y - this.center.y, e.x - this.center.x);
         
         this.action = 'rotate';
     }
             
-    rotate(e:React.MouseEvent, layer:LayerState){
-        const angle = Math.atan2(e.clientY - this.center.y, e.clientX - this.center.x) - this.initAngle;
+    rotate(e: DOMPoint, layer:LayerState){
+        const angle = Math.atan2(e.y - this.center.y, e.x - this.center.x) - this.initAngle;
         const subPivot = this.pivot.matrixTransform(this.prevMatrix);
         
         this.matrix = new DOMMatrix().translate(subPivot.x,subPivot.y).rotate( 

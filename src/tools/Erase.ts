@@ -1,4 +1,3 @@
-import { MouseEvent } from 'react';
 import Tool from '../abstracts/Tool';
 import { createDrawable } from '../hooks/createDrawable';
 import { DrawableState } from '../types/DrawableState';
@@ -23,35 +22,40 @@ export const erase = new (class Erase extends Tool {
     }
     
     setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        throw new Error('Method not implemented.');
+        const { layers, selectedLayer, brushes, selectedBrush} = options;
+        const layer = layers[selectedLayer];
+        const {canvas} = layer;
+        this.mask.canvas.width = canvas.canvas.width;
+        this.mask.canvas.height = canvas.canvas.height;
     }
     
     dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        throw new Error('Method not implemented.');
+        this.mask.canvas.width = 0;
+        this.mask.canvas.height = 0;
     }
     
-    mouseDown({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseDown(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
+        const {x,y} = point;
+        const {rect:{position:[dx,dy]}} = layer;
         const {canvas, buffer} = layer;
-        this.mask.canvas.width = layer.canvas.canvas.width;
-        this.mask.canvas.height = layer.canvas.canvas.height;
         layer.canvas.canvas.style.display = 'none';
         this.renderMask(canvas, buffer);
-        brush.startStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
+        brush.startStroke(this.mask, [x-dx, y-dy], color, brushWidth);
         this.down = true;
     }
     
-    mouseUp({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
+        const {x,y} = point;
+        const {rect:{position:[dx,dy]}} = layer; 
         if (!this.down) return;
         const {canvas, buffer} = layer;
-        brush.endStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
+        brush.endStroke(this.mask, [x-dx, y-dy], color, brushWidth);
         this.renderMask(canvas, buffer);
         if(canvas.ctx){
             canvas.ctx.globalCompositeOperation = 'copy';
@@ -64,18 +68,19 @@ export const erase = new (class Erase extends Tool {
         this.down = false;
     }
     
-    mouseMove({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseMove(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
+        const {x,y} = point;
+        const {rect:{position:[dx,dy]}} = layer; 
         if (!this.down) return;
         const {canvas, buffer} = layer;
-        brush.drawStroke(this.mask, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
+        brush.drawStroke(this.mask, [x-dx, y-dy], color, brushWidth);
         this.renderMask(canvas, buffer);
     }
     
-    click({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        nativeEvent.preventDefault();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
     }
 })();

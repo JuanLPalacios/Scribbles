@@ -1,37 +1,36 @@
-import { MouseEvent } from 'react';
-import Brush from '../abstracts/Brush';
 import Tool from '../abstracts/Tool';
 import { DrawableState } from '../types/DrawableState';
-import { LayerState } from '../types/LayerState';
 import { MenuOptions } from '../types/MenuOptions';
 import { Point } from '../types/Point';
   
 export const fill = new (class Fill extends Tool {
     
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        throw new Error('Method not implemented.');
     }
     
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        throw new Error('Method not implemented.');
     }
     
-    mouseDown({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        nativeEvent.preventDefault();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    mouseDown(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
     }
     
-    mouseUp({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        nativeEvent.preventDefault();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
     }
     
-    mouseMove({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        nativeEvent.preventDefault();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    mouseMove(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
     }
     
-    click({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, color } = options;
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
+        const {x,y} = point;
+        const {rect:{position:[dx,dy]}} = layer; 
+        const px = x - dx, py = y - dy;
         const {canvas, buffer} = layer;
         if(!buffer.ctx) return;
         buffer.ctx.fillStyle = color;
@@ -39,10 +38,10 @@ export const fill = new (class Fill extends Tool {
             canvas,
             buffer,
             .15,
-            nativeEvent.offsetX,
-            nativeEvent.offsetY,
+            Math.floor(px),
+            Math.floor(py),
             parseColor(color),
-            canvas.ctx?.getImageData(nativeEvent.offsetX,nativeEvent.offsetY,1,1).data || [0,0,0,0]
+            canvas.ctx?.getImageData(px,py,1,1).data || [0,0,0,0]
         );
         if(!canvas.ctx) return;
         canvas.ctx.globalCompositeOperation = 'source-over';

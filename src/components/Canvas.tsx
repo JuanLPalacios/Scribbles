@@ -1,5 +1,4 @@
-import { createContext, useEffect, useState } from 'react';
-import { transform } from 'typescript';
+import { createContext, useEffect, useCallback, useState, useRef } from 'react';
 import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
 import { MenuOptions } from '../types/MenuOptions';
@@ -23,6 +22,9 @@ function Canvas(props:CanvasProps) {
         layers, tools, selectedTool, selectedLayer
     } = options;
     const tool = tools[selectedTool].tool;
+
+    const ref = useRef<HTMLDivElement>(null);
+
     useEffect(()=>{
         let temp = options;
         prevTool?.dispose(temp, (o)=>{temp = o;});
@@ -30,19 +32,29 @@ function Canvas(props:CanvasProps) {
         setTool(tool);
         onChange(temp);
     },[tool]);
+
+    const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>)=>{
+        e.preventDefault();
+        e.stopPropagation();
+        if(!ref.current) return new DOMPoint(0,0);
+        const {clientX, clientY} = e;
+        const {top, left} = ref.current.getBoundingClientRect();
+        return new DOMPoint(clientX - left, clientY - top);
+    },[]);
     return (
         <CanvasContext.Provider value={{ brush: tool }}>
             <div className="Canvas" 
-                onMouseMove={(e) => tool.mouseMove(e, options, onChange)}
-                onMouseDown={(e) => tool.mouseDown(e, options, onChange)}
-                onMouseUp={(e) => tool.mouseUp(e, options, onChange)}
+                onMouseMove={(e) => tool.mouseMove(preventAll(e), options, onChange)}
+                onMouseDown={(e) => tool.mouseDown(preventAll(e), options, onChange)}
+                onMouseUp={(e) => tool.mouseUp(preventAll(e), options, onChange)}
             >
                 <div>
                     <div
-                        onMouseMove={(e) => tool.mouseMove(e, options, onChange)}
-                        onClick={(e) => tool.click(e, options, onChange)}
-                        onMouseDown={(e) => tool.mouseDown(e, options, onChange)}
-                        onMouseUp={(e) => tool.mouseUp(e, options, onChange)}
+                        ref={ref}
+                        onMouseMove={(e) => tool.mouseMove(preventAll(e), options, onChange)}
+                        onClick={(e) => tool.click(preventAll(e), options, onChange)}
+                        onMouseDown={(e) => tool.mouseDown(preventAll(e), options, onChange)}
+                        onMouseUp={(e) => tool.mouseUp(preventAll(e), options, onChange)}
                         style={{ width: `${width}px`, height: `${height}px` }}
                     >
                         {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
@@ -57,7 +69,7 @@ function Canvas(props:CanvasProps) {
                                 transform:`translate(${-12}px, ${-12}px) ${rotation}`
                             }}
                             alt=""
-                            onMouseDown={e => onMouseDown(e,options,onChange)}
+                            onMouseDown={e => onMouseDown(preventAll(e), options,onChange)}
                         />)}
                     </div>
                 </div>

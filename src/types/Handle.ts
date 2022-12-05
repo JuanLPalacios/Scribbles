@@ -6,5 +6,5 @@ export interface Handle {
     icon: string
     position: DOMPoint
     rotation: DOMMatrix
-    onMouseDown:(e:React.MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>)=>void)=>void
+    onMouseDown:(point:DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>)=>void)=>void
 }

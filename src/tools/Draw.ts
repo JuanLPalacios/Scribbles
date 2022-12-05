@@ -1,4 +1,3 @@
-import { MouseEvent } from 'react';
 import Tool from '../abstracts/Tool';
 import { MenuOptions } from '../types/MenuOptions';
 
@@ -13,39 +12,42 @@ export const draw = new (class Draw extends Tool {
         //throw new Error('Method not implemented.');
     }
     
-    mouseDown({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseDown(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
         this.down = true;
-        brush.startStroke(layer.buffer, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
+        const {x,y} = point;
+        const {rect:{position:[dx,dy]}} = layer; 
+        brush.startStroke(layer.buffer, [x-dx, y-dy], color, brushWidth);
     }
     
-    mouseUp({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
+        const {x,y} = point;
+        const {rect:{position:[dx,dy]}} = layer; 
         if (!this.down) return;
         const {canvas, buffer} = layer;
-        brush.endStroke(layer.buffer, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
+        brush.endStroke(layer.buffer, [x-dx, y-dy], color, brushWidth);
         canvas.ctx?.drawImage(buffer.canvas, 0, 0);
         buffer.ctx?.clearRect(0,0,buffer.canvas.width, buffer.canvas.height);
         this.down = false;
         this.renderThumbnail(layer);
     }
     
-    mouseMove({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseMove(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
         const { layers, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
-        nativeEvent.preventDefault();
+        const {x,y} = point;
+        const {rect:{position:[dx,dy]}} = layer; 
         if (!this.down) return;
-        brush.drawStroke(layer.buffer, [nativeEvent.offsetX, nativeEvent.offsetY], color, brushWidth);
+        brush.drawStroke(layer.buffer, [x-dx, y-dy], color, brushWidth);
     }
     
-    click({nativeEvent}: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        nativeEvent.preventDefault();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
     }
 })();

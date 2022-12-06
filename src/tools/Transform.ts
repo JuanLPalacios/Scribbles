@@ -149,7 +149,7 @@ export const transform = new (class Transform extends Tool {
             buffer.ctx?.clearRect(0,0,buffer.canvas.width, buffer.canvas.width);
         }
         layer.handles = [];
-
+        this.renderThumbnail(layer);
         setOptions({...options});
     }
     

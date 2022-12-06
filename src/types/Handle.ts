@@ -1,5 +1,4 @@
 import { MenuOptions } from './MenuOptions';
-import { Point } from './Point';
 
 export interface Handle {
     key: number

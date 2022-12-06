@@ -8,7 +8,7 @@ interface ToolbarProps {
 }
 
 function Toolbar(props:ToolbarProps) {
-    const {toolButtons, selectedTool, onSelect} = props;
+    const { toolButtons, selectedTool, onSelect } = props;
     return (
         <div className="Toolbar">
             {toolButtons.map((toolButton, i) => (

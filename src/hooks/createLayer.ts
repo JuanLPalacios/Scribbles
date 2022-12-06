@@ -6,10 +6,10 @@ import { createDrawable } from './createDrawable';
 
 export const createLayer = (name:string, rect:Rect):LayerState => {
     const { size } = rect;
-    const [ width, height ] = size;
-    const canvas = createDrawable({size});
-    const buffer = createDrawable({size});
-    const thumbnail = createDrawable({size:[40, 40 * (height / width)]}); 
+    const [width, height] = size;
+    const canvas = createDrawable({ size });
+    const buffer = createDrawable({ size });
+    const thumbnail = createDrawable({ size: [40, 40 * (height / width)] });
     return {
         key: uid(),
         name,
@@ -17,8 +17,8 @@ export const createLayer = (name:string, rect:Rect):LayerState => {
         canvas,
         buffer,
         thumbnail,
-        visible:true,
-        opacity:1,
+        visible: true,
+        opacity: 1,
         mixBlendMode: blendModes[0],
         handles: []
     };

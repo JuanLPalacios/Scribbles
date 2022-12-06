@@ -1,12 +1,9 @@
 import Brush from '../abstracts/Brush';
-import { LayerState } from './LayerState';
+import { DrawingState } from './DrawingState';
 import { ToolButton } from './ToolButton';
 
 export type MenuOptions<T = any> = {
-    name:string,
-    width:number,
-    height:number,
-    layers:LayerState[],
+    drawing?:DrawingState
     selectedLayer:number,
     color:string,
     alpha:number,

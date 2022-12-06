@@ -30,26 +30,28 @@ function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
         if(newPosirion >= layers.length) return;
         const layer = layers[selection];
         const otherLayer = layers[newPosirion];
-        onUpdate(Object.assign([...layers], {[selection]:otherLayer, [newPosirion]:layer}), newPosirion);
+        onUpdate(Object.assign([...layers], { [selection]: otherLayer, [newPosirion]: layer }), newPosirion);
     };
     return (
         <div className="LayerMenu">
             <div className='actions'>
                 <label>
           blend mode
-                    <select value={layers[selection].mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
+                    <select value={layers[selection]?.mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
                         {blendModes.map((value) => <option key={value} value={value}>{value}</option>)}
                     </select>
                 </label>
                 <label>
             opacity
-                    <input type="range" value={layers[selection].opacity} min="0" max="1" step="0.004" onChange={(e) => {onOpacityChange(parseFloat(e.target.value));}} />
+                    <input type="range" value={layers[selection]?.opacity} min="0" max="1" step="0.004" onChange={(e) => {
+                        onOpacityChange(parseFloat(e.target.value));
+                    }} />
                 </label>
             </div>
             <div className="scroller">
                 <div className="list">
                     {layers.map((layer, i) => (
-                        <div key={`${layer.key}-item`} className={`layer ${selection === i ? 'selected' : ''}`} onClick={() => onUpdate(layers,i)}>
+                        <div key={`${layer.key}-item`} className={`layer ${selection === i ? 'selected' : ''}`} onClick={() => onUpdate(layers, i)}>
                             <label>
                                 <div className='checkbox'>
                   visible

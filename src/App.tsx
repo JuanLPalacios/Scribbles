@@ -14,6 +14,7 @@ import { erase } from './tools/Erase';
 import { fill } from './tools/Fill';
 import { transform } from './tools/Transform';
 import { uid } from './lib/uid';
+import { AppContext } from './AppContext';
 
 function App() {
     const prevWidth = 200;
@@ -46,38 +47,40 @@ function App() {
             setState({ ...state, drawing: drawing && { ...drawing, layers: [...newLayers] }  });
     };
     return (
-        <div className="App">
-            <Menu options={state} onChange={setState} />
-            <div className="content">
-                <Canvas options={state} onChange={setState} />
-                <div className="tools">
-                    {color+ ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1)}
-                    <label>
+        <AppContext.Provider value={undefined}>
+            <div className="App">
+                <Menu options={state} onChange={setState} />
+                <div className="content">
+                    <Canvas options={state} onChange={setState} />
+                    <div className="tools">
+                        {color+ ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1)}
+                        <label>
                         color
-                        <div style={{ background: color + ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1), display: 'inline-block', inlineSize: 'fit-content' }}>
-                            <input type="color" value={color} onChange={(e) => setState({ ...state, color: e.target.value })} style={{ opacity: 0 }} />
-                        </div>
-                    </label>
-                    <label>
+                            <div style={{ background: color + ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1), display: 'inline-block', inlineSize: 'fit-content' }}>
+                                <input type="color" value={color} onChange={(e) => setState({ ...state, color: e.target.value })} style={{ opacity: 0 }} />
+                            </div>
+                        </label>
+                        <label>
                         alpha
-                        <input type="range" value={alpha} min="0" max="255" onChange={(e) => setState({ ...state, alpha: parseInt(e.target.value) })} />
-                    </label>
-                    <Toolbar toolButtons={tools}  selectedTool={selectedTool} onSelect={(selectedTool)=>setState({ ...state, selectedTool })} />
-                    <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
-                        const newLayers:LayerState[] = [...layers,
-                            createLayer(
-                                'Image',
-                                {
-                                    position: [0, 0],
-                                    size: [prevWidth, prevHeight]
-                                }
-                            )
-                        ];
-                        setState({ ...state, drawing: drawing && { ...drawing, layers: newLayers } });
-                    }} />
+                            <input type="range" value={alpha} min="0" max="255" onChange={(e) => setState({ ...state, alpha: parseInt(e.target.value) })} />
+                        </label>
+                        <Toolbar toolButtons={tools}  selectedTool={selectedTool} onSelect={(selectedTool)=>setState({ ...state, selectedTool })} />
+                        <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
+                            const newLayers:LayerState[] = [...layers,
+                                createLayer(
+                                    'Image',
+                                    {
+                                        position: [0, 0],
+                                        size: [prevWidth, prevHeight]
+                                    }
+                                )
+                            ];
+                            setState({ ...state, drawing: drawing && { ...drawing, layers: newLayers } });
+                        }} />
+                    </div>
                 </div>
             </div>
-        </div>
+        </AppContext.Provider>
     );
 }
 

@@ -1,8 +1,9 @@
-import { createContext, useEffect, useCallback, useState, useRef } from 'react';
+import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
 import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
-import { MenuOptions } from '../types/MenuOptions';
+import { MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
+import { DrawingContext } from '../contexts/DrawingState';
 
 export const CanvasContext = createContext({});
 
@@ -12,12 +13,13 @@ interface CanvasProps {
 }
 
 function Canvas(props:CanvasProps) {
+    const [drawing] = useContext(DrawingContext);
     const [prevTool, setTool] = useState<Tool>();
     const {
         options, onChange
     } = props;
     const {
-        drawing, tools, selectedTool, selectedLayer
+        tools, selectedTool, selectedLayer
     } = options;
     const tool = tools[selectedTool].tool;
 
@@ -34,6 +36,13 @@ function Canvas(props:CanvasProps) {
         setTool(tool);
         onChange(temp);
     }, [tool]);
+
+    useEffect(()=>{
+        if(drawing){
+            document.documentElement.style.setProperty('--doc-width', `${drawing.width}px`);
+            document.documentElement.style.setProperty('--doc-height', `${drawing.height}px`);
+        }
+    }, [drawing]);
 
     const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>)=>{
         e.preventDefault();

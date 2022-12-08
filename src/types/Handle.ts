@@ -1,4 +1,4 @@
-import { MenuOptions } from './MenuOptions';
+import { MenuOptions } from '../contexts/MenuOptions';
 
 export interface Handle {
     key: number

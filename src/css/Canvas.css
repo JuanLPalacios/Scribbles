@@ -6,7 +6,6 @@
   scroll-snap-type: both mandatory;
   box-sizing: border-box;
   background: rgb(128, 128, 128);
-  scroll-padding: max(calc(50vh - ((var(--doc-height)/2) + 23px)), 100px) max(calc(50% - (var(--doc-width)/2)), 100px);
 }
 
 .Canvas > * {

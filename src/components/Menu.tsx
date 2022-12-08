@@ -1,18 +1,20 @@
-import { useCallback } from 'react';
+import { useCallback, useContext } from 'react';
 import '../css/Menu.css';
 import { createLayer } from '../hooks/createLayer';
 import { mergeLayers } from '../lib/Graphics';
-import { MenuOptions } from '../types/MenuOptions';
+import { MenuOptions } from '../contexts/MenuOptions';
+import { DrawingContext } from '../contexts/DrawingState';
 
 interface MenuProps {
     options:MenuOptions,
     onChange:(options:MenuOptions)=>void
 }
 
-function Menu({ options, onChange }:MenuProps) {
+function Menu({ onChange }:MenuProps) {
+    const [drawing, setDrawing] = useContext(DrawingContext);
     const exportPng = useCallback(() => {
-        if(!options.drawing) return false;
-        const { layers, width, height, name } = options.drawing;
+        if(!drawing) return false;
+        const { layers, width, height, name } = drawing;
         const mergged = createLayer('', { position: [0, 0], size: [width, height] });
         layers.forEach((layer) => mergeLayers(layer, mergged));
         const url = mergged.canvas.canvas.toDataURL();
@@ -20,12 +22,12 @@ function Menu({ options, onChange }:MenuProps) {
         a.download = name+'.png';
         a.href = url;
         a.click();
-    }, [options.drawing]);
+    }, [drawing]);
     const newfile = useCallback(() => {
         const prevName = 'Drawing',
             prevWidth = 2000,
             prevHeight = 2000;
-        onChange({ ...options, drawing: {
+        if(setDrawing)setDrawing({
             name: prevName,
             width: prevWidth,
             height: prevHeight,
@@ -38,7 +40,7 @@ function Menu({ options, onChange }:MenuProps) {
                     }
                 ),
             ]
-        } });
+        });
     }, []);
     const changeProps = useCallback(() => {
         throw new Error('Function not implemented.');

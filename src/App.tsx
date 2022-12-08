@@ -3,51 +3,45 @@ import Menu from './components/Menu';
 import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
-import { useState } from 'react';
-import Marker from './brushes/Marker';
+import { useContext } from 'react';
 import { LayerState } from './types/LayerState';
 import { createLayer } from './hooks/createLayer';
-import { MenuOptions } from './types/MenuOptions';
+import { MenuContext } from './contexts/MenuOptions';
 
-import { draw } from './tools/Draw';
-import { erase } from './tools/Erase';
-import { fill } from './tools/Fill';
-import { transform } from './tools/Transform';
-import { uid } from './lib/uid';
-import { AppContext } from './AppContext';
+import ReactModal from 'react-modal';
+import { ModalContext } from './contexts/ModalState';
+import { DrawingContext } from './contexts/DrawingState';
 
 function App() {
-    const prevWidth = 200;
-    const prevHeight = 200;
-    document.documentElement.style.setProperty('--doc-width', `${prevWidth}px`);
-    document.documentElement.style.setProperty('--doc-height', `${prevHeight}px`);
-    const [state, setState] = useState<MenuOptions>({
-        selectedLayer: 0,
-        brushes: [new Marker()],
-        selectedBrush: 0,
-        brushWidth: 20,
-        tools: [
-            { key: uid(), tool: draw, name: 'draw' },
-            { key: uid(), tool: erase, name: 'erase' },
-            { key: uid(), tool: fill, name: 'fill' },
-            { key: uid(), tool: transform, name: 'transform' }
-        ],
-        selectedTool: 0,
-        color: '#000000ff',
-        alpha: 255,
-    });
+    const prevWidth = 2000;
+    const prevHeight = 2000;
+    const [modal] = useContext(ModalContext);
+    const [drawing, setDrawing] = useContext(DrawingContext);
+    const [state, setState] = useContext(MenuContext);
     const {
-        drawing, selectedLayer, color, alpha, tools, selectedTool
+        selectedLayer, color, alpha, tools, selectedTool
     } = state;
     const { layers } = drawing || { layers: [] };
     const onUpdate = (newLayers: LayerState[], selectedLayer?: number) => {
-        if(selectedLayer !== undefined)
-            setState({ ...state, drawing: drawing && { ...drawing, layers: [...newLayers] }, selectedLayer  });
+        if(selectedLayer !== undefined){
+            setDrawing(drawing && { ...drawing, layers: [...newLayers] });
+            setState({ ...state, selectedLayer });
+        }
         else
-            setState({ ...state, drawing: drawing && { ...drawing, layers: [...newLayers] }  });
+            setDrawing(drawing && { ...drawing, layers: [...newLayers] });
     };
     return (
-        <AppContext.Provider value={undefined}>
+        <>
+            {modal &&
+                <ReactModal
+                    isOpen={modal.isOpen}
+                    onRequestClose={modal.onRequestClose}
+                    onAfterClose={modal.onAfterClose}
+                    onAfterOpen={modal.onAfterOpen}
+                >
+                    {modal.contents}
+                </ReactModal>
+            }
             <div className="App">
                 <Menu options={state} onChange={setState} />
                 <div className="content">
@@ -75,12 +69,12 @@ function App() {
                                     }
                                 )
                             ];
-                            setState({ ...state, drawing: drawing && { ...drawing, layers: newLayers } });
+                            setDrawing(drawing && { ...drawing, layers: newLayers });
                         }} />
                     </div>
                 </div>
             </div>
-        </AppContext.Provider>
+        </>
     );
 }
 

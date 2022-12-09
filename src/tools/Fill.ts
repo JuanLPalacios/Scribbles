@@ -1,33 +1,32 @@
 import Tool from '../abstracts/Tool';
 import { DrawableState } from '../types/DrawableState';
-import { MenuOptions } from '../types/MenuOptions';
 import { Point } from '../types/Point';
+import { CanvasEvent } from '../types/CanvasEvent';
 
 export const fill = new (class Fill extends Tool {
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    setup(): void {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    dispose(): void {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseDown(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseDown({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseUp({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseMove(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseMove({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
     }
 
-    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer, color } = options;
+    click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;

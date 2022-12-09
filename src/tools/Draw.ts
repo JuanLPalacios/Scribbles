@@ -1,13 +1,13 @@
 import Tool from '../abstracts/Tool';
-import { MenuOptions } from '../types/MenuOptions';
+import { CanvasEvent } from '../types/CanvasEvent';
+import { ToolEvent } from '../types/ToolEvent';
 
 export const draw = new (class Draw extends Tool {
     down = false;
 
-    setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    setup({ drawingContext: [drawing] }:ToolEvent): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
         canvas.ctx?.save();
@@ -15,20 +15,18 @@ export const draw = new (class Draw extends Tool {
         this.down = false;
     }
 
-    dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    dispose({ drawingContext: [drawing] }:ToolEvent): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
         canvas.ctx?.restore();
         buffer.ctx?.restore();
     }
 
-    mouseDown(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
+    mouseDown({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         this.down = true;
@@ -37,10 +35,9 @@ export const draw = new (class Draw extends Tool {
         brush.startStroke(layer.buffer, [x-dx, y-dy], color, brushWidth);
     }
 
-    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
+    mouseUp({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         const { x, y } = point;
@@ -54,10 +51,9 @@ export const draw = new (class Draw extends Tool {
         this.renderThumbnail(layer);
     }
 
-    mouseMove(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer, color, brushes, selectedBrush, brushWidth } = options;
+    mouseMove({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         const { x, y } = point;
@@ -67,6 +63,6 @@ export const draw = new (class Draw extends Tool {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
     }
 })();

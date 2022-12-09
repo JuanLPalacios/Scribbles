@@ -1,9 +1,9 @@
-import { MenuOptions } from '../contexts/MenuOptions';
+import { CanvasEvent } from './CanvasEvent';
 
 export interface Handle {
     key: number
     icon: string
     position: DOMPoint
     rotation: DOMMatrix
-    onMouseDown:(point:DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>)=>void)=>void
+    onMouseDown:(point:CanvasEvent)=>void
 }

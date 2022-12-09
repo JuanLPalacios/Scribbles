@@ -39,7 +39,8 @@ function Menu({ onChange }:MenuProps) {
                         size: [prevWidth, prevHeight]
                     }
                 ),
-            ]
+            ],
+            selectedLayer: 0
         });
     }, []);
     const changeProps = useCallback(() => {

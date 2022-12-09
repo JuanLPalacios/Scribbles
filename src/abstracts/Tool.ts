@@ -1,5 +1,6 @@
+import { CanvasEvent } from '../types/CanvasEvent';
 import { LayerState } from '../types/LayerState';
-import { MenuOptions } from '../types/MenuOptions';
+import { ToolEvent } from '../types/ToolEvent';
 
 export default abstract class Tool {
     renderThumbnail(layer:LayerState){
@@ -18,10 +19,10 @@ export default abstract class Tool {
         }
     }
 
-    abstract setup(options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
-    abstract dispose(options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
-    abstract mouseDown(point: DOMPoint, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
-    abstract mouseUp(point: DOMPoint, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
-    abstract mouseMove(point: DOMPoint, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
-    abstract click(point: DOMPoint, options:MenuOptions, setOptions:(options:MenuOptions)=>void):void;
+    abstract setup(event:ToolEvent):void;
+    abstract dispose(event:ToolEvent):void;
+    abstract mouseDown(event: CanvasEvent):void;
+    abstract mouseUp(event: CanvasEvent):void;
+    abstract mouseMove(event: CanvasEvent):void;
+    abstract click(event: CanvasEvent):void;
 }

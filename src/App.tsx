@@ -45,7 +45,7 @@ function App() {
             <div className="App">
                 <Menu options={state} onChange={setState} />
                 <div className="content">
-                    <Canvas options={state} onChange={setState} />
+                    <Canvas/>
                     <div className="tools">
                         {color+ ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1)}
                         <label>

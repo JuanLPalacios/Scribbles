@@ -1,23 +1,19 @@
 import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
 import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
-import { MenuOptions } from '../contexts/MenuOptions';
+import { MenuContext } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { DrawingContext } from '../contexts/DrawingState';
+import { CanvasEvent } from '../types/CanvasEvent';
 
 export const CanvasContext = createContext({});
 
-interface CanvasProps {
-    options:MenuOptions,
-    onChange:(options:MenuOptions)=>void
-}
-
-function Canvas(props:CanvasProps) {
-    const [drawing] = useContext(DrawingContext);
+function Canvas() {
+    const drawingContext = useContext(DrawingContext);
+    const menuContext = useContext(MenuContext);
+    const [drawing, setDrawing] = drawingContext;
+    const [options, onChange] = menuContext;
     const [prevTool, setTool] = useState<Tool>();
-    const {
-        options, onChange
-    } = props;
     const {
         tools, selectedTool, selectedLayer
     } = options;
@@ -27,14 +23,34 @@ function Canvas(props:CanvasProps) {
 
     useEffect(()=>{
         let temp = options;
-        prevTool?.dispose(temp, (o)=>{
-            temp = o;
+        let temp2 = drawing;
+        prevTool?.dispose({
+            menuContext: [temp, (o)=>{
+                if(typeof o == 'function') temp = o(temp);
+                else temp = o;
+                return temp;
+            }],
+            drawingContext: [temp2, (o) => {
+                if(typeof o == 'function') temp2 = o(temp2);
+                else temp2 = o;
+                return temp2;
+            }]
         });
-        tool.setup(temp, (o)=>{
-            temp = o;
+        tool.setup({
+            menuContext: [temp, (o)=>{
+                if(typeof o == 'function') temp = o(temp);
+                else temp = o;
+                return temp;
+            }],
+            drawingContext: [temp2, (o) => {
+                if(typeof o == 'function') temp2 = o(temp2);
+                else temp2 = o;
+                return temp2;
+            }]
         });
         setTool(tool);
         onChange(temp);
+        setDrawing(temp2);
     }, [tool]);
 
     useEffect(()=>{
@@ -44,14 +60,14 @@ function Canvas(props:CanvasProps) {
         }
     }, [drawing]);
 
-    const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>)=>{
+    const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>):CanvasEvent=>{
         e.preventDefault();
         e.stopPropagation();
-        if(!ref.current) return new DOMPoint(0, 0);
+        if(!ref.current) return { point: new DOMPoint(0, 0), drawingContext, menuContext };
         const { clientX, clientY } = e;
         const { top, left } = ref.current.getBoundingClientRect();
-        return new DOMPoint(clientX - left, clientY - top);
-    }, []);
+        return { point: new DOMPoint(clientX - left, clientY - top), drawingContext, menuContext };
+    }, [drawingContext, menuContext]);
 
     const causeBlur = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>)=>{
         (document.activeElement as HTMLElement).blur();
@@ -64,10 +80,10 @@ function Canvas(props:CanvasProps) {
         viewPort = <div>
             <div
                 ref={ref}
-                onMouseMove={(e) => tool.mouseMove(preventAll(e), options, onChange)}
-                onClick={(e) => tool.click(preventAll(causeBlur(e)), options, onChange)}
-                onMouseDown={(e) => tool.mouseDown(preventAll(e), options, onChange)}
-                onMouseUp={(e) => tool.mouseUp(preventAll(e), options, onChange)}
+                onMouseMove={(e) => tool.mouseMove(preventAll(e))}
+                onClick={(e) => tool.click(preventAll(causeBlur(e)))}
+                onMouseDown={(e) => tool.mouseDown(preventAll(e))}
+                onMouseUp={(e) => tool.mouseUp(preventAll(e))}
                 style={{ width: `${width}px`, height: `${height}px` }}
             >
                 {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
@@ -82,7 +98,7 @@ function Canvas(props:CanvasProps) {
                         transform: `translate(${-12}px, ${-12}px) ${rotation}`
                     }}
                     alt=""
-                    onMouseDown={e => onMouseDown(preventAll(e), options, onChange)}
+                    onMouseDown={e => onMouseDown(preventAll(e))}
                 />)}
             </div>
         </div>;
@@ -90,9 +106,9 @@ function Canvas(props:CanvasProps) {
     return (
         <CanvasContext.Provider value={{ brush: tool }}>
             <div className="Canvas"
-                onMouseMove={(e) => tool.mouseMove(preventAll(e), options, onChange)}
-                onMouseDown={(e) => tool.mouseDown(preventAll(e), options, onChange)}
-                onMouseUp={(e) => tool.mouseUp(preventAll(causeBlur(e)), options, onChange)}
+                onMouseMove={(e) => tool.mouseMove(preventAll(e))}
+                onMouseDown={(e) => tool.mouseDown(preventAll(e))}
+                onMouseUp={(e) => tool.mouseUp(preventAll(causeBlur(e)))}
             >
                 {viewPort}
             </div>

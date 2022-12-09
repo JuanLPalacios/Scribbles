@@ -1,7 +1,8 @@
 import Tool from '../abstracts/Tool';
 import { createDrawable } from '../hooks/createDrawable';
+import { CanvasEvent } from '../types/CanvasEvent';
 import { DrawableState } from '../types/DrawableState';
-import { MenuOptions } from '../types/MenuOptions';
+import { ToolEvent } from '../types/ToolEvent';
 
 export const erase = new (class Erase extends Tool {
     mask: DrawableState;
@@ -21,10 +22,9 @@ export const erase = new (class Erase extends Tool {
         }
     }
 
-    setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    setup({ drawingContext: [drawing] }:ToolEvent): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
         this.mask.canvas.width = canvas.canvas.width;
@@ -34,10 +34,9 @@ export const erase = new (class Erase extends Tool {
         this.down = false;
     }
 
-    dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    dispose({ drawingContext: [drawing] }:ToolEvent): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
         canvas.ctx?.restore();
@@ -46,10 +45,9 @@ export const erase = new (class Erase extends Tool {
         this.mask.canvas.height = 0;
     }
 
-    mouseDown(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer, brushes, selectedBrush, brushWidth } = options;
+    mouseDown({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         const { x, y } = point;
@@ -61,10 +59,9 @@ export const erase = new (class Erase extends Tool {
         this.down = true;
     }
 
-    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer, brushes, selectedBrush, brushWidth } = options;
+    mouseUp({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         const { x, y } = point;
@@ -84,10 +81,9 @@ export const erase = new (class Erase extends Tool {
         this.down = false;
     }
 
-    mouseMove(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer, brushes, selectedBrush, brushWidth } = options;
+    mouseMove({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         const { x, y } = point;
@@ -99,6 +95,6 @@ export const erase = new (class Erase extends Tool {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
     }
 })();

@@ -3,7 +3,6 @@ import { uid } from '../lib/uid';
 import { scalePoint, sub } from '../lib/DOMMath';
 import { Handle } from '../types/Handle';
 import { LayerState } from '../types/LayerState';
-import { MenuOptions } from '../types/MenuOptions';
 import square from '../icons/square-svgrepo-com.svg';
 import hSkew from '../icons/arrows-h-alt-svgrepo-com.svg';
 import vSkew from '../icons/arrows-v-alt-svgrepo-com.svg';
@@ -11,6 +10,8 @@ import rotateBottomLeft from '../icons/corner-double-bottom-left-svgrepo-com.svg
 import rotateBottomRight from '../icons/corner-double-bottom-right-svgrepo-com.svg';
 import rotateTopLeft from '../icons/corner-double-top-left-svgrepo-com.svg';
 import rotateTopRight from '../icons/corner-double-top-right-svgrepo-com.svg';
+import { CanvasEvent } from '../types/CanvasEvent';
+import { ToolEvent } from '../types/ToolEvent';
 
 const SKEW_ICONS = [
     rotateTopLeft,
@@ -37,12 +38,10 @@ export const transform = new (class Transform extends Tool {
     axis: [boolean, boolean] = [false, false];
     skewMode = false;
     action: 'none' | 'scale' | 'rotate' | 'skew' | 'translate' = 'none';
-    drawnRect: { left: number; top: number; width: number; height: number; } = { left: 0, top: 0, height: 0, width: 0 };
 
-    setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    setup({ drawingContext: [drawing, setDrawing] }:ToolEvent): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
 
@@ -77,10 +76,10 @@ export const transform = new (class Transform extends Tool {
             icon: '',
             position,
             rotation: new DOMMatrix(),
-            onMouseDown: (i%2 === 0)?(e, options, setOptions) => {
-                const { drawing, selectedLayer } = options;
+            onMouseDown: (i%2 === 0)?(e) => {
+                const { drawingContext: [drawing, setDrawing] } = e;
                 if(!drawing) return;
-                const { layers } = drawing;
+                const { layers, selectedLayer } = drawing;
                 const layer = layers[selectedLayer];
                 this.axis = [true, true];
                 if(this.skewMode){
@@ -91,13 +90,12 @@ export const transform = new (class Transform extends Tool {
                     this.pivot = this.handles[(i+4)%8];
                     this.startScaling(e, layer);
                 }
-                setOptions({ ...options });
-            }:(e, options, setOptions) => {
+                setDrawing({ ...drawing });
+            }:(e) => {
                 //cl
-
-                const { drawing, selectedLayer } = options;
+                const { drawingContext: [drawing, setDrawing] } = e;
                 if(!drawing) return;
-                const { layers } = drawing;
+                const { layers, selectedLayer } = drawing;
                 const layer = layers[selectedLayer];
                 this.axis = [(i%4 === 1), (i%4 !== 1)];
                 this.pivot = this.handles[(i+4)%8];
@@ -107,7 +105,7 @@ export const transform = new (class Transform extends Tool {
                 else{
                     this.startScaling(e, layer);
                 }
-                setOptions({ ...options });
+                setDrawing({ ...drawing });
             }
         });
         this.handleH = this.handles.map(createHandle);
@@ -117,13 +115,12 @@ export const transform = new (class Transform extends Tool {
             canvas.canvas.style.display = 'none';
         }
         this.render(layer);
-        setOptions({ ...options });
+        setDrawing({ ...drawing });
     }
 
-    dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    dispose({ drawingContext: [drawing, setDrawing] }:ToolEvent): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layers[selectedLayer];
         const finalCords = this.handles.map(cord => cord.matrixTransform(this.matrix)),
@@ -152,26 +149,26 @@ export const transform = new (class Transform extends Tool {
         }
         layer.handles = [];
         this.renderThumbnail(layer);
-        setOptions({ ...options });
+        setDrawing({ ...drawing });
     }
 
-    mouseDown(e: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    mouseDown(e: CanvasEvent,): void {
+        const { drawingContext: [drawing] } = e;
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
 
         this.startTranslation(e, layer);
     }
 
-    mouseUp(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseUp(e: CanvasEvent,): void {
         this.action = 'none';
     }
 
-    mouseMove(e: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    mouseMove(e: CanvasEvent,): void {
+        const { drawingContext: [drawing, setDrawing] } = e;
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
 
         switch(this.action){
@@ -189,13 +186,12 @@ export const transform = new (class Transform extends Tool {
             break;
         }
 
-        setOptions({ ...options });
+        setDrawing({ ...drawing });
     }
 
-    click(point: DOMPoint, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
-        const { drawing, selectedLayer } = options;
+    click({ point, drawingContext: [drawing, setDrawing] }: CanvasEvent,): void {
         if(!drawing) return;
-        const { layers } = drawing;
+        const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         const { x: projectionX, y: projectionY } = point.matrixTransform(this.inverseMatrix);
@@ -211,10 +207,10 @@ export const transform = new (class Transform extends Tool {
         if(dt > 500) return;
         this.skewMode = !this.skewMode;
         this.render(layer);
-        setOptions({ ...options });
+        setDrawing({ ...drawing });
     }
 
-    startTranslation(e: DOMPoint, layer:LayerState){
+    startTranslation({ point: e }: CanvasEvent, layer:LayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         const { x: projectionX, y: projectionY } = e.matrixTransform(this.inverseMatrix);
         const { rect: { size: [width, height] } } = layer;
@@ -230,7 +226,7 @@ export const transform = new (class Transform extends Tool {
         this.action = 'translate';
     }
 
-    translate(e: DOMPoint, layer:LayerState){
+    translate({ point: e }: CanvasEvent, layer:LayerState){
         const movement =
         sub(
             this.pivot,
@@ -243,7 +239,7 @@ export const transform = new (class Transform extends Tool {
         this.render(layer);
     }
 
-    startSkewering(e: DOMPoint, layer:LayerState){
+    startSkewering({ point: e }: CanvasEvent, layer:LayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         this.center = this.pivot.matrixTransform(this.matrix);
         this.prevMatrix = this.matrix;
@@ -253,7 +249,7 @@ export const transform = new (class Transform extends Tool {
         this.action = 'skew';
     }
 
-    skew(e: DOMPoint, layer:LayerState){
+    skew({ point: e }: CanvasEvent, layer:LayerState){
         const angle = Math.atan2(e.y - this.center.y, e.x - this.center.x) - this.initAngle;
 
         if(this.axis[0])
@@ -269,7 +265,7 @@ export const transform = new (class Transform extends Tool {
         this.render(layer);
     }
 
-    startScaling(e: DOMPoint, layer:LayerState){
+    startScaling({ point: e }: CanvasEvent, layer:LayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         this.center = this.pivot.matrixTransform(this.matrix);
         const dv = sub(
@@ -290,7 +286,7 @@ export const transform = new (class Transform extends Tool {
         this.action = 'scale';
     }
 
-    scale(e: DOMPoint, layer:LayerState){
+    scale({ point: e }: CanvasEvent, layer:LayerState){
         const canvasRect = layer.canvas.canvas;
         const dv = sub(
             new DOMPoint(0, 0).matrixTransform(this.inverseMatrix),
@@ -309,7 +305,7 @@ export const transform = new (class Transform extends Tool {
         this.render(layer);
     }
 
-    startRotation(e: DOMPoint, layer:LayerState){
+    startRotation({ point: e }: CanvasEvent, layer:LayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         this.center = this.pivot.matrixTransform(this.matrix);
         this.prevMatrix = this.matrix;
@@ -319,7 +315,7 @@ export const transform = new (class Transform extends Tool {
         this.action = 'rotate';
     }
 
-    rotate(e: DOMPoint, layer:LayerState){
+    rotate({ point: e }: CanvasEvent, layer:LayerState){
         const angle = Math.atan2(e.y - this.center.y, e.x - this.center.x) - this.initAngle;
         const subPivot = this.pivot.matrixTransform(this.prevMatrix);
 

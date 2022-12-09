@@ -25,8 +25,8 @@ function Menu({ onChange }:MenuProps) {
     }, [drawing]);
     const newfile = useCallback(() => {
         const prevName = 'Drawing',
-            prevWidth = 2000,
-            prevHeight = 2000;
+            prevWidth = 600,
+            prevHeight = 600;
         if(setDrawing)setDrawing({
             name: prevName,
             width: prevWidth,

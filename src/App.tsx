@@ -19,13 +19,13 @@ function App() {
     const [drawing, setDrawing] = useContext(DrawingContext);
     const [state, setState] = useContext(MenuContext);
     const {
-        selectedLayer, color, alpha, tools, selectedTool
+        color, alpha, tools, selectedTool
     } = state;
-    const { layers } = drawing || { layers: [] };
+    const { layers, selectedLayer } = drawing || { layers: [], selectedLayer: -1 };
     const onUpdate = (newLayers: LayerState[], selectedLayer?: number) => {
         if(selectedLayer !== undefined){
-            setDrawing(drawing && { ...drawing, layers: [...newLayers] });
-            setState({ ...state, selectedLayer });
+            setDrawing(drawing && { ...drawing, layers: [...newLayers], selectedLayer });
+            setState({ ...state });
         }
         else
             setDrawing(drawing && { ...drawing, layers: [...newLayers] });
@@ -48,16 +48,6 @@ function App() {
                     <Canvas/>
                     <div className="tools">
                         {color+ ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1)}
-                        <label>
-                        color
-                            <div style={{ background: color + ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1), display: 'inline-block', inlineSize: 'fit-content' }}>
-                                <input type="color" value={color} onChange={(e) => setState({ ...state, color: e.target.value })} style={{ opacity: 0 }} />
-                            </div>
-                        </label>
-                        <label>
-                        alpha
-                            <input type="range" value={alpha} min="0" max="255" onChange={(e) => setState({ ...state, alpha: parseInt(e.target.value) })} />
-                        </label>
                         <Toolbar toolButtons={tools}  selectedTool={selectedTool} onSelect={(selectedTool)=>setState({ ...state, selectedTool })} />
                         <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
                             const newLayers:LayerState[] = [...layers,

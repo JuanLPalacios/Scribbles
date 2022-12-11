@@ -3,15 +3,25 @@ import Brush from '../abstracts/Brush';
 import { ToolButton } from '../types/ToolButton';
 import { StatePair } from '../types/StatePair';
 
-export type MenuOptions = {
-    selectedLayer:number,
+export type MenuOptions = ToolOptions & BrushOptions & AlphaOptions & ColorOptions
+
+export type ToolOptions = {
+    tools:ToolButton[],
+    selectedTool:number
+};
+
+export type ColorOptions = {
     color:string,
+};
+
+export type AlphaOptions = {
     alpha:number,
+};
+
+export type BrushOptions = {
     brushes:Brush[],
     selectedBrush:number,
     brushWidth:number,
-    tools:ToolButton[],
-    selectedTool:number
 };
 
 export const MenuContext = createContext<StatePair<MenuOptions>>([
@@ -21,7 +31,6 @@ export const MenuContext = createContext<StatePair<MenuOptions>>([
         brushWidth: 0,
         color: '',
         selectedBrush: 0,
-        selectedLayer: 0,
         selectedTool: 0,
         tools: [],
     },

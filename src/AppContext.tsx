@@ -12,15 +12,14 @@ import { transform } from './tools/Transform';
 export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) => {
     const useDrawing = useState<DrawingState | undefined>();
     const useMenuOptions = useState<MenuOptions>({
-        selectedLayer: 0,
         brushes: [new Marker()],
         selectedBrush: 0,
         brushWidth: 20,
         tools: [
-            { key: uid(), tool: draw, name: 'draw' },
-            { key: uid(), tool: erase, name: 'erase' },
-            { key: uid(), tool: fill, name: 'fill' },
-            { key: uid(), tool: transform, name: 'transform' }
+            { key: uid(), Tool: draw, name: 'draw' },
+            { key: uid(), Tool: erase, name: 'erase' },
+            { key: uid(), Tool: fill, name: 'fill' },
+            { key: uid(), Tool: transform, name: 'transform' }
         ],
         selectedTool: 0,
         color: '#000000',

@@ -15,9 +15,9 @@ function Canvas() {
     const [options, onChange] = menuContext;
     const [prevTool, setTool] = useState<Tool>();
     const {
-        tools, selectedTool, selectedLayer
+        tools, selectedTool
     } = options;
-    const tool = tools[selectedTool].tool;
+    const tool = tools[selectedTool].Tool;
 
     const ref = useRef<HTMLDivElement>(null);
 
@@ -76,7 +76,7 @@ function Canvas() {
 
     let viewPort = undefined;
     if(drawing){
-        const { width, height, layers } = drawing;
+        const { width, height, layers, selectedLayer } = drawing;
         viewPort = <div>
             <div
                 ref={ref}

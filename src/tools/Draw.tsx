@@ -1,9 +1,29 @@
+import { Dispatch, SetStateAction } from 'react';
 import Tool from '../abstracts/Tool';
+import { AlphaOptions, BrushOptions, ColorOptions } from '../contexts/MenuOptions';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
 
-export const draw = new (class Draw extends Tool {
+type DrawOptions = BrushOptions & ColorOptions & AlphaOptions;
+
+export const draw = new (class Draw extends Tool<DrawOptions> {
     down = false;
+    Menu:(props: {config:DrawOptions, onChange:Dispatch<SetStateAction<DrawOptions>>}) => JSX.Element = ({ config, onChange }) => {
+        const { color, alpha } = config;
+        return <div>
+            <label>
+            color
+                <input type="color" value={color} onChange={(e) => onChange({ ...config, color: e.target.value })} />
+            </label>
+            <label>
+                 alpha
+                <input type="range" value={alpha} min="0" max="255" onChange={(e) => onChange({ ...config, alpha: parseInt(e.target.value) })} />
+            </label>
+        </div>; };
+
+    constructor(){
+        super();
+    }
 
     setup({ drawingContext: [drawing] }:ToolEvent): void {
         if(!drawing) return;

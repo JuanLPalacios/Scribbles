@@ -1,9 +1,27 @@
+import { Dispatch, SetStateAction } from 'react';
+import { AlphaOptions, ColorOptions } from '../contexts/MenuOptions';
 import Tool from '../abstracts/Tool';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 import { CanvasEvent } from '../types/CanvasEvent';
 
+type DrawOptions = ColorOptions & AlphaOptions;
+
 export const fill = new (class Fill extends Tool {
+    Menu:(props: {config:DrawOptions, onChange:Dispatch<SetStateAction<DrawOptions>>}) => JSX.Element = ({ config, onChange }) => {
+        const { color, alpha } = config;
+        return <div>
+            <label>
+            color
+                <input type="color" value={color} onChange={(e) => onChange({ ...config, color: e.target.value })} />
+            </label>
+            <label>
+                 alpha
+                <input type="range" value={alpha*255} min="0" max="255" onChange={(e) => onChange({ ...config, alpha: parseInt(e.target.value)/255 })} />
+            </label>
+        </div>;
+    };
+
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     setup(): void {
     }

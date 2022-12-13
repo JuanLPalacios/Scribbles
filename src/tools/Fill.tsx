@@ -1,15 +1,15 @@
 import { Dispatch, SetStateAction } from 'react';
-import { AlphaOptions, ColorOptions } from '../contexts/MenuOptions';
+import { AlphaOptions, ColorOptions, ToleranceOptions } from '../contexts/MenuOptions';
 import Tool from '../abstracts/Tool';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 import { CanvasEvent } from '../types/CanvasEvent';
 
-type DrawOptions = ColorOptions & AlphaOptions;
+type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
-export const fill = new (class Fill extends Tool {
-    Menu:(props: {config:DrawOptions, onChange:Dispatch<SetStateAction<DrawOptions>>}) => JSX.Element = ({ config, onChange }) => {
-        const { color, alpha } = config;
+export const fill = new (class Fill extends Tool<FillOptions> {
+    Menu:(props: {config:FillOptions, onChange:Dispatch<SetStateAction<FillOptions>>}) => JSX.Element = ({ config, onChange }) => {
+        const { color, alpha, tolerance } = config;
         return <div>
             <label>
             color
@@ -18,6 +18,10 @@ export const fill = new (class Fill extends Tool {
             <label>
                  alpha
                 <input type="range" value={alpha*255} min="0" max="255" onChange={(e) => onChange({ ...config, alpha: parseInt(e.target.value)/255 })} />
+            </label>
+            <label>
+                 tolerance
+                <input type="range" value={tolerance}  step="0.01" min="0.01" max="1" onChange={(e) => onChange({ ...config, tolerance: parseFloat(e.target.value) })} />
             </label>
         </div>;
     };
@@ -31,18 +35,18 @@ export const fill = new (class Fill extends Tool {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseDown({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
+    mouseDown(): void {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseUp({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
+    mouseUp(): void {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseMove({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
+    mouseMove(): void {
     }
 
-    click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent,): void {
+    click({ point, drawingContext: [drawing], menuContext: [{ color, tolerance }] }: CanvasEvent<FillOptions>,): void {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
@@ -55,7 +59,7 @@ export const fill = new (class Fill extends Tool {
         this.fill(
             canvas,
             buffer,
-            .15,
+            tolerance,
             Math.floor(px),
             Math.floor(py),
             parseColor(color),

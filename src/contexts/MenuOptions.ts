@@ -24,6 +24,10 @@ export type BrushOptions = {
     brushWidth:number,
 };
 
+export type ToleranceOptions = {
+    tolerance:number,
+};
+
 export const MenuContext = createContext<StatePair<MenuOptions>>([
     {
         alpha: 0,

@@ -1,8 +1,7 @@
 import { DrawingState } from '../contexts/DrawingState';
-import { MenuOptions } from '../contexts/MenuOptions';
 import { StatePair } from './StatePair';
 
-export type ToolEvent = {
+export type ToolEvent<O> = {
     drawingContext:StatePair<DrawingState|undefined>;
-    menuContext:StatePair<MenuOptions>;
+    menuContext:StatePair<O>;
 }

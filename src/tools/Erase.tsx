@@ -60,7 +60,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.mask.canvas.height = 0;
     }
 
-    mouseDown({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush }] }: CanvasEvent<EraseOptions>,): void {
+    mouseDown({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
@@ -70,11 +70,11 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { canvas, buffer } = layer;
         layer.canvas.canvas.style.display = 'none';
         this.renderMask(canvas, buffer);
-        brush.startStroke(this.mask, [x-dx, y-dy], '#000000', brushWidth);
+        brush.startStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
         this.down = true;
     }
 
-    mouseUp({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush }] }: CanvasEvent<EraseOptions>,): void {
+    mouseUp({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
@@ -83,7 +83,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
         const { canvas, buffer } = layer;
-        brush.endStroke(this.mask, [x-dx, y-dy], '#000000', brushWidth);
+        brush.endStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
         this.renderMask(canvas, buffer);
         if(canvas.ctx){
             canvas.ctx.globalCompositeOperation = 'copy';
@@ -96,7 +96,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.down = false;
     }
 
-    mouseMove({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush }] }: CanvasEvent<EraseOptions>,): void {
+    mouseMove({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;
         const brush = brushes[selectedBrush];
@@ -105,7 +105,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
         const { canvas, buffer } = layer;
-        brush.drawStroke(this.mask, [x-dx, y-dy], '#000000', brushWidth);
+        brush.drawStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
         this.renderMask(canvas, buffer);
     }
 

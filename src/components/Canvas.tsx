@@ -1,7 +1,7 @@
 import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
 import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
-import { MenuContext } from '../contexts/MenuOptions';
+import { MenuContext, MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { DrawingContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
@@ -60,7 +60,7 @@ function Canvas() {
         }
     }, [drawing]);
 
-    const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>):CanvasEvent=>{
+    const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>):CanvasEvent<MenuOptions>=>{
         e.preventDefault();
         e.stopPropagation();
         if(!ref.current) return { point: new DOMPoint(0, 0), drawingContext, menuContext };

@@ -30,7 +30,7 @@ type TransformOptions = any;
 export const transform = new (class Transform extends Tool<TransformOptions> {
     lastclickTime = 0;
     center = new DOMPoint();
-    handleH: Handle[] = [];
+    handleH: Handle<any>[] = [];
     pivot = new DOMPoint();
     rotation = 0;
     initAngle = 0;
@@ -353,7 +353,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             new DOMPoint(mw, 0)
         ];
         layer.buffer.canvas.style.transformOrigin = 'top left';
-        const createHandle = (position: DOMPoint, i: number):Handle => ({
+        const createHandle = (position: DOMPoint, i: number):Handle<TransformOptions> => ({
             key: uid(),
             icon: '',
             position,

@@ -1,28 +1,21 @@
-import { MouseEvent } from 'react';
-import Brush from '../abstracts/Brush';
-import Tool from '../abstracts/Tool';
-import { DrawableState } from '../types/DrawableState';
-import { LayerState } from '../types/LayerState';
-import { MenuOptions } from '../types/MenuOptions';
-import { Point } from '../types/Point';
-  
-export const fillBucket = new (class FillBucket extends Tool {
-    setup(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+
+export const fillBucket = new (class FillBucket extends Object {
+    setup(): void {
         throw new Error('Method not implemented.');
     }
-    dispose(options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    dispose(): void {
         throw new Error('Method not implemented.');
     }
-    mouseDown(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseDown(): void {
         throw new Error('Method not implemented.');
     }
-    mouseUp(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseUp(): void {
         throw new Error('Method not implemented.');
     }
-    mouseMove(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    mouseMove(): void {
         throw new Error('Method not implemented.');
     }
-    click(e: MouseEvent, options: MenuOptions<any>, setOptions: (options: MenuOptions<any>) => void): void {
+    click(): void {
         throw new Error('Method not implemented.');
     }
     /*
@@ -33,11 +26,11 @@ export const fillBucket = new (class FillBucket extends Tool {
     mouseMove(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
         nativeEvent.preventDefault();
     }
-    
+
     mouseUp(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, width:number) {
         nativeEvent.preventDefault();
     }
-    
+
     click(brush:Brush, {nativeEvent}:React.MouseEvent, layer:LayerState, color:string, bwidth:number) {
         nativeEvent.preventDefault();
         const width = 1024;
@@ -65,7 +58,7 @@ export const fillBucket = new (class FillBucket extends Tool {
         );
         //next = nn;
     }
-    
+
     fillchunk(canvas: DrawableState, sx: number, sy: number, mmx: number, mmy: number, color: Uint8ClampedArray | number[], ocolor: Uint8ClampedArray | number[], pixelStack:Point[] = []): [Point[],Point[],Point[],Point[]] {
         let nn:Point[] = [];
         let [UProp, DProp, LProp, RProp] = this.fillchunk(canvas,sx,sy,mmx,mmy,color, ocolor, pixelStack);
@@ -76,8 +69,7 @@ export const fillBucket = new (class FillBucket extends Tool {
         //next = nn;
     }
     chunk(canvas: DrawableState, ox: number, oy: number, color: Uint8ClampedArray | number[], ocolor: Uint8ClampedArray | number[], pixelStack:Point[] = []): [Point[],Point[],Point[],Point[]] {
-        
-        
+
         const width = 1024;
         const height = 1024;
         const sx = Math.floor(ox/width)*width;
@@ -90,7 +82,7 @@ export const fillBucket = new (class FillBucket extends Tool {
         const RProp:Point[] = [];
         const UProp:Point[] = [];
         const DProp:Point[] = [];
-        
+
         while(pixelStack.length)
         {
             const newPos = pixelStack.pop() as Point;
@@ -98,8 +90,6 @@ export const fillBucket = new (class FillBucket extends Tool {
             const x = newPos[0];
             let y = newPos[1];
 
-            
-  
             pixelPos = (y*canvasWidth + x) * 4;
             while(y-- >= 0 && this.matchStartColor(chunk, pixelPos, ocolor))
             {
@@ -130,7 +120,7 @@ export const fillBucket = new (class FillBucket extends Tool {
                         reachLeft = false;
                     }
                 }
-	
+
                 if(x < canvasWidth-1)
                 {
                     if(this.matchStartColor(chunk, pixelPos + 4, ocolor))
@@ -146,7 +136,7 @@ export const fillBucket = new (class FillBucket extends Tool {
                         reachRight = false;
                     }
                 }
-			
+
                 pixelPos += canvasWidth * 4;
             }
         }
@@ -169,17 +159,17 @@ export const fillBucket = new (class FillBucket extends Tool {
         const startG = color[1];
         const startB = color[2];
         const startA = color[3];
-        
-        const r = colorLayer.data[pixelPos];	
-        const g = colorLayer.data[pixelPos+1];	
-        const b = colorLayer.data[pixelPos+2];	
+
+        const r = colorLayer.data[pixelPos];
+        const g = colorLayer.data[pixelPos+1];
+        const b = colorLayer.data[pixelPos+2];
         const a = colorLayer.data[pixelPos+3];
-    
+
         return (r == startR && g == startG && b == startB && a == startA);
     }
     */
 })();
 
-function parseColor(color:string): [number,number,number,number] {
-    return [0,0,0,0];
-}
+//function parseColor(color:string): [number, number, number, number] {
+//    return [0, 0, 0, 0];
+//}

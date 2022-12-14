@@ -19,7 +19,7 @@ function App() {
     const [drawing, setDrawing] = useContext(DrawingContext);
     const [state, setState] = useContext(MenuContext);
     const {
-        color, alpha, tools, selectedTool
+        tools, selectedTool
     } = state;
     const { layers, selectedLayer } = drawing || { layers: [], selectedLayer: -1 };
     const onUpdate = (newLayers: LayerState[], selectedLayer?: number) => {
@@ -47,7 +47,6 @@ function App() {
                 <div className="content">
                     <Canvas/>
                     <div className="tools">
-                        {color+ ('0'+alpha.toString(16)).substring(alpha.toString(16).length-1)}
                         <Toolbar toolButtons={tools}  selectedTool={selectedTool} onSelect={(selectedTool)=>setState({ ...state, selectedTool })} />
                         <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
                             const newLayers:LayerState[] = [...layers,

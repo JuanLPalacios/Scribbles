@@ -57,12 +57,11 @@ export default class Marker extends Brush {
         this.lastPoint = point;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     endStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: canvas2 } = this.buffer;
         if (!ctx || !bufferCtx) return;
-        //canvas.style.filter = 'none';
+        ctx?.restore();
         bufferCtx.globalCompositeOperation = 'copy';
         bufferCtx.filter = 'blur(1px)';
         bufferCtx.drawImage(canvas, 0, 0);
@@ -76,5 +75,6 @@ export default class Marker extends Brush {
         ctx.filter = 'none';
         canvas2.width = 0;
         canvas2.height = 0;
+        canvas.style.filter = 'none';
     }
 }

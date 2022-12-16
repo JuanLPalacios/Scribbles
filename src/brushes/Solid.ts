@@ -24,6 +24,8 @@ export default class Solid extends Brush {
         ctx.stroke();
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    endStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {}
+    endStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
+        const { ctx, } = drawable;
+        ctx?.restore();
+    }
 }

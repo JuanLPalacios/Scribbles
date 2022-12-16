@@ -7,3 +7,9 @@ export const scalePoint = (a:DOMPoint, ...others:Array<DOMPoint|number>) => othe
         new DOMPoint(b*a.x, b*a.y, b*a.z)
         : new DOMPoint(b.x*a.x, b.y*a.y, b.z*a.z)
 , a);
+
+export const translateMatrix = (matrix:DOMMatrix, vec:DOMPoint|number, y = 0, z = 0) => {
+    return (typeof vec == 'number')?
+        matrix.translate(vec, y, z)
+        : matrix.translate(vec.x, vec.y, vec.z);
+};

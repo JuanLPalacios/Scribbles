@@ -1,9 +1,22 @@
-import { Dispatch, SetStateAction } from 'react';
-import { BrushOptions } from '../../contexts/MenuOptions';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { AlphaOptions, BrushOptions } from '../../contexts/MenuOptions';
+import { createDrawable } from '../../hooks/createDrawable';
+import { uid } from '../../lib/uid';
+import { DrawableState } from '../../types/DrawableState';
+import { Drawable } from '../Drawable';
 
-export const BrushSelectInput = (props:BrushOptions & {onChange:Dispatch<SetStateAction<BrushOptions>>}) => {
-    const { brushes, selectedBrush, brushWidth, onChange } = props;
+export const BrushSelectInput = (props:BrushOptions & (AlphaOptions | Record<string, never>) & {onChange:Dispatch<SetStateAction<BrushOptions & (AlphaOptions | Record<string, never>)>>}) => {
+    const { brushes, selectedBrush, brushWidth, alpha, onChange } = props;
+    const [previews, setPreviews] = useState<DrawableState[]>([]);
+    const [id] = useState(uid());
+    useEffect(()=>{
+        setPreviews(brushes.map(() => createDrawable({ size: [120, 20] })));
+    }, [brushes]);
+    useEffect(()=>{
+        previews.forEach((preview, i) => brushes[i].renderPreview(preview, [[10, 10], [110, 10]], '#000000', alpha || 1, brushWidth));
+    }, [brushes, previews]);
     return <div>
+        {previews.map((prev, i) => <Drawable key={id+'-'+i} canvas={prev.canvas} onClick={()=>onChange({})} />)}
         <label>
             brush
             <select value={selectedBrush} onChange={(e) => onChange({ ...props, selectedBrush: parseInt(e.target.value) })}>

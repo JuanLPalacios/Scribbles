@@ -28,7 +28,7 @@ for (let i = 0; i < roundFibersNumber; i++) {
         width
     });
 }
-for (let i = 0; i < roundFibersNumber; i++) {
+for (let i = 0; i < roundFibersNumber/2; i++) {
     const width = Math.sqrt(.7/roundFibersNumber);
     const r = 2*(1-width)*Math.random()-1;
     const phi = 45;

@@ -1,6 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-
-export const Drawable = ({ canvas }:{canvas:HTMLCanvasElement|undefined}) => {
+type DrawableProps = {
+    canvas:HTMLCanvasElement|undefined
+} & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+export const Drawable = (props:DrawableProps) => {
+    const { canvas } = props;
     const [rendered, setRendered] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
     useEffect(()=>{
@@ -10,7 +13,7 @@ export const Drawable = ({ canvas }:{canvas:HTMLCanvasElement|undefined}) => {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [canvas, ref.current, rendered]);
-    return <div ref={ref} >
+    return <div {...props} ref={ref} >
     </div>
     ;
 };

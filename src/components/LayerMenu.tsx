@@ -34,7 +34,7 @@ function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
     };
     return (
         <div className="LayerMenu">
-            <div className='actions'>
+            {layers[selection] && <div className='actions'>
                 <label>
           blend mode
                     <select value={layers[selection]?.mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
@@ -47,7 +47,7 @@ function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
                         onOpacityChange(parseFloat(e.target.value));
                     }} />
                 </label>
-            </div>
+            </div>}
             <div className="scroller">
                 <div className="list">
                     {layers.map((layer, i) => (

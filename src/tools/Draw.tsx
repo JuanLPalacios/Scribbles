@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import Tool from '../abstracts/Tool';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { AlphaOptions, BrushOptions, ColorOptions } from '../contexts/MenuOptions';
@@ -11,10 +11,13 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
     down = false;
     Menu:(props: {config:DrawOptions, onChange:Dispatch<SetStateAction<DrawOptions>>}) => JSX.Element = ({ config, onChange }) => {
         const { color, alpha } = config;
+        useEffect(()=>{
+            if((color === undefined)||(alpha === undefined))onChange({ ...config, color: '#000000', alpha: 1 });
+        }, [alpha, color, config, onChange]);
         return <div>
             <BrushSelectInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
             <label>
-            color
+                color
                 <input type="color" value={color} onChange={(e) => onChange({ ...config, color: e.target.value })} />
             </label>
             <label>

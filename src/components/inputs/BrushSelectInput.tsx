@@ -5,18 +5,21 @@ import { uid } from '../../lib/uid';
 import { DrawableState } from '../../types/DrawableState';
 import { Drawable } from '../Drawable';
 
-export const BrushSelectInput = (props:BrushOptions & (AlphaOptions | Record<string, never>) & {onChange:Dispatch<SetStateAction<BrushOptions & (AlphaOptions | Record<string, never>)>>}) => {
+export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:Dispatch<SetStateAction<BrushOptions & AlphaOptions>>}) => {
     const { brushes, selectedBrush, brushWidth, alpha, onChange } = props;
     const [previews, setPreviews] = useState<DrawableState[]>([]);
     const [id] = useState(uid());
     useEffect(()=>{
+        if(brushWidth === undefined)onChange({ ...props, brushWidth: 20 });
+    }, [brushWidth]);
+    useEffect(()=>{
         setPreviews(brushes.map(() => createDrawable({ size: [120, 20] })));
     }, [brushes]);
     useEffect(()=>{
-        previews.forEach((preview, i) => brushes[i].renderPreview(preview, [[10, 10], [110, 10]], '#000000', alpha || 1, brushWidth));
-    }, [brushes, previews]);
+        previews.forEach((preview, i) => brushes[i].renderPreview(preview, [[10, 10], [110, 10]], '#000000', alpha || 1, Math.min(20, brushWidth)));
+    }, [alpha, Math.min(20, brushWidth), brushes, previews]);
     return <div>
-        {previews.map((prev, i) => <Drawable key={id+'-'+i} canvas={prev.canvas} onClick={()=>onChange({})} />)}
+        {previews.map((prev, i) => <Drawable key={id+'-'+i} canvas={prev.canvas} className={i==selectedBrush ? 'selected' : ''} onClick={()=>onChange({ ...props, selectedBrush: i })} />)}
         <label>
             brush
             <select value={selectedBrush} onChange={(e) => onChange({ ...props, selectedBrush: parseInt(e.target.value) })}>
@@ -24,11 +27,8 @@ export const BrushSelectInput = (props:BrushOptions & (AlphaOptions | Record<str
             </select>
         </label>
         <label>
-            Brush width
-            <label>
-                 alpha
-                <input type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="32" onChange={(e) => onChange({ ...props, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} />
-            </label>
+            alpha
+            <input type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="32" onChange={(e) => onChange({ ...props, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} />
         </label>
     </div>;
 };

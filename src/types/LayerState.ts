@@ -13,6 +13,6 @@ export interface LayerState {
   visible: boolean
   opacity: number
   mixBlendMode: BlendMode
-  handles: Handle<any>[]
+  handles: Handle[]
 }
 

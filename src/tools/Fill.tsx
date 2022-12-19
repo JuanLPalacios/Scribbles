@@ -1,15 +1,19 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import { AlphaOptions, ColorOptions, ToleranceOptions } from '../contexts/MenuOptions';
 import Tool from '../abstracts/Tool';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 import { CanvasEvent } from '../types/CanvasEvent';
+import { ToolEvent } from '../types/ToolEvent';
 
 type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
 export const fill = new (class Fill extends Tool<FillOptions> {
     Menu:(props: {config:FillOptions, onChange:Dispatch<SetStateAction<FillOptions>>}) => JSX.Element = ({ config, onChange }) => {
         const { color, alpha, tolerance } = config;
+        useEffect(()=>{
+            if((color === undefined)||(alpha === undefined)||(tolerance === undefined))onChange({ ...config, color: '#000000', alpha: 1, tolerance: .15 });
+        }, [alpha, color, config, onChange]);
         return <div>
             <label>
             color
@@ -26,8 +30,16 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         </div>;
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    setup(): void {
+    setup({ drawingContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: ToolEvent<FillOptions>): void {
+        if(!drawing) return;
+        const { layers, selectedLayer } = drawing;
+        const layer = layers[selectedLayer];
+        const { canvas, buffer } = layer;
+        if(!canvas.ctx || !buffer.ctx) return;
+        canvas.ctx.restore();
+        canvas.ctx.globalCompositeOperation = 'source-over';
+        buffer.ctx.restore();
+        buffer.ctx.globalCompositeOperation = 'source-over';
     }
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -46,7 +58,7 @@ export const fill = new (class Fill extends Tool<FillOptions> {
     mouseMove(): void {
     }
 
-    click({ point, drawingContext: [drawing], menuContext: [{ color, tolerance }] }: CanvasEvent<FillOptions>,): void {
+    click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;
         const layer = layers[selectedLayer];
@@ -56,13 +68,14 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         const { canvas, buffer } = layer;
         if(!buffer.ctx) return;
         buffer.ctx.fillStyle = color;
+        buffer.ctx.globalAlpha = alpha;
         this.fill(
             canvas,
             buffer,
             tolerance,
             Math.floor(px),
             Math.floor(py),
-            parseColor(color),
+            parseColor(color+Math.round(alpha*255).toString(16)),
             canvas.ctx?.getImageData(px, py, 1, 1).data || [0, 0, 0, 0]
         );
         if(!canvas.ctx) return;

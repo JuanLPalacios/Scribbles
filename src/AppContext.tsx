@@ -60,6 +60,8 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
             { key: uid(), Tool: transform, name: 'transform' }
         ],
         selectedTool: 0,
+        color: '#000000',
+        alpha: 255,
     });
     const useModal = useState<ModalState|undefined>();
     return<DrawingContext.Provider value={useDrawing}>

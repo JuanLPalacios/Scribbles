@@ -1,4 +1,4 @@
-import './App.css';
+import './css/App.css';
 import Menu from './components/Menu';
 import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
@@ -11,6 +11,10 @@ import { MenuContext } from './contexts/MenuOptions';
 import ReactModal from 'react-modal';
 import { ModalContext } from './contexts/ModalState';
 import { DrawingContext } from './contexts/DrawingState';
+import { TopMenu } from './components/portals/TopMenu';
+import { LeftMenu } from './components/portals/LeftMenu';
+import { RightMenu } from './components/portals/RightMenu';
+import { BottomMenu } from './components/portals/BottomMenu';
 
 function App() {
     const prevWidth = 2000;
@@ -43,25 +47,27 @@ function App() {
                 </ReactModal>
             }
             <div className="App">
-                <Menu options={state} onChange={setState} />
-                <div className="content">
-                    <Canvas/>
-                    <div className="tools">
-                        <Toolbar toolButtons={tools}  selectedTool={selectedTool} onSelect={(selectedTool)=>setState({ ...state, selectedTool })} />
-                        <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
-                            const newLayers:LayerState[] = [...layers,
-                                createLayer(
-                                    'Image',
-                                    {
-                                        position: [0, 0],
-                                        size: [prevWidth, prevHeight]
-                                    }
-                                )
-                            ];
-                            setDrawing(drawing && { ...drawing, layers: newLayers });
-                        }} />
-                    </div>
-                </div>
+                <TopMenu>
+                    <Menu options={state} onChange={setState} />
+                </TopMenu>
+                <LeftMenu></LeftMenu>
+                <Canvas/>
+                <RightMenu>
+                    <Toolbar toolButtons={tools}  selectedTool={selectedTool} onSelect={(selectedTool)=>setState({ ...state, selectedTool })} />
+                    <LayerMenu layers={layers} selection={selectedLayer} onUpdate={onUpdate} onAddLayer={() => {
+                        const newLayers:LayerState[] = [...layers,
+                            createLayer(
+                                'Image',
+                                {
+                                    position: [0, 0],
+                                    size: [prevWidth, prevHeight]
+                                }
+                            )
+                        ];
+                        setDrawing(drawing && { ...drawing, layers: newLayers });
+                    }} />
+                </RightMenu>
+                <BottomMenu></BottomMenu>
             </div>
         </>
     );

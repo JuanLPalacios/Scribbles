@@ -10,16 +10,19 @@ import { draw } from './tools/Draw';
 import { erase } from './tools/Erase';
 import { fill } from './tools/Fill';
 import { transform } from './tools/Transform';
+import round from './brushes/stiff/round.json';
+import oldRound from './brushes/stiff/oldRound.json';
+import diagonal from './brushes/stiff/flat.json';
 
-const roundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
-const diagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
-const roundFibersNumber = 16;
+const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
+const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
+const roundFibersNumber = 32;
 for (let i = 0; i < roundFibersNumber; i++) {
-    const width = Math.sqrt(.7/roundFibersNumber);
-    const r = (1-width)*Math.random();
-    const phi = 360*Math.random();
-    const alpha = Math.random();
-    roundFibers.push({
+    const width = Math.sqrt(2/roundFibersNumber)*Math.random();
+    const r = (1-width)*(1 - Math.pow(Math.random(), 2));
+    const phi = (i%8)*360/8 + 360*Math.random()/8;
+    const alpha = 1;
+    randomRoundFibers.push({
         alpha,
         position: new DOMPoint(1, 0).matrixTransform(
             new DOMMatrix()
@@ -29,11 +32,11 @@ for (let i = 0; i < roundFibersNumber; i++) {
     });
 }
 for (let i = 0; i < roundFibersNumber/2; i++) {
-    const width = Math.sqrt(.7/roundFibersNumber);
+    const width = Math.sqrt(.7/roundFibersNumber)*Math.random();
     const r = 2*(1-width)*Math.random()-1;
     const phi = 45;
-    const alpha = Math.random();
-    diagonalFibers.push({
+    const alpha = 1;
+    randomDiagonalFibers.push({
         alpha,
         position: new DOMPoint(1, 0).matrixTransform(
             new DOMMatrix()
@@ -42,14 +45,20 @@ for (let i = 0; i < roundFibersNumber/2; i++) {
         width
     });
 }
+console.log(JSON.stringify(randomRoundFibers));
+console.log(JSON.stringify(randomDiagonalFibers));
+
 export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) => {
     const useDrawing = useState<DrawingState | undefined>();
     const useMenuOptions = useState<MenuOptions>({
         brushes: [
             new Solid(),
             new Marker(),
-            new StiffBrush(roundFibers),
-            new StiffBrush(diagonalFibers),
+            new StiffBrush(round as any),
+            new StiffBrush(oldRound as any),
+            new StiffBrush(diagonal as any),
+            new StiffBrush(randomRoundFibers),
+            new StiffBrush(randomDiagonalFibers),
         ],
         selectedBrush: 0,
         brushWidth: 20,

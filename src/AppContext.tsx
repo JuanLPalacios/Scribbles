@@ -13,6 +13,10 @@ import { transform } from './tools/Transform';
 import round from './brushes/stiff/round.json';
 import oldRound from './brushes/stiff/oldRound.json';
 import diagonal from './brushes/stiff/flat.json';
+import drawIcon from '../icons/brush-f-svgrepo-com.svg';
+import eraseIcon from '../icons/erase-svgrepo-com.svg';
+import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
+import transformIcon from '../icons/nametag-svgrepo-com.svg';
 
 const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
 const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
@@ -63,10 +67,10 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
         selectedBrush: 0,
         brushWidth: 20,
         tools: [
-            { key: uid(), Tool: draw, name: 'draw' },
-            { key: uid(), Tool: erase, name: 'erase' },
-            { key: uid(), Tool: fill, name: 'fill' },
-            { key: uid(), Tool: transform, name: 'transform' }
+            { key: uid(), Tool: draw, name: 'draw', icon: drawIcon },
+            { key: uid(), Tool: erase, name: 'erase', icon: eraseIcon },
+            { key: uid(), Tool: fill, name: 'fill', icon: fillIcon },
+            { key: uid(), Tool: transform, name: 'transform', icon: transformIcon }
         ],
         selectedTool: 0,
         color: '#000000',

@@ -4,4 +4,5 @@ export type ToolButton = {
     key:number
     Tool:Tool
     name:string
+    icon:string
 }

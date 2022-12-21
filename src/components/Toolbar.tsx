@@ -16,9 +16,9 @@ function Toolbar(props:ToolbarProps) {
     const { Tool } = toolButtons[selectedTool];
     return (
         <div className="Toolbar">
-            {toolButtons.map((toolButton, i) => (
-                <button key={`${toolButton.key}-item`} className={`tool ${selectedTool === i ? 'selected' : ''}`} onClick={() => onSelect(i)}>
-                    {toolButton.name}
+            {toolButtons.map(({ key, icon, name }, i) => (
+                <button key={`${key}-item`} className={`tool ${selectedTool === i ? 'selected' : ''}`} onClick={() => onSelect(i)}>
+                    <img src={icon} alt={name} />
                 </button>
             ))}
             <Tool.Menu config={options} onChange={onChange}/>

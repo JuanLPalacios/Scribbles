@@ -1,5 +1,9 @@
 import { useCallback, useContext } from 'react';
 import '../css/Menu.css';
+import fileIcon from '../icons/file-svgrepo-com.svg';
+import addFileIcon from '../icons/file-add-svgrepo-com.svg';
+import exportIcon from '../icons/external-svgrepo-com.svg';
+import optionsIcon from '../icons/options-svgrepo-com.svg';
 import { createLayer } from '../hooks/createLayer';
 import { mergeLayers } from '../lib/Graphics';
 import { MenuOptions } from '../contexts/MenuOptions';
@@ -48,11 +52,20 @@ function Menu({ onChange }:MenuProps) {
     }, []);
     return (
         <ul className="Menu">
-            <li><button>File</button>
+            <li>
+                <button>
+                    <img src={fileIcon} alt="File" />
+                </button>
                 <ul>
-                    <li><button onClick={newfile}>New scrible</button></li>
-                    <li><button onClick={exportPng}>Export to PNG</button></li>
-                    <li><button onClick={changeProps}>Properties</button></li>
+                    <li><button onClick={newfile}>
+                        <img src={addFileIcon} alt="New scribble" />
+                    </button></li>
+                    <li><button onClick={exportPng}>
+                        <img src={exportIcon} alt="Export to PNG" />
+                    </button></li>
+                    <li><button onClick={changeProps}>
+                        <img src={optionsIcon} alt="Properties" />
+                    </button></li>
                 </ul>
             </li>
         </ul>

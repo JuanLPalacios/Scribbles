@@ -1,35 +1,45 @@
-.LayerMenu {
+.LayerMenu .layer-button {
+}
+
+.LayerMenu .menu {
   flex: 1 1 auto;
+  position: absolute;
+  width: 200px;
+  right: -200px;
   overflow: auto;
   display: flex;
   flex-direction: column;
 }
 
-.LayerMenu > .scroller {
+.LayerMenu:focus-within .menu {
+  right: 0;
+}
+
+.LayerMenu .menu > .scroller {
   flex: 1 1 auto;
   overflow: auto;
 }
 
-.LayerMenu .list {
+.LayerMenu .menu .list {
   display: flex;
   flex-direction: column-reverse;
 }
 
-.LayerMenu > .actions {
+.LayerMenu .menu > .actions {
   flex: 0 0 auto;
 }
 
-.LayerMenu .list .layer {
+.LayerMenu .menu .list .layer {
   display: flex;
   gap: 10px;
   align-items: center;
   padding: 5px;
 }
 
-.LayerMenu .layer > .thumbnail {
+.LayerMenu .menu .layer > .thumbnail {
   background: url(Transparency10.png), linear-gradient(0deg, #ffffff, #ffffff);
 }
 
-.LayerMenu .list .selected {
+.LayerMenu .menu .list .selected {
   background: rgb(214, 240, 255);
 }

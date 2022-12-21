@@ -1,7 +1,7 @@
 .Canvas {
   overflow: auto;
   height: calc(100vh - 23px);
-  width: 100%;
+  width: calc(100% - 23px);
   scroll-padding: 100px;
   scroll-snap-type: both mandatory;
   box-sizing: border-box;

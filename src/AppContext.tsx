@@ -13,10 +13,10 @@ import { transform } from './tools/Transform';
 import round from './brushes/stiff/round.json';
 import oldRound from './brushes/stiff/oldRound.json';
 import diagonal from './brushes/stiff/flat.json';
-import drawIcon from '../icons/brush-f-svgrepo-com.svg';
-import eraseIcon from '../icons/erase-svgrepo-com.svg';
-import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
-import transformIcon from '../icons/nametag-svgrepo-com.svg';
+import drawIcon from './icons/brush-f-svgrepo-com.svg';
+import eraseIcon from './icons/erase-svgrepo-com.svg';
+import fillIcon from './icons/color-bucket-svgrepo-com.svg';
+import transformIcon from './icons/nametag-svgrepo-com.svg';
 
 const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
 const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];

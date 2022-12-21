@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, CSSProperties } from 'react';
 import ReactDOM from 'react-dom';
 import { uid } from '../../lib/uid';
 
@@ -8,8 +8,16 @@ type MenuProps = {
     children?: React.ReactNode;
   };
 
+const style:CSSProperties = {
+    display: 'flex',
+    position: 'absolute',
+    width: '100%',
+    top: 0,
+    zIndex: 5
+};
+
 export const TopMenu = ({ children }:MenuProps) => {
-    return <div id={id} >
+    return <div id={id} style={style}>
         {children}
     </div>;
 };

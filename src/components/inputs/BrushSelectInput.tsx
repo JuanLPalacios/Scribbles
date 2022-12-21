@@ -1,10 +1,15 @@
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState, CSSProperties } from 'react';
 import { AlphaOptions, BrushOptions } from '../../contexts/MenuOptions';
 import { createDrawable } from '../../hooks/createDrawable';
 import { uid } from '../../lib/uid';
 import { DrawableState } from '../../types/DrawableState';
 import { Drawable } from '../Drawable';
 import { TopMenuPortal } from '../portals/TopMenu';
+
+const style:CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column'
+};
 
 export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:Dispatch<SetStateAction<BrushOptions & AlphaOptions>>}) => {
     const { brushes, selectedBrush, brushWidth, alpha, onChange } = props;
@@ -21,7 +26,9 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
     }, [alpha, Math.min(20, brushWidth), brushes, previews]);
     return <div>
         <TopMenuPortal>
-            {previews.map((prev, i) => <Drawable key={id+'-'+i} canvas={prev.canvas} className={i==selectedBrush ? 'selected' : ''} onClick={()=>onChange({ ...props, selectedBrush: i })} />)}
+            <div style={style}>
+                {previews.map((prev, i) => <Drawable key={id+'-'+i} canvas={prev.canvas} className={i==selectedBrush ? 'selected' : ''} onClick={()=>onChange({ ...props, selectedBrush: i })} />)}
+            </div>
         </TopMenuPortal>
         <label>
             brush

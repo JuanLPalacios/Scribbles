@@ -6,6 +6,30 @@
   overflow: hidden;
 }
 
+.App .side-menu {
+  flex-direction: column;
+}
+
+.App .side-menu > label {
+  display: flex;
+  flex-direction: column;
+  width: var(--button-radius);
+  writing-mode: vertical-lr;
+  text-align: center;
+}
+
+.App .side-menu > input[type='range'],
+.App .side-menu > label > input[type='range'] {
+  -webkit-appearance: slider-vertical;
+  width: calc(var(--button-radius) / 2);
+}
+
+.App .menu > label {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
 .App > .content {
   flex: 1 1 auto;
   display: flex;

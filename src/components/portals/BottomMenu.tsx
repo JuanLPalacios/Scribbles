@@ -11,13 +11,14 @@ type MenuProps = {
 const style:CSSProperties = {
     display: 'flex',
     position: 'absolute',
-    width: '100%',
+    width: 'calc(100% - 2 * var(--button-radius))',
+    left: 'var(--button-radius)',
     bottom: 0,
     zIndex: 5
 };
 
 export const BottomMenu = ({ children }:MenuProps) => {
-    return <div id={id} style={style} >
+    return <div id={id} className="menu" style={style} >
         {children}
     </div>;
 };

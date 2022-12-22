@@ -11,25 +11,3 @@
   display: flex;
   flex-direction: column;
 }
-
-.Menu ul {
-  flex-direction: column;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.Menu li {
-  display: flex;
-  flex-direction: column;
-}
-
-.Menu > li > ul {
-  height: 0;
-  overflow: hidden;
-  z-index: 5;
-}
-
-.Menu > li:focus-within > ul {
-  overflow: visible;
-}

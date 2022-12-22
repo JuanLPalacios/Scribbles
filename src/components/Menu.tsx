@@ -52,7 +52,7 @@ function Menu({ onChange }:MenuProps) {
     }, []);
     return (
         <ul className="Menu">
-            <li>
+            <li className='dropdown'>
                 <button>
                     <img src={fileIcon} alt="File" />
                 </button>

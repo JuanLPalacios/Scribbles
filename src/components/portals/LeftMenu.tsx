@@ -12,13 +12,14 @@ const style:CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     position: 'absolute',
-    height: '100%',
+    height: 'calc(100% - 2 * var(--button-radius))',
+    top: 'var(--button-radius)',
     left: 0,
     zIndex: 5
 };
 
 export const LeftMenu = ({ children }:MenuProps) => {
-    return <div id={id} style={style} >
+    return <div id={id} className="side-menu" style={style} >
         {children}
     </div>;
 };

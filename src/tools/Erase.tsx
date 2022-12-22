@@ -6,6 +6,7 @@ import { createDrawable } from '../hooks/createDrawable';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { DrawableState } from '../types/DrawableState';
 import { ToolEvent } from '../types/ToolEvent';
+import { AlphaInput } from '../components/inputs/AlphaInput';
 
 type EraseOptions = BrushOptions & AlphaOptions;
 
@@ -13,14 +14,10 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
     mask: DrawableState;
     down = false;
     Menu:(props: {config:EraseOptions, onChange:Dispatch<SetStateAction<EraseOptions>>}) => JSX.Element = ({ config, onChange }) => {
-        const { alpha } = config;
-        return <div>
+        return <>
             <BrushSelectInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
-            <label>
-                 alpha
-                <input type="range" value={alpha*255} min="0" max="255" onChange={(e) => onChange({ ...config, alpha: parseInt(e.target.value)/255 })} />
-            </label>
-        </div>;
+            <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
+        </>;
     };
 
     constructor(){

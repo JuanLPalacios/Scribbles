@@ -1,18 +1,41 @@
 :root {
   --doc-width: 200px;
   --doc-height: 200px;
+  --button-radius: 40px;
+  --main-color: #eb840f;
+  --secondary-color: #303030;
+  --background-color: #353535;
+  --text-color: #e7e7e7;
+  --title-color: #ff7856;
 }
 
 body {
   margin: 0;
+  background: var(--background-color);
 }
 
-code {
-  font-family:
-    source-code-pro,
-    Menlo,
-    Monaco,
-    Consolas,
-    'Courier New',
-    monospace;
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown li {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown > ul {
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 0;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.dropdown:focus-within > ul {
+  overflow: visible;
 }

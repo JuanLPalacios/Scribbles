@@ -5,6 +5,9 @@ import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
+import { ColorInput } from '../components/inputs/ColorInput';
+import { AlphaInput } from '../components/inputs/AlphaInput';
+import { ToleranceInput } from '../components/inputs/ToleranceInput';
 
 type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
@@ -15,18 +18,9 @@ export const fill = new (class Fill extends Tool<FillOptions> {
             if((color === undefined)||(alpha === undefined)||(tolerance === undefined))onChange({ ...config, color: '#000000', alpha: 1, tolerance: .15 });
         }, [alpha, color, config, onChange]);
         return <div>
-            <label>
-            color
-                <input type="color" value={color} onChange={(e) => onChange({ ...config, color: e.target.value })} />
-            </label>
-            <label>
-                 alpha
-                <input type="range" value={alpha*255} min="0" max="255" onChange={(e) => onChange({ ...config, alpha: parseInt(e.target.value)/255 })} />
-            </label>
-            <label>
-                 tolerance
-                <input type="range" value={tolerance}  step="0.01" min="0.01" max="1" onChange={(e) => onChange({ ...config, tolerance: parseFloat(e.target.value) })} />
-            </label>
+            <ColorInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
+            <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
+            <ToleranceInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
         </div>;
     };
 

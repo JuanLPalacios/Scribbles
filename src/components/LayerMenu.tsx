@@ -1,42 +1,61 @@
 import '../css/LayerMenu.css';
 import stackIcon from '../icons/stack-svgrepo-com.svg';
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { LayerState } from '../types/LayerState';
 import { Drawable } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
 import ReactModal from 'react-modal';
+import { createLayer } from '../hooks/createLayer';
+import { DrawingContext } from '../contexts/DrawingState';
 
-interface LayerMenuProps {
-  layers:LayerState[],
-  selection:number
-  onUpdate:(layers:LayerState[], index?:number)=>void,
-  onAddLayer:()=>void
-}
-
-function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
+function LayerMenu() {
     const [modal, setState] = useState({
         isOpen: false,
     });
+    const [drawing, setDrawing] = useContext(DrawingContext);
+    if(!drawing) return <></>;
+    const { selectedLayer, layers } = drawing;
+    const onAddLayer = () => {
+        if(!drawing) return;
+        const { width, height } = drawing;
+        const newLayers:LayerState[] = [...layers,
+            createLayer(
+                'Image',
+                {
+                    position: [0, 0],
+                    size: [width, height]
+                }
+            )
+        ];
+        setDrawing(drawing && { ...drawing, layers: newLayers });
+    };
     const onRemoveLayer = () => {
-        onUpdate([...layers.filter((x, i) => selection !== i)], selection%(layers.length -1));
+        onUpdate([...layers.filter((x, i) => selectedLayer !== i)], selectedLayer%(layers.length -1));
     };
     const onOpacityChange = (opacity:number) => {
-        const layer = layers[selection];
+        const layer = layers[selectedLayer];
         layer.opacity = opacity;
         onUpdate([...layers]);
     };
     const onModeChange = (mixBlendMode:BlendMode) => {
-        const layer = layers[selection];
+        const layer = layers[selectedLayer];
         layer.mixBlendMode = mixBlendMode;
         onUpdate([...layers]);
     };
     const onMove = (change:number) => {
-        const newPosirion = selection + change;
+        const newPosirion = selectedLayer + change;
         if(newPosirion < 0) return;
         if(newPosirion >= layers.length) return;
-        const layer = layers[selection];
+        const layer = layers[selectedLayer];
         const otherLayer = layers[newPosirion];
-        onUpdate(Object.assign([...layers], { [selection]: otherLayer, [newPosirion]: layer }), newPosirion);
+        onUpdate(Object.assign([...layers], { [selectedLayer]: otherLayer, [newPosirion]: layer }), newPosirion);
+    };
+    const onUpdate = (newLayers: LayerState[], selectedLayer?: number) => {
+        if(selectedLayer !== undefined){
+            setDrawing(drawing && { ...drawing, layers: [...newLayers], selectedLayer });
+        }
+        else
+            setDrawing(drawing && { ...drawing, layers: [...newLayers] });
     };
 
     return (
@@ -60,13 +79,13 @@ function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
                         <div className='actions'>
                             <label>
                                 blend mode
-                                <select value={layers[selection]?.mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
+                                <select value={layers[selectedLayer]?.mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
                                     {blendModes.map((value) => <option key={value} value={value}>{value}</option>)}
                                 </select>
                             </label>
                             <label>
                                 opacity
-                                <input type="range" value={layers[selection]?.opacity} min="0" max="1" step="0.004" onChange={(e) => {
+                                <input type="range" value={layers[selectedLayer]?.opacity} min="0" max="1" step="0.004" onChange={(e) => {
                                     onOpacityChange(parseFloat(e.target.value));
                                 }} />
                             </label>
@@ -74,7 +93,7 @@ function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
                         <div className="scroller">
                             <div className="list">
                                 {layers.map((layer, i) => (
-                                    <div key={`${layer.key}-item`} className={`layer ${selection === i ? 'selected' : ''}`} onClick={() => onUpdate(layers, i)}>
+                                    <div key={`${layer.key}-item`} className={`layer ${selectedLayer === i ? 'selected' : ''}`} onClick={() => onUpdate(layers, i)}>
                                         <label>
                                             <div className='checkbox'>
                                                 visible

@@ -8,8 +8,6 @@ import { LayerState } from './types/LayerState';
 import { createLayer } from './hooks/createLayer';
 import { MenuContext } from './contexts/MenuOptions';
 
-import ReactModal from 'react-modal';
-import { ModalContext } from './contexts/ModalState';
 import { DrawingContext } from './contexts/DrawingState';
 import { TopMenu } from './components/portals/TopMenu';
 import { LeftMenu } from './components/portals/LeftMenu';
@@ -19,7 +17,6 @@ import { BottomMenu } from './components/portals/BottomMenu';
 function App() {
     const prevWidth = 2000;
     const prevHeight = 2000;
-    const [modal] = useContext(ModalContext);
     const [drawing, setDrawing] = useContext(DrawingContext);
     const [state, setState] = useContext(MenuContext);
     const {
@@ -36,26 +33,10 @@ function App() {
     };
     return (
         <>
-            {modal &&
-                <ReactModal
-                    isOpen={modal.isOpen}
-                    style={{ content: {
-                        margin: 'auto',
-                        top: 0,
-                        left: 'auto',
-                        bottom: 0,
-                        right: 0,
-                    } }}
-                    onRequestClose={modal.onRequestClose}
-                    onAfterClose={modal.onAfterClose}
-                    onAfterOpen={modal.onAfterOpen}
-                >
-                    {modal.contents}
-                </ReactModal>
-            }
             <div className="App">
                 <TopMenu>
-                    <Menu options={state} onChange={setState} />
+                    <Menu />
+                    <h1>{drawing?.name}</h1>
                 </TopMenu>
                 <LeftMenu></LeftMenu>
                 <Canvas/>

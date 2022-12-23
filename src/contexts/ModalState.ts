@@ -6,8 +6,8 @@ export type ModalState = {
     isOpen:boolean,
     contents: ReactNode
     onRequestClose:()=>void,
-    onAfterClose: (() => void) | undefined
-    onAfterOpen: OnAfterOpenCallback | undefined
+    onAfterClose?: (() => void) | undefined
+    onAfterOpen?: OnAfterOpenCallback | undefined
 }
 
 export const ModalContext = createContext<StatePair<ModalState|undefined>>([

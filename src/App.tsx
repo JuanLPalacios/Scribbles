@@ -39,6 +39,13 @@ function App() {
             {modal &&
                 <ReactModal
                     isOpen={modal.isOpen}
+                    style={{ content: {
+                        margin: 'auto',
+                        top: 0,
+                        left: 'auto',
+                        bottom: 0,
+                        right: 0,
+                    } }}
                     onRequestClose={modal.onRequestClose}
                     onAfterClose={modal.onAfterClose}
                     onAfterOpen={modal.onAfterOpen}

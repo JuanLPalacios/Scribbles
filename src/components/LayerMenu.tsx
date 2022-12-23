@@ -1,8 +1,10 @@
 import '../css/LayerMenu.css';
 import stackIcon from '../icons/stack-svgrepo-com.svg';
+import { useState } from 'react';
 import { LayerState } from '../types/LayerState';
 import { Drawable } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
+import ReactModal from 'react-modal';
 
 interface LayerMenuProps {
   layers:LayerState[],
@@ -12,6 +14,9 @@ interface LayerMenuProps {
 }
 
 function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
+    const [modal, setState] = useState({
+        isOpen: false,
+    });
     const onRemoveLayer = () => {
         onUpdate([...layers.filter((x, i) => selection !== i)], selection%(layers.length -1));
     };
@@ -33,59 +38,74 @@ function LayerMenu({ layers, selection, onUpdate, onAddLayer }:LayerMenuProps) {
         const otherLayer = layers[newPosirion];
         onUpdate(Object.assign([...layers], { [selection]: otherLayer, [newPosirion]: layer }), newPosirion);
     };
+
     return (
         <div className="LayerMenu">
-            <button className='layer-button'>
+            <button className='layer-button' onClick={() => setState({ ...modal, isOpen: true })}>
                 <img src={stackIcon} alt="layers" />
             </button>
-            <div className="menu">
-                <div className='actions'>
-                    <label>
-                        blend mode
-                        <select value={layers[selection]?.mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
-                            {blendModes.map((value) => <option key={value} value={value}>{value}</option>)}
-                        </select>
-                    </label>
-                    <label>
-                        opacity
-                        <input type="range" value={layers[selection]?.opacity} min="0" max="1" step="0.004" onChange={(e) => {
-                            onOpacityChange(parseFloat(e.target.value));
-                        }} />
-                    </label>
-                </div>
-                <div className="scroller">
-                    <div className="list">
-                        {layers.map((layer, i) => (
-                            <div key={`${layer.key}-item`} className={`layer ${selection === i ? 'selected' : ''}`} onClick={() => onUpdate(layers, i)}>
-                                <label>
-                                    <div className='checkbox'>
-                                        visible
+            {modal &&
+                <ReactModal
+                    isOpen={modal.isOpen}
+                    style={{ content: {
+                        margin: 'auto',
+                        top: 0,
+                        left: 'auto',
+                        bottom: 0,
+                        right: 0,
+                    } }}
+                    onRequestClose={() => setState({ ...modal, isOpen: false })}
+                >
+                    <div className="menu">
+                        <div className='actions'>
+                            <label>
+                                blend mode
+                                <select value={layers[selection]?.mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
+                                    {blendModes.map((value) => <option key={value} value={value}>{value}</option>)}
+                                </select>
+                            </label>
+                            <label>
+                                opacity
+                                <input type="range" value={layers[selection]?.opacity} min="0" max="1" step="0.004" onChange={(e) => {
+                                    onOpacityChange(parseFloat(e.target.value));
+                                }} />
+                            </label>
+                        </div>
+                        <div className="scroller">
+                            <div className="list">
+                                {layers.map((layer, i) => (
+                                    <div key={`${layer.key}-item`} className={`layer ${selection === i ? 'selected' : ''}`} onClick={() => onUpdate(layers, i)}>
+                                        <label>
+                                            <div className='checkbox'>
+                                                visible
+                                            </div>
+                                            <input type="checkbox" checked={layer.visible} value="visible" onChange={()=>{
+                                                layer.visible=!layer.visible;
+                                                onUpdate([...layers]);
+                                            }} />
+                                        </label>
+                                        <div className='thumbnail'>
+                                            <Drawable
+                                                canvas={layer.thumbnail?.canvas}
+                                                key={`${layer.key}-thumb`}
+                                            />
+                                        </div>
+                                        <div>
+                                            {layer.name}
+                                        </div>
                                     </div>
-                                    <input type="checkbox" checked={layer.visible} value="visible" onChange={()=>{
-                                        layer.visible=!layer.visible;
-                                        onUpdate([...layers]);
-                                    }} />
-                                </label>
-                                <div className='thumbnail'>
-                                    <Drawable
-                                        canvas={layer.thumbnail?.canvas}
-                                        key={`${layer.key}-thumb`}
-                                    />
-                                </div>
-                                <div>
-                                    {layer.name}
-                                </div>
+                                ))}
                             </div>
-                        ))}
+                        </div>
+                        <div className='actions'>
+                            <button onClick={onAddLayer}>+</button>
+                            <button onClick={onRemoveLayer}>-</button>
+                            <button onClick={() => onMove(1)}>move up</button>
+                            <button onClick={() => onMove(-1)}>move down</button>
+                        </div>
                     </div>
-                </div>
-                <div className='actions'>
-                    <button onClick={onAddLayer}>+</button>
-                    <button onClick={onRemoveLayer}>-</button>
-                    <button onClick={() => onMove(1)}>move up</button>
-                    <button onClick={() => onMove(-1)}>move down</button>
-                </div>
-            </div>
+                </ReactModal>
+            }
         </div>
     );
 }

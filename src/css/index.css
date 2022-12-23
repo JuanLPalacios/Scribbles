@@ -12,6 +12,7 @@
 body {
   margin: 0;
   background: var(--background-color);
+  color: var(--text-color);
 }
 
 .dropdown {
@@ -38,4 +39,8 @@ body {
 
 .dropdown:focus-within > ul {
   overflow: visible;
+}
+
+.ReactModal__Overlay {
+  z-index: 10;
 }

@@ -5,7 +5,7 @@
   scroll-padding: 100px;
   scroll-snap-type: both mandatory;
   box-sizing: border-box;
-  background: rgb(128, 128, 128);
+  background: var(--background-color);
 }
 
 .Canvas > * {

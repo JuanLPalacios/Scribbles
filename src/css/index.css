@@ -3,8 +3,10 @@
   --doc-height: 200px;
   --button-radius: 40px;
   --main-color: #eb840f;
-  --secondary-color: #303030;
+  --secondary-color: #636363;
   --background-color: #353535;
+  --background2-color: #161616;
+  --overlay-color: #35353588;
   --text-color: #e7e7e7;
   --title-color: #ff7856;
 }
@@ -13,6 +15,33 @@ body {
   margin: 0;
   background: var(--background-color);
   color: var(--text-color);
+}
+
+input,
+select {
+  background: var(--background2-color);
+  border: none;
+  color: var(--text-color);
+}
+
+button {
+  background: var(--secondary-color);
+  border: none;
+  color: var(--text-color);
+}
+
+button > img {
+  filter: invert(1);
+}
+
+button:focus {
+  filter: brightness(1.1);
+}
+
+.round-btn {
+  border-radius: calc(var(--button-radius) / 2);
+  width: var(--button-radius);
+  height: var(--button-radius);
 }
 
 .dropdown {

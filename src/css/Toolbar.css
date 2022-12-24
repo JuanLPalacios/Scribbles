@@ -2,16 +2,17 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
+  gap: 5px;
+}
+
+.Toolbar .tool {
+  cursor: pointer;
 }
 
 .Toolbar .tool.selected {
-  cursor: default;
-  box-sizing: border-box;
-  background-color: #fff;
-  margin: 0;
-  padding: 1px 6px;
-  border-width: 2px;
-  border-style: outset;
-  border-color: #ccc;
-  border-image: initial;
+  background: var(--main-color);
+}
+
+.Toolbar .tool.selected > img {
+  filter: none;
 }

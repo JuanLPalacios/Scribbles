@@ -47,24 +47,28 @@ export const NewFile = () => {
         close();
     }, [close, height, name, setDrawing, width]);
     return <>
-        <li><button onClick={openModal}>
+        <li><button className='round-btn' onClick={openModal}>
             <img src={addFileIcon} alt="New scribble" />
         </button></li>
         <ReactModal isOpen={isOpen} onRequestClose={close}>
-            <label>
+            <div className="fields">
+                <label>
                 name
-                <input type="text" name='name' value={name} onChange={update} />
-            </label>
-            <label>
+                    <input type="text" name='name' value={name} onChange={update} />
+                </label>
+                <label>
                 width
-                <input type="number" name='width' value={width} onChange={update} />
-            </label>
-            <label>
+                    <input type="number" name='width' value={width} onChange={update} />
+                </label>
+                <label>
                 height
-                <input type="number" name='height' value={height} onChange={update} />
-            </label>
-            <button onClick={newfile}>create</button>
-            <button onClick={close}>cancel</button>
+                    <input type="number" name='height' value={height} onChange={update} />
+                </label>
+                <div>
+                    <button onClick={newfile}>create</button>
+                    <button onClick={close}>cancel</button>
+                </div>
+            </div>
         </ReactModal>
     </>;
 };

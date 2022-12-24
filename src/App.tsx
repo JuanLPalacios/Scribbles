@@ -18,7 +18,7 @@ function App() {
             <div className="App">
                 <TopMenu>
                     <Menu />
-                    <h1>{drawing?.name}</h1>
+                    <h1 className='filename'>{drawing?.name}</h1>
                 </TopMenu>
                 <LeftMenu></LeftMenu>
                 <Canvas/>

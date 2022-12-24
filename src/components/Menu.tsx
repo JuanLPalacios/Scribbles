@@ -8,7 +8,7 @@ function Menu() {
     return (
         <ul className="Menu">
             <li className='dropdown'>
-                <button>
+                <button className='round-btn'>
                     <img src={fileIcon} alt="File" />
                 </button>
                 <ul>

@@ -19,7 +19,7 @@ export const ExportPNG = () => {
         a.click();
     }, [drawing]);
     return <>
-        <li><button onClick={exportPng}>
+        <li><button className='round-btn' onClick={exportPng}>
             <img src={exportIcon} alt="Export to PNG" />
         </button></li>
     </>;

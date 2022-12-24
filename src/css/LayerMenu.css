@@ -1,9 +1,16 @@
-.LayerMenu .layer-button {
+.LayerMenu {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
 }
 
-.LayerMenu .menu {
+.layer-options {
   flex: 1 1 auto;
-  position: absolute;
+  display: flex;
+}
+
+.layer-options .menu {
+  flex: 1 1 auto;
   width: 200px;
   right: -200px;
   overflow: auto;
@@ -11,35 +18,47 @@
   flex-direction: column;
 }
 
-.LayerMenu:focus-within .menu {
+.layer-options:focus-within .menu {
   right: 0;
 }
 
-.LayerMenu .menu > .scroller {
+.layer-options .menu > .scroller {
   flex: 1 1 auto;
   overflow: auto;
 }
 
-.LayerMenu .menu .list {
+.layer-options input[type='checkbox'] {
+  display: none;
+}
+
+.layer-options .checkbox {
+  filter: invert(1);
+}
+
+.layer-options input[type='checkbox']:not(:checked) + .checkbox {
+  opacity: 0.3;
+}
+
+.layer-options .menu .list {
   display: flex;
   flex-direction: column-reverse;
 }
 
-.LayerMenu .menu > .actions {
+.layer-options .menu > .actions {
   flex: 0 0 auto;
 }
 
-.LayerMenu .menu .list .layer {
+.layer-options .menu .list .layer {
   display: flex;
   gap: 10px;
   align-items: center;
   padding: 5px;
 }
 
-.LayerMenu .menu .layer > .thumbnail {
-  background: url(Transparency10.png), linear-gradient(0deg, #ffffff, #ffffff);
+.layer-options .menu .layer > .thumbnail {
+  background: url(Transparency10.png), linear-gradient(0deg, #fff, #fff);
 }
 
-.LayerMenu .menu .list .selected {
-  background: rgb(214, 240, 255);
+.layer-options .menu .list .selected {
+  background: var(--secondary-color);
 }

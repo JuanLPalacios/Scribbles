@@ -35,7 +35,7 @@ export const Properties = () => {
         close();
     }, [close, drawing, name, setDrawing]);
     return <>
-        <li><button onClick={openModal}>
+        <li><button className='round-btn' onClick={openModal}>
             <img src={optionsIcon} alt="Properties" />
         </button></li>
         <ReactModal isOpen={isOpen} onRequestClose={close}>

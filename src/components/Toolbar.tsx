@@ -13,7 +13,7 @@ function Toolbar() {
     return (
         <div className="Toolbar">
             {tools.map(({ key, icon, name }, i) => (
-                <button key={`${key}-item`} className={`tool ${selectedTool === i ? 'selected' : ''}`} onClick={() => onSelect(i)}>
+                <button key={`${key}-item`} className={`tool round-btn ${selectedTool === i ? 'selected' : ''}`} onClick={() => onSelect(i)}>
                     <img src={icon} alt={name} />
                 </button>
             ))}

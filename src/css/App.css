@@ -1,25 +1,41 @@
 .App {
   display: flex;
+  justify-content: center;
+  align-items: center;
   position: relative;
-  flex-direction: column;
+  height: 100vh;
   max-height: 100vh;
   overflow: hidden;
+}
+
+.App .filename {
+  padding: 10px;
+  margin: auto;
+  font-size: 1.5rem;
 }
 
 .App .side-menu {
   flex-direction: column;
 }
 
-.App .side-menu > label {
+.App .side-menu > label,
+.App .menu > label {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   width: var(--button-radius);
-  writing-mode: vertical-lr;
   text-align: center;
+}
+
+
+.App .side-menu > label {
+  writing-mode: vertical-lr;
 }
 
 .App .side-menu > input[type='range'],
 .App .side-menu > label > input[type='range'] {
+  flex: 1 1 auto;
   -webkit-appearance: slider-vertical;
   width: calc(var(--button-radius) / 2);
 }

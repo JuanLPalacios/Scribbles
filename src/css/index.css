@@ -1,12 +1,13 @@
 :root {
   --doc-width: 200px;
   --doc-height: 200px;
-  --button-radius: 40px;
+  --button-diameter: 50px;
+  --scroll-width: 10px;
   --main-color: #eb840f;
   --secondary-color: #636363;
   --background-color: #353535;
   --background2-color: #161616;
-  --overlay-color: #35353588;
+  --overlay-color: #16161688;
   --text-color: #e7e7e7;
   --title-color: #ff7856;
 }
@@ -15,6 +16,26 @@ body {
   margin: 0;
   background: var(--background-color);
   color: var(--text-color);
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px var(--overlay-color);
+  background-color: var(--background2-color);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scroll-width);
+  height: var(--scroll-width);
+  background-color: var(--background2-color);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary-color);
+  border: 0 solid #000;
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
 }
 
 input,
@@ -30,6 +51,10 @@ button {
   color: var(--text-color);
 }
 
+input[type=range] {
+  filter: grayscale(1) invert(0.9);
+}
+
 button > img {
   filter: invert(1);
 }
@@ -39,9 +64,9 @@ button:focus {
 }
 
 .round-btn {
-  border-radius: calc(var(--button-radius) / 2);
-  width: var(--button-radius);
-  height: var(--button-radius);
+  border-radius: calc(var(--button-diameter) / 2);
+  width: var(--button-diameter);
+  height: var(--button-diameter);
 }
 
 .dropdown {
@@ -57,13 +82,19 @@ button:focus {
 }
 
 .dropdown > ul {
+  display: flex;
   flex-direction: column;
+  background: var(--background2-color);
   list-style: none;
   padding: 0;
   margin: 0;
   height: 0;
   overflow: hidden;
   z-index: 5;
+}
+
+.dropdown > ul > li {
+  background: var(--overlay-color);
 }
 
 .dropdown:focus-within > ul {

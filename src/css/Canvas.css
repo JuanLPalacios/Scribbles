@@ -1,7 +1,7 @@
 .Canvas {
   overflow: auto;
-  height: calc(100vh - var(--button-radius) * 2);
-  width: calc(100% - var(--button-radius) * 2);
+  height: calc(100vh - var(--button-diameter) * 2 - 21px);
+  width: calc(100% - var(--button-diameter) * 2);
   scroll-padding: 100px;
   scroll-snap-type: both mandatory;
   box-sizing: border-box;

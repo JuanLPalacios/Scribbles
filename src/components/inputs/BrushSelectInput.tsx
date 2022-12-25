@@ -1,3 +1,4 @@
+import '../../css/inputs/BrushSelectInput.css';
 import { Dispatch, SetStateAction, useEffect, useState, CSSProperties } from 'react';
 import { AlphaOptions, BrushOptions } from '../../contexts/MenuOptions';
 import { createDrawable } from '../../hooks/createDrawable';
@@ -30,7 +31,7 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
     }, [alpha, Math.min(20, brushWidth), selectedBrush]);
     return <>
         <TopMenuPortal>
-            <div style={style} className='dropdown'>
+            <div style={style} className='brush dropdown'>
                 <button>
                     <Drawable canvas={selectedPreview.canvas} />Brush
                 </button>

@@ -11,8 +11,8 @@ type MenuProps = {
 const style:CSSProperties = {
     display: 'flex',
     position: 'absolute',
-    width: 'calc(100% - 2 * var(--button-radius))',
-    left: 'var(--button-radius)',
+    width: 'calc(100% - 2 * var(--button-diameter))',
+    left: 'var(--button-diameter)',
     top: 0,
     zIndex: 5
 };

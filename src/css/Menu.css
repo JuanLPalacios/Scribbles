@@ -10,6 +10,15 @@
   flex-direction: column;
 }
 
+.Menu > li > ul {
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.Menu .dropdown ul > li {
+  background: transparent;
+}
+
 .fields {
   display: flex;
   flex-direction: column;

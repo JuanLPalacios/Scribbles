@@ -1,0 +1,5 @@
+.brush.dropdown li > div {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}

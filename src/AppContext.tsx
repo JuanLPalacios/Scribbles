@@ -4,7 +4,6 @@ import Solid from './brushes/Solid';
 import StiffBrush from './brushes/StiffBrush';
 import { DrawingContext, DrawingState } from './contexts/DrawingState';
 import { MenuOptions, MenuContext } from './contexts/MenuOptions';
-import { ModalState, ModalContext } from './contexts/ModalState';
 import { uid } from './lib/uid';
 import { draw } from './tools/Draw';
 import { erase } from './tools/Erase';
@@ -76,12 +75,9 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
         color: '#000000',
         alpha: 255,
     });
-    const useModal = useState<ModalState|undefined>();
     return<DrawingContext.Provider value={useDrawing}>
         <MenuContext.Provider value={useMenuOptions}>
-            <ModalContext.Provider value={useModal}>
-                {props.children}
-            </ModalContext.Provider>
+            {props.children}
         </MenuContext.Provider>
     </DrawingContext.Provider>;
 };

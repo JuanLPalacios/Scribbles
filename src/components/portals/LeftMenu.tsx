@@ -12,8 +12,8 @@ const style:CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     position: 'absolute',
-    height: 'calc(100% - 2 * var(--button-radius))',
-    top: 'var(--button-radius)',
+    height: 'calc(100% - 2 * var(--button-diameter))',
+    top: 'var(--button-diameter)',
     left: 0,
     zIndex: 5
 };

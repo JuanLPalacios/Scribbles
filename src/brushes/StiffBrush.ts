@@ -4,6 +4,8 @@ import { scalePoint } from '../lib/DOMMath';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
+let str: Point[] = [];
+
 export default class StiffBrush extends Brush {
     buffer:DrawableState = createDrawable({ size: [1, 1] });
     fibers: { position: DOMPoint, width: number, alpha:number }[];
@@ -32,6 +34,7 @@ export default class StiffBrush extends Brush {
         bufferCtx.strokeStyle = color;
         bufferCtx.beginPath();
         bufferCtx.moveTo(...point);
+        str = [point];
     }
 
     drawStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
@@ -59,6 +62,7 @@ export default class StiffBrush extends Brush {
         ctx.globalCompositeOperation = 'copy';
         ctx.globalAlpha = alpha;
         ctx.drawImage(buffer, 0, 0);
+        str.push(point);
     }
 
     endStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
@@ -67,5 +71,15 @@ export default class StiffBrush extends Brush {
         ctx?.restore();
         canvas.width = 0;
         canvas.height = 0;
+        console.log('ok');
+        const maxX = str.reduce((max, current)=>Math.max(max, current[0]), str[0][0]);
+        const maxY = str.reduce((max, current)=>Math.max(max, current[1]), str[0][1]);
+        const minX = str.reduce((min, current)=>Math.min(min, current[0]), str[0][0]);
+        const minY = str.reduce((min, current)=>Math.min(min, current[1]), str[0][1]);
+        const scaleX = maxX - minX;
+        const scaleY = maxY - minY;
+        str = str.map(p => [Math.round((p[0]-minX)*135/scaleX+7.5), Math.round((p[1]-minY)*15/scaleY+7.5)]);
+        str = str.reduce((list, item)=>{ if(''+item != list[list.length-1] as any)list.push(item); return list; }, [str[0]]);
+        console.log(JSON.stringify(str));
     }
 }

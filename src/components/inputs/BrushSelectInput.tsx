@@ -1,4 +1,5 @@
 import '../../css/inputs/BrushSelectInput.css';
+import demoStroke from '../../demo/strokePreview.json';
 import { Dispatch, SetStateAction, useEffect, useState, CSSProperties } from 'react';
 import { AlphaOptions, BrushOptions } from '../../contexts/MenuOptions';
 import { createDrawable } from '../../hooks/createDrawable';
@@ -14,21 +15,21 @@ const style:CSSProperties = {
 };
 
 export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:Dispatch<SetStateAction<BrushOptions & AlphaOptions>>}) => {
-    const { brushes, selectedBrush, brushWidth, alpha, onChange } = props;
+    const { brushes, selectedBrush, brushWidth, onChange } = props;
     const [{ previews, selectedPreview }, setPreviews] = useState<{previews:DrawableState[], selectedPreview:DrawableState}>({ previews: [], selectedPreview: createPreview() });
     const [id] = useState(uid());
     useEffect(()=>{
-        if(brushWidth === undefined)onChange({ ...props, brushWidth: 20 });
-    }, [brushWidth]);
+        if(brushWidth === undefined)onChange({ ...props, brushWidth: 15 });
+    }, [brushWidth, onChange, props]);
     useEffect(()=>{
         setPreviews({ previews: brushes.map(() => createPreview()), selectedPreview });
-    }, [brushes]);
+    }, [brushes, selectedPreview]);
     useEffect(()=>{
-        previews.forEach((preview, i) => brushes[i].renderPreview(preview, [[10, 10], [110, 10]], '#000000', alpha || 1, Math.min(20, brushWidth)));
-    }, [alpha, Math.min(20, brushWidth), brushes, previews, selectedBrush]);
+        previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5 || 1, 15));
+    }, [brushes, previews, selectedBrush]);
     useEffect(()=>{
-        brushes[selectedBrush]?.renderPreview(selectedPreview, [[10, 10], [110, 10]], '#000000', alpha || 1, Math.min(20, brushWidth));
-    }, [alpha, Math.min(20, brushWidth), selectedBrush]);
+        brushes[selectedBrush]?.renderPreview(selectedPreview, demoStroke as any, '#ffffff', .5 || 1, 15);
+    }, [brushes, selectedBrush, selectedPreview]);
     return <>
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
@@ -51,4 +52,4 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
     </>;
 };
 
-const createPreview = () => createDrawable({ size: [120, 20] });
+const createPreview = () => createDrawable({ size: [150, 30] });

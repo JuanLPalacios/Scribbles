@@ -7,6 +7,7 @@
 .layer-options {
   flex: 1 1 auto;
   display: flex;
+  height: 90vh;
 }
 
 .layer-options .menu {
@@ -16,10 +17,7 @@
   overflow: auto;
   display: flex;
   flex-direction: column;
-}
-
-.layer-options:focus-within .menu {
-  right: 0;
+  gap: 10px;
 }
 
 .layer-options .menu > .scroller {
@@ -56,6 +54,7 @@
 }
 
 .layer-options .menu .layer > .thumbnail {
+  display: flex;
   background: url(Transparency10.png), linear-gradient(0deg, #fff, #fff);
 }
 

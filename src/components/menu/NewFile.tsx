@@ -52,6 +52,7 @@ export const NewFile = () => {
         </button></li>
         <ReactModal isOpen={isOpen} onRequestClose={close}>
             <div className="fields">
+                <h2>New Scribble</h2>
                 <label>
                 name
                     <input type="text" name='name' value={name} onChange={update} />
@@ -64,7 +65,7 @@ export const NewFile = () => {
                 height
                     <input type="number" name='height' value={height} onChange={update} />
                 </label>
-                <div>
+                <div className='actions'>
                     <button onClick={newfile}>create</button>
                     <button onClick={close}>cancel</button>
                 </div>

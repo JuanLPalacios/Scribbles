@@ -22,4 +22,20 @@
 .fields {
   display: flex;
   flex-direction: column;
+  gap: 5px;
+}
+
+.fields label {
+  display: flex;
+  gap: 10px;
+}
+
+.fields label > input {
+  flex: 1 1 auto;
+}
+
+.fields .actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }

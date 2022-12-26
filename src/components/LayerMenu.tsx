@@ -14,8 +14,12 @@ import { createLayer } from '../hooks/createLayer';
 import { DrawingContext } from '../contexts/DrawingState';
 
 function LayerMenu() {
-    const [modal, setState] = useState({
+    const [sideMenu, setSideMenu] = useState({
         isOpen: false,
+    });
+    const [newLayerPopup, setNewLayerPopup] = useState({
+        isOpen: false,
+        layerName: 'Image'
     });
     const [drawing, setDrawing] = useContext(DrawingContext);
     if(!drawing) return <></>;
@@ -25,13 +29,14 @@ function LayerMenu() {
         const { width, height } = drawing;
         const newLayers:LayerState[] = [...layers,
             createLayer(
-                'Image',
+                newLayerPopup.layerName,
                 {
                     position: [0, 0],
                     size: [width, height]
                 }
             )
         ];
+        setNewLayerPopup({ ...newLayerPopup, isOpen: false });
         setDrawing(drawing && { ...drawing, layers: newLayers });
     };
     const onRemoveLayer = () => {
@@ -65,12 +70,12 @@ function LayerMenu() {
 
     return (
         <div className="LayerMenu">
-            <button className='layer-button round-btn' onClick={() => setState({ ...modal, isOpen: true })}>
+            <button className='layer-button round-btn' onClick={() => setSideMenu({ ...sideMenu, isOpen: true })}>
                 <img src={stackIcon} alt="layers" />
             </button>
-            {modal &&
+            {sideMenu &&
                 <ReactModal
-                    isOpen={modal.isOpen}
+                    isOpen={sideMenu.isOpen}
                     style={{ content: {
                         display: 'flex',
                         flexDirection: 'column',
@@ -82,11 +87,11 @@ function LayerMenu() {
                         marginRight: 0,
                         transform: 'none',
                     } }}
-                    onRequestClose={() => setState({ ...modal, isOpen: false })}
+                    onRequestClose={() => setSideMenu({ ...sideMenu, isOpen: false })}
                 >
                     <div className="layer-options">
                         <div className="menu">
-                            <div className='actions'>
+                            <div className='fields'>
                                 <label>
                                 blend mode
                                     <select value={layers[selectedLayer]?.mixBlendMode} onChange={(e) => onModeChange(e.target.value as BlendMode)}>
@@ -113,12 +118,11 @@ function LayerMenu() {
                                                     <img src={eyeIcon} alt="visible" />
                                                 </div>
                                             </label>
-                                            <div className='thumbnail'>
-                                                <Drawable
-                                                    canvas={layer.thumbnail?.canvas}
-                                                    key={`${layer.key}-thumb`}
-                                                />
-                                            </div>
+                                            <Drawable
+                                                canvas={layer.thumbnail?.canvas}
+                                                className='thumbnail'
+                                                key={`${layer.key}-thumb`}
+                                            />
                                             <div>
                                                 {layer.name}
                                             </div>
@@ -126,16 +130,35 @@ function LayerMenu() {
                                     ))}
                                 </div>
                             </div>
-                            <div className='actions'>
-                                <button onClick={onAddLayer}><img src={addIcon} alt="Add Layer" /></button>
-                                <button onClick={onRemoveLayer}><img src={trashIcon} alt="Delete Layer" /></button>
-                                <button onClick={() => onMove(1)}><img src={pushUpIcon} alt="Move Up" /></button>
-                                <button onClick={() => onMove(-1)}><img src={pushDownIcon} alt="Move Down" /></button>
+                            <div className='fields'>
+                                <div className='actions'>
+                                    <button onClick={() => setNewLayerPopup({ isOpen: true, layerName: 'Image' })}><img src={addIcon} alt="Add Layer" /></button>
+                                    <button onClick={onRemoveLayer}><img src={trashIcon} alt="Delete Layer" /></button>
+                                    <button onClick={() => onMove(1)}><img src={pushUpIcon} alt="Move Up" /></button>
+                                    <button onClick={() => onMove(-1)}><img src={pushDownIcon} alt="Move Down" /></button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </ReactModal>
             }
+
+            <ReactModal
+                isOpen={newLayerPopup.isOpen}
+                onRequestClose={() => setNewLayerPopup({ ...newLayerPopup, isOpen: false })}
+            >
+                <div className="fields">
+                    <h2>New Layer</h2>
+                    <label>
+                        name
+                        <input type="text" name='name' value={newLayerPopup.layerName} onChange={(e) => setNewLayerPopup({ ...newLayerPopup, layerName: e.target.value })} />
+                    </label>
+                    <div className='actions'>
+                        <button onClick={onAddLayer}>create</button>
+                        <button onClick={() => setNewLayerPopup({ ...newLayerPopup, isOpen: false })}>cancel</button>
+                    </div>
+                </div>
+            </ReactModal>
         </div>
     );
 }

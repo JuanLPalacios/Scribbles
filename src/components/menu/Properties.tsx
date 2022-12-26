@@ -39,12 +39,17 @@ export const Properties = () => {
             <img src={optionsIcon} alt="Properties" />
         </button></li>
         <ReactModal isOpen={isOpen} onRequestClose={close}>
-            <label>
-                name
-                <input type="text" name='name' value={name} onChange={update} />
-            </label>
-            <button onClick={updateFile}>update</button>
-            <button onClick={close}>cancel</button>
+            <div className="fields">
+                <h2>Scribble Config</h2>
+                <label>
+                    name
+                    <input type="text" name='name' value={name} onChange={update} />
+                </label>
+                <div className='actions'>
+                    <button onClick={updateFile}>update</button>
+                    <button onClick={close}>cancel</button>
+                </div>
+            </div>
         </ReactModal>
     </>;
 };

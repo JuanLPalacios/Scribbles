@@ -6,7 +6,7 @@ export default class Solid extends Brush {
     startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
         const { ctx } = drawable;
         if (!ctx) return;
-        ctx.globalCompositeOperation = 'destination-over';
+        ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = alpha;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';

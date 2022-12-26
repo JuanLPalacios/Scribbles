@@ -23,6 +23,7 @@ export default class Marker extends Brush {
         //ctx.filter = 'blur(1px)';
         bufferCtx.imageSmoothingEnabled = false;
         bufferCtx.filter = 'url(#no-anti-aliasing)';
+        ctx.globalCompositeOperation = 'source-over';
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctx.strokeStyle = color;

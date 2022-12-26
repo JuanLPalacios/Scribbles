@@ -3,18 +3,12 @@ import ReactDOM from 'react-dom/client';
 import ReactModal from 'react-modal';
 import App from './App';
 import { AppStateProvider } from './AppContext';
+import { content, overlay } from './css/Modal.css';
 import './css/index.css';
 
 ReactModal.defaultStyles = {
-    content: {
-        ...ReactModal.defaultStyles.content,
-        background: 'var(--background-color)',
-        border: 'solid 1px var(--secondary-color)',
-    },
-    overlay: {
-        ...ReactModal.defaultStyles.overlay,
-        background: 'var(--overlay-color)'
-    }
+    content: { ...ReactModal.defaultStyles.content, ...content },
+    overlay: { ...ReactModal.defaultStyles.overlay, ...overlay }
 };
 
 const root = ReactDOM.createRoot(document.getElementById('root') || document.body);

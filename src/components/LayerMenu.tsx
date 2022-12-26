@@ -79,6 +79,8 @@ function LayerMenu() {
                         left: 'auto',
                         bottom: 0,
                         right: 0,
+                        marginRight: 0,
+                        transform: 'none',
                     } }}
                     onRequestClose={() => setState({ ...modal, isOpen: false })}
                 >

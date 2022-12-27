@@ -4,34 +4,34 @@ import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
 export default class WaterColor extends Brush {
-    lastPoint: Point = [0,0];
+    lastPoint: Point = [0, 0];
     spred = 2;
     alpha:DrawableState;
     path:DrawableState;
 
     constructor(){
         super();
-        this.alpha = createDrawable({size:[1,1]});
-        this.path = createDrawable({size:[1,1]});
+        this.alpha = createDrawable({ size: [1, 1] });
+        this.path = createDrawable({ size: [1, 1] });
     }
-    
+
     startStroke(drawable:DrawableState, point:Point, color:string, width:number) {
         this.lastPoint = point;
-        const {ctx, canvas} = drawable;
+        const { canvas } = drawable;
         this.alpha.canvas.width = this.path.canvas.width = canvas.width;
         this.alpha.canvas.height = this.path.canvas.height = canvas.height;
         this.spred = 0;
-        
+
         if (!this.alpha.ctx) return;
         if (!this.path.ctx) return;
-        
+
         this.alpha.ctx.lineCap = 'round';
         this.alpha.ctx.lineJoin = 'round';
-    
+
         this.path.ctx.strokeStyle = '#000000';
         this.path.ctx.lineCap = 'round';
         this.path.ctx.lineJoin = 'round';
-            
+
         this.alpha.ctx.strokeStyle = color;
         this.alpha.ctx.lineWidth = width;
         this.path.ctx.lineWidth = width;
@@ -39,14 +39,14 @@ export default class WaterColor extends Brush {
     }
 
     f = (x:number, c:number) => 0.5 * ((x-c) / (1 + Math.abs(x-c)) + 1);
-  
+
     drawStroke(drawable:DrawableState, point:Point, color:string, width:number) {
-        const [x,y] = point;
+        const [x, y] = point;
         const ctx = drawable.ctx;
         const fx0 = this.f(this.spred/5, 25);
-        console.log('fx0',fx0);
-        
-        const c = 3; 
+        console.log('fx0', fx0);
+
+        const c = 3;
         const maxW = width + c;
         if (!ctx) return;
         if (!this.alpha.ctx) return;
@@ -54,7 +54,7 @@ export default class WaterColor extends Brush {
         this.alpha.ctx.beginPath();
         this.alpha.ctx.strokeStyle = color;
         const dilution = .2 ;
-        console.log('dilution',dilution);
+        console.log('dilution', dilution);
         let diluted = 0;
         diluted += this.alpha.ctx.getImageData(...point, 1, 1).data[3];
         diluted += this.alpha.ctx.getImageData(x - maxW, y, 1, 1).data[3];
@@ -89,7 +89,7 @@ export default class WaterColor extends Brush {
         //this.alpha.ctx.globalAlpha = 1/(10*this.spred);
         //this.alpha.ctx.beginPath();
         //this.alpha.ctx.strokeStyle = '#000000'+(~~(255*(1 - 1/this.spred))).toString(16);
-        
+
         this.path.ctx.beginPath();
         this.path.ctx.moveTo(...this.lastPoint);
         this.path.ctx.lineTo(...point);
@@ -97,18 +97,17 @@ export default class WaterColor extends Brush {
         ctx.globalCompositeOperation = 'copy';
         //ctx.globalAlpha = 1-.5*fx3;
         ctx.globalAlpha = 1;
-        ctx.drawImage(this.alpha.canvas,0,0);
+        ctx.drawImage(this.alpha.canvas, 0, 0);
         ctx.globalCompositeOperation = 'destination-in';
         ctx.filter = 'none';
-        ctx.drawImage(this.path.canvas,0,0);
+        ctx.drawImage(this.path.canvas, 0, 0);
         this.spred++;
         this.lastPoint = point;
     }
-  
+
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     endStroke(drawable:DrawableState, point:Point, color:string, width:number) {
         //this.alpha.ctx?.clearRect(0,0,this.alpha.canvas.width, this.alpha.canvas.height);
         //this.path.ctx?.clearRect(0,0,this.path.canvas.width, this.path.canvas.height);
     }
 }
-  

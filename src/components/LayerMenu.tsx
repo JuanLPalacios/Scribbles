@@ -10,7 +10,7 @@ import { LayerState } from '../types/LayerState';
 import { Drawable } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
 import ReactModal from 'react-modal';
-import { createLayer } from '../hooks/createLayer';
+import { createLayer } from '../generators/createLayer';
 import { DrawingContext } from '../contexts/DrawingState';
 
 function LayerMenu() {

@@ -1,7 +1,7 @@
 import { useCallback, useContext } from 'react';
 import '../../css/Menu.css';
 import exportIcon from '../../icons/external-svgrepo-com.svg';
-import { createLayer } from '../../hooks/createLayer';
+import { createLayer } from '../../generators/createLayer';
 import { DrawingContext } from '../../contexts/DrawingState';
 import { mergeLayers } from '../../lib/Graphics';
 

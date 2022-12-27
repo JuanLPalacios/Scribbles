@@ -1,7 +1,7 @@
 import { useCallback, useContext, useState, useEffect } from 'react';
 import '../../css/Menu.css';
 import addFileIcon from '../../icons/file-add-svgrepo-com.svg';
-import { createLayer } from '../../hooks/createLayer';
+import { createLayer } from '../../generators/createLayer';
 import { DrawingContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 

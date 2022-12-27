@@ -2,7 +2,7 @@ import '../../css/inputs/BrushSelectInput.css';
 import demoStroke from '../../demo/strokePreview.json';
 import { Dispatch, SetStateAction, useEffect, useState, CSSProperties } from 'react';
 import { AlphaOptions, BrushOptions } from '../../contexts/MenuOptions';
-import { createDrawable } from '../../hooks/createDrawable';
+import { createDrawable } from '../../generators/createDrawable';
 import { uid } from '../../lib/uid';
 import { DrawableState } from '../../types/DrawableState';
 import { Drawable } from '../Drawable';

@@ -12,7 +12,7 @@ import rotateTopLeft from '../icons/corner-double-top-left-svgrepo-com.svg';
 import rotateTopRight from '../icons/corner-double-top-right-svgrepo-com.svg';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
-import { createDrawable } from '../hooks/createDrawable';
+import { createDrawable } from '../generators/createDrawable';
 
 const SKEW_ICONS = [
     rotateTopLeft,

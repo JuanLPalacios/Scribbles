@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import '../css/Layer.css';
 import { Drawable } from './Drawable';
 import { LayerState } from '../types/LayerState';
-import { createDrawable } from '../hooks/createDrawable';
+import { createDrawable } from '../generators/createDrawable';
 
 const Layer = ({ values }:{values:LayerState}) => {
     const { rect, canvas, buffer, thumbnail, visible, opacity, mixBlendMode } = values;

@@ -1,5 +1,5 @@
 import Brush from '../abstracts/Brush';
-import { createDrawable } from '../hooks/createDrawable';
+import { createDrawable } from '../generators/createDrawable';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 

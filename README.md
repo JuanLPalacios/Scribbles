@@ -1,5 +1,7 @@
 # Scribles
 
+![Scribbles](./src/logo.svg)
+
 A simple PWA for drawing ilustrations
 
 ### Setup

@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import '../css/Layer.css';
 import { Drawable } from './Drawable';
 import { LayerState } from '../types/LayerState';
 import { createDrawable } from '../generators/createDrawable';

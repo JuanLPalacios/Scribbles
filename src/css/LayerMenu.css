@@ -1,0 +1,63 @@
+.LayerMenu {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
+}
+
+.layer-options {
+  flex: 1 1 auto;
+  display: flex;
+  height: 90vh;
+}
+
+.layer-options .menu {
+  flex: 1 1 auto;
+  width: 200px;
+  right: -200px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.layer-options .menu > .scroller {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.layer-options input[type='checkbox'] {
+  display: none;
+}
+
+.layer-options .checkbox {
+  filter: invert(1);
+}
+
+.layer-options input[type='checkbox']:not(:checked) + .checkbox {
+  opacity: 0.3;
+}
+
+.layer-options .menu .list {
+  display: flex;
+  flex-direction: column-reverse;
+}
+
+.layer-options .menu > .actions {
+  flex: 0 0 auto;
+}
+
+.layer-options .menu .list .layer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 5px;
+}
+
+.layer-options .menu .layer > .thumbnail {
+  display: flex;
+  background: url(Transparency10.png), linear-gradient(0deg, #fff, #fff);
+}
+
+.layer-options .menu .list .selected {
+  background: var(--secondary-color);
+}

@@ -1,0 +1,18 @@
+.Toolbar {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.Toolbar .tool {
+  cursor: pointer;
+}
+
+.Toolbar .tool.selected {
+  background: var(--main-color);
+}
+
+.Toolbar .tool.selected > img {
+  filter: none;
+}

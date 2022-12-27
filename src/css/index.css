@@ -1,0 +1,141 @@
+:root {
+  --doc-width: 200px;
+  --doc-height: 200px;
+  --button-diameter: 50px;
+  --scroll-width: 10px;
+  --main-color: #eb840f;
+  --secondary-color: #636363;
+  --background-color: #353535;
+  --background2-color: #161616;
+  --overlay-color: #16161688;
+  --text-color: #e7e7e7;
+  --title-color: #ff7856;
+}
+
+body {
+  margin: 0;
+  background: var(--background-color);
+  color: var(--text-color);
+}
+
+*::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px var(--overlay-color);
+  background-color: var(--background2-color);
+}
+
+*::-webkit-scrollbar {
+  width: var(--scroll-width);
+  height: var(--scroll-width);
+  background-color: var(--background2-color);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--secondary-color);
+  border: 0 solid #000;
+}
+
+*::-webkit-scrollbar-corner {
+  background-color: transparent;
+}
+
+input,
+select {
+  background: var(--background2-color);
+  border: none;
+  color: var(--text-color);
+}
+
+button {
+  background: var(--secondary-color);
+  border: none;
+  color: var(--text-color);
+}
+
+input[type=range] {
+  filter: grayscale(1) invert(0.9);
+}
+
+input[type=submit]:disabled,
+input[type=submit][disabled],
+button:disabled,
+button[disabled] {
+  opacity: 0.5;
+}
+
+button > img {
+  filter: invert(1);
+}
+
+button:focus {
+  filter: brightness(1.1);
+}
+
+.round-btn {
+  border-radius: calc(var(--button-diameter) / 2);
+  width: var(--button-diameter);
+  height: var(--button-diameter);
+}
+
+.errors {
+  color: var(--main-color);
+  font-size: 0.8rem;
+  min-height: 1.2rem;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fields label {
+  display: flex;
+  gap: 10px;
+}
+
+.fields label > input {
+  flex: 1 1 auto;
+}
+
+.fields .actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown li {
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown > ul {
+  display: flex;
+  flex-direction: column;
+  background: var(--background2-color);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  height: 0;
+  overflow: hidden;
+  z-index: 5;
+}
+
+.dropdown > ul > li {
+  background: var(--overlay-color);
+}
+
+.dropdown:focus-within > ul {
+  overflow: visible;
+}
+
+.ReactModal__Overlay {
+  z-index: 10;
+}

@@ -1,0 +1,16 @@
+.ColorInput {
+  flex: 0 1 auto !important;
+  align-items: center !important;
+}
+
+.ColorInput .color {
+  display: flex;
+  width: calc(var(--button-diameter) / 2);
+  height: calc(var(--button-diameter) / 2);
+  border-radius: calc(var(--button-diameter) / 4);
+}
+
+.ColorInput input[type="color"] {
+  opacity: 0;
+  width: calc(var(--button-diameter) / 2);
+}

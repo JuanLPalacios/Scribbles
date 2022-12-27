@@ -1,0 +1,53 @@
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  height: calc(100vh - 21px);
+  max-height: 100vh;
+  overflow: hidden;
+}
+
+.App .filename {
+  padding: 10px;
+  margin: auto;
+  font-size: 1.5rem;
+}
+
+.App .side-menu {
+  flex-direction: column;
+}
+
+.App .side-menu > label,
+.App .menu > label {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: var(--button-diameter);
+  text-align: center;
+  box-sizing: border-box;
+  padding: 5px;
+}
+
+.App .side-menu > label {
+  writing-mode: vertical-lr;
+}
+
+.App .side-menu > input[type='range'],
+.App .side-menu > label > input[type='range'] {
+  flex: 1 1 auto;
+  -webkit-appearance: slider-vertical;
+  width: calc(var(--button-diameter) / 2);
+}
+
+.App .menu > label {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+}
+
+.App > .content {
+  flex: 1 1 auto;
+  display: flex;
+}

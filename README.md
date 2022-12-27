@@ -1,5 +1,7 @@
 # Scribles
 
+![Scribbles](./src/logo.svg)
+
 A simple PWA for drawing ilustrations
 
 ### Setup
@@ -25,7 +27,7 @@ npm start
 
 ## Live Demo
 
-[Live Demo Link](https://juanlpalacios.github.io/scribbles/)
+[Live Demo Link](https://juanlpalacios.github.io/Scribbles/)
 
 ## Author
 

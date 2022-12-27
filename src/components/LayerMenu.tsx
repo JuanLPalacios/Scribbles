@@ -5,7 +5,7 @@ import trashIcon from '../icons/trash-svgrepo-com.svg';
 import pushUpIcon from '../icons/push-chevron-up-r-svgrepo-com.svg';
 import pushDownIcon from '../icons/push-chevron-down-r-svgrepo-com.svg';
 import eyeIcon from '../icons/eye-alt-svgrepo-com.svg';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { LayerState } from '../types/LayerState';
 import { Drawable } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
@@ -19,9 +19,19 @@ function LayerMenu() {
     });
     const [newLayerPopup, setNewLayerPopup] = useState({
         isOpen: false,
-        layerName: 'Image'
+        layerName: 'Image',
+        isValid: true,
+        errors: { layerName: new Array<string> }
     });
     const [drawing, setDrawing] = useContext(DrawingContext);
+    useEffect(() => {
+        const errors = { layerName: new Array<string>() };
+        if(newLayerPopup.layerName.length<1)
+            errors.layerName.push('Must have at least 1 character');
+        if(newLayerPopup.layerName.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
+            errors.layerName.push('Shuld not contain forbidden characters');
+        setNewLayerPopup({ ...newLayerPopup, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
+    }, [newLayerPopup.layerName]);
     if(!drawing) return <></>;
     const { selectedLayer, layers } = drawing;
     const onAddLayer = () => {
@@ -67,7 +77,6 @@ function LayerMenu() {
         else
             setDrawing(drawing && { ...drawing, layers: [...newLayers] });
     };
-
     return (
         <div className="LayerMenu">
             <button className='layer-button round-btn' onClick={() => setSideMenu({ ...sideMenu, isOpen: true })}>
@@ -132,7 +141,7 @@ function LayerMenu() {
                             </div>
                             <div className='fields'>
                                 <div className='actions'>
-                                    <button onClick={() => setNewLayerPopup({ isOpen: true, layerName: 'Image' })}><img src={addIcon} alt="Add Layer" /></button>
+                                    <button onClick={() => setNewLayerPopup({ ...newLayerPopup, isOpen: true, layerName: 'Image' })}><img src={addIcon} alt="Add Layer" /></button>
                                     <button onClick={onRemoveLayer}><img src={trashIcon} alt="Delete Layer" /></button>
                                     <button onClick={() => onMove(1)}><img src={pushUpIcon} alt="Move Up" /></button>
                                     <button onClick={() => onMove(-1)}><img src={pushDownIcon} alt="Move Down" /></button>
@@ -146,15 +155,19 @@ function LayerMenu() {
             <ReactModal
                 isOpen={newLayerPopup.isOpen}
                 onRequestClose={() => setNewLayerPopup({ ...newLayerPopup, isOpen: false })}
+                style={{ content: { width: '14rem' } }}
             >
                 <div className="fields">
                     <h2>New Layer</h2>
+                    <div className='errors'>
+                        {newLayerPopup.errors.layerName.map((error, i) => <div key={'error.name-'+i} className='error'>Name: {error}</div>)}
+                    </div>
                     <label>
                         name
                         <input type="text" name='name' value={newLayerPopup.layerName} onChange={(e) => setNewLayerPopup({ ...newLayerPopup, layerName: e.target.value })} />
                     </label>
                     <div className='actions'>
-                        <button onClick={onAddLayer}>create</button>
+                        <button onClick={onAddLayer} disabled={!newLayerPopup.isValid}>create</button>
                         <button onClick={() => setNewLayerPopup({ ...newLayerPopup, isOpen: false })}>cancel</button>
                     </div>
                 </div>

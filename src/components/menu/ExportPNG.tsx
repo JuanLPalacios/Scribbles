@@ -1,6 +1,6 @@
 import { useCallback, useContext } from 'react';
 import '../../css/Menu.css';
-import exportIcon from '../..//icons/external-svgrepo-com.svg';
+import exportIcon from '../../icons/external-svgrepo-com.svg';
 import { createLayer } from '../../hooks/createLayer';
 import { DrawingContext } from '../../contexts/DrawingState';
 import { mergeLayers } from '../../lib/Graphics';
@@ -19,9 +19,12 @@ export const ExportPNG = () => {
         a.click();
     }, [drawing]);
     return <>
-        <li><button className='round-btn' onClick={exportPng}>
-            <img src={exportIcon} alt="Export to PNG" />
-        </button></li>
+        <li>
+            <button className='round-btn' onClick={exportPng}>
+                <img src={exportIcon} alt="Export to PNG" />
+            </button>
+            <div className="text">Export to PNG</div>
+        </li>
     </>;
 };
 

@@ -19,9 +19,6 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
     const [{ previews, selectedPreview }, setPreviews] = useState<{previews:DrawableState[], selectedPreview:DrawableState}>({ previews: [], selectedPreview: createPreview() });
     const [id] = useState(uid());
     useEffect(()=>{
-        if(brushWidth === undefined)onChange({ ...props, brushWidth: 15 });
-    }, [brushWidth, onChange, props]);
-    useEffect(()=>{
         setPreviews({ previews: brushes.map(() => createPreview()), selectedPreview });
     }, [brushes, selectedPreview]);
     useEffect(()=>{

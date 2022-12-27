@@ -1,21 +1,21 @@
 import { JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useState } from 'react';
-import Marker from './brushes/Marker';
-import Solid from './brushes/Solid';
-import StiffBrush from './brushes/StiffBrush';
-import { DrawingContext, DrawingState } from './contexts/DrawingState';
-import { MenuOptions, MenuContext } from './contexts/MenuOptions';
-import { uid } from './lib/uid';
-import { draw } from './tools/Draw';
-import { erase } from './tools/Erase';
-import { fill } from './tools/Fill';
-import { transform } from './tools/Transform';
-import round from './brushes/stiff/round.json';
-import oldRound from './brushes/stiff/oldRound.json';
-import diagonal from './brushes/stiff/flat.json';
-import drawIcon from './icons/brush-f-svgrepo-com.svg';
-import eraseIcon from './icons/erase-svgrepo-com.svg';
-import fillIcon from './icons/color-bucket-svgrepo-com.svg';
-import transformIcon from './icons/nametag-svgrepo-com.svg';
+import Marker from '../brushes/Marker';
+import Solid from '../brushes/Solid';
+import StiffBrush from '../brushes/StiffBrush';
+import { DrawingContext, DrawingState } from './DrawingState';
+import { MenuOptions, MenuContext } from './MenuOptions';
+import { uid } from '../lib/uid';
+import { draw } from '../tools/Draw';
+import { erase } from '../tools/Erase';
+import { fill } from '../tools/Fill';
+import { transform } from '../tools/Transform';
+import round from '../brushes/stiff/round.json';
+import oldRound from '../brushes/stiff/oldRound.json';
+import diagonal from '../brushes/stiff/flat.json';
+import drawIcon from '../icons/brush-f-svgrepo-com.svg';
+import eraseIcon from '../icons/erase-svgrepo-com.svg';
+import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
+import transformIcon from '../icons/nametag-svgrepo-com.svg';
 
 const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
 const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
@@ -48,8 +48,6 @@ for (let i = 0; i < roundFibersNumber/2; i++) {
         width
     });
 }
-console.log(JSON.stringify(randomRoundFibers));
-console.log(JSON.stringify(randomDiagonalFibers));
 
 export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) => {
     const useDrawing = useState<DrawingState | undefined>();
@@ -74,6 +72,7 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
         selectedTool: 0,
         color: '#000000',
         alpha: 255,
+        tolerance: 0.15,
     });
     return<DrawingContext.Provider value={useDrawing}>
         <MenuContext.Provider value={useMenuOptions}>

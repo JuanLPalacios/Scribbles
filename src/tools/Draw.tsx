@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useEffect } from 'react';
+import { Dispatch, SetStateAction } from 'react';
 import Tool from '../abstracts/Tool';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
@@ -12,15 +12,11 @@ type DrawOptions = BrushOptions & ColorOptions & AlphaOptions;
 export const draw = new (class Draw extends Tool<DrawOptions> {
     down = false;
     Menu:(props: {config:DrawOptions, onChange:Dispatch<SetStateAction<DrawOptions>>}) => JSX.Element = ({ config, onChange }) => {
-        const { color, alpha } = config;
-        useEffect(()=>{
-            if((color === undefined)||(alpha === undefined))onChange({ ...config, color: '#000000', alpha: 1 });
-        }, [alpha, color, config, onChange]);
-        return <div>
+        return <>
             <BrushSelectInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
             <ColorInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
             <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
-        </div>;
+        </>;
     };
 
     setup({ drawingContext: [drawing] }:ToolEvent<DrawOptions>): void {
@@ -78,9 +74,5 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
         brush.drawStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
     }
 })();

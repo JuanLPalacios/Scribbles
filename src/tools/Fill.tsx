@@ -40,18 +40,6 @@ export const fill = new (class Fill extends Tool<FillOptions> {
     dispose(): void {
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseDown(): void {
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseUp(): void {
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    mouseMove(): void {
-    }
-
     click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;

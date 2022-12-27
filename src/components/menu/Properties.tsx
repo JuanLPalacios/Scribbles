@@ -35,9 +35,12 @@ export const Properties = () => {
         close();
     }, [close, drawing, name, setDrawing]);
     return <>
-        <li><button className='round-btn' onClick={openModal}>
-            <img src={optionsIcon} alt="Properties" />
-        </button></li>
+        <li>
+            <button className='round-btn' onClick={openModal}>
+                <img src={optionsIcon} alt="Properties" />
+            </button>
+            <div className="text">Properties</div>
+        </li>
         <ReactModal isOpen={isOpen} onRequestClose={close}>
             <div className="fields">
                 <h2>Scribble Config</h2>

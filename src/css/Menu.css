@@ -17,25 +17,22 @@
 
 .Menu .dropdown ul > li {
   background: transparent;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-.fields {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+.Menu li > .text {
+  background: var(--overlay-color);
+  padding: 0.2rem 0;
+  max-width: 0;
+  transition: 0.5s;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
 }
 
-.fields label {
-  display: flex;
-  gap: 10px;
-}
-
-.fields label > input {
-  flex: 1 1 auto;
-}
-
-.fields .actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
+.Menu:focus-within li > .text {
+  padding: 0.2rem 0.5rem;
+  max-width: 100vw;
 }

@@ -56,7 +56,6 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         const layer = layers[selectedLayer];
         this.endTranform(e, layer);
         setDrawing({ ...drawing });
-        console.log('dispose');
     }
 
     mouseDown(e: CanvasEvent<TransformOptions>,): void {
@@ -382,7 +381,6 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
                 }
                 setDrawing({ ...drawing });
             }:(e) => {
-                //cl
                 const { drawingContext: [drawing, setDrawing] } = e;
                 if(!drawing) return;
                 const { layers, selectedLayer } = drawing;
@@ -411,13 +409,6 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;
         const { canvas, buffer } = layers[selectedLayer];
-        const finalCords = this.handles.map(cord => cord.matrixTransform(this.matrix)),
-            minX = Math.min(...finalCords.map(cord => cord.x)),
-            minY = Math.min(...finalCords.map(cord => cord.y)),
-            maxX = Math.max(...finalCords.map(cord => cord.x)),
-            maxY = Math.max(...finalCords.map(cord => cord.y));
-        console.log(minX+minY+maxX+maxY);
-
         if(canvas.ctx){
             canvas.ctx.globalCompositeOperation = 'source-over';
             canvas.ctx.globalAlpha = 1;

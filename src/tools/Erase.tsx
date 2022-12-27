@@ -105,8 +105,4 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         brush.drawStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
         this.renderMask(canvas, buffer);
     }
-
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    click(): void {
-    }
 })();

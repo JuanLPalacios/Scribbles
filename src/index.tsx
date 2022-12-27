@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ReactModal from 'react-modal';
 import App from './App';
-import { AppStateProvider } from './AppContext';
+import { AppStateProvider } from './contexts/AppContext';
 import { content, overlay } from './css/Modal.css';
 import './css/index.css';
 

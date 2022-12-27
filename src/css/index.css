@@ -55,6 +55,13 @@ input[type=range] {
   filter: grayscale(1) invert(0.9);
 }
 
+input[type=submit]:disabled,
+input[type=submit][disabled],
+button:disabled,
+button[disabled] {
+  opacity: 0.5;
+}
+
 button > img {
   filter: invert(1);
 }
@@ -67,6 +74,34 @@ button:focus {
   border-radius: calc(var(--button-diameter) / 2);
   width: var(--button-diameter);
   height: var(--button-diameter);
+}
+
+.errors {
+  color: var(--main-color);
+  font-size: 0.8rem;
+  min-height: 1.2rem;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fields label {
+  display: flex;
+  gap: 10px;
+}
+
+.fields label > input {
+  flex: 1 1 auto;
+}
+
+.fields .actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
 }
 
 .dropdown {

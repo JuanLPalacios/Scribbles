@@ -44,15 +44,19 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
 
     setup({ drawingContext: [drawing, setDrawing] }:ToolEvent<TransformOptions>): void {
         if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
-        const layer = layers[selectedLayer];
         this.action = 'none';
-        this.render(layer);
         setDrawing({ ...drawing });
     }
 
-    dispose({ drawingContext: [drawing, setDrawing] }:ToolEvent<TransformOptions>): void {
+    dispose(e:ToolEvent<TransformOptions>): void {
         this.action = 'none';
+        const { drawingContext: [drawing, setDrawing] } = e;
+        if(!drawing) return;
+        const { layers, selectedLayer } = drawing;
+        const layer = layers[selectedLayer];
+        this.endTranform(e, layer);
+        setDrawing({ ...drawing });
+        console.log('dispose');
     }
 
     mouseDown(e: CanvasEvent<TransformOptions>,): void {
@@ -124,7 +128,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         const layer = layers[selectedLayer];
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         const { x: projectionX, y: projectionY } = point.matrixTransform(this.inverseMatrix);
-        const { rect: { size: [width, height] } } = layer;
+        const { x: width, y: height }  = this.handles[4];
         if(
             (projectionX<0)
             ||(projectionY<0)
@@ -291,6 +295,10 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             y = Math.min(py, cy)-dy,
             w = Math.abs(px-cx),
             h = Math.abs(py-cy);
+        if((w==0)||(h==0)){
+            this.action = 'none';
+            return;
+        }
         const { buffer, canvas } = layer;
         const mask = createDrawable({ size: [buffer.canvas.width, buffer.canvas.height] });
         if(!buffer.ctx || !mask.ctx || !canvas.ctx) return;
@@ -399,7 +407,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         setDrawing(drawing && { ...drawing });
     }
 
-    endTranform({ drawingContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>, layer: LayerState) {
+    endTranform({ drawingContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState) {
         if(!drawing) return;
         const { layers, selectedLayer } = drawing;
         const { canvas, buffer } = layers[selectedLayer];
@@ -408,14 +416,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             minY = Math.min(...finalCords.map(cord => cord.y)),
             maxX = Math.max(...finalCords.map(cord => cord.x)),
             maxY = Math.max(...finalCords.map(cord => cord.y));
-            // canvas.canvas.width = maxX - minX;
-            // canvas.canvas.height = maxY - minY;
-            // layer.rect.size = [maxX - minX, maxY - minY];
-            // layer.rect.position = [layer.rect.position[0]+minX, layer.rect.position[1]+minY];
         console.log(minX+minY+maxX+maxY);
-        // const p = new DOMPoint(minX, minY).matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()));
-        // const p2 = new DOMPoint(0, 0).matrixTransform(DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array()));
-        // this.matrix.translateSelf(-p.x+p2.x, -p.y+p2.y);
 
         if(canvas.ctx){
             canvas.ctx.globalCompositeOperation = 'source-over';

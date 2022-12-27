@@ -25,7 +25,7 @@ npm start
 
 ## Live Demo
 
-[Live Demo Link](https://juanlpalacios.github.io/scribbles/)
+[Live Demo Link](https://juanlpalacios.github.io/Scribbles/)
 
 ## Author
 

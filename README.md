@@ -2,7 +2,7 @@
 
 ![Scribbles](./src/logo.svg)
 
-A simple PWA for drawing ilustrations
+A simple PWA for drawing ilustrations with multilayer support
 
 ### Setup
 
@@ -21,8 +21,7 @@ npm start
 ## Built With
 
 - React
-- Redux
-- JavaScript
+- TypeScript
 - CSS
 
 ## Live Demo
@@ -50,7 +49,7 @@ Give a ⭐️ if you like this project!
 
 ## Acknowledgments
 
-- Fernando montoya for the logo original design
+- [TurboColors](https://instagram.com/turbocolors?igshid=ZDdkNTZiNTM=) for the logo original design
 
 ## 📝 License
 

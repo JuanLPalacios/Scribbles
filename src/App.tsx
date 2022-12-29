@@ -5,14 +5,14 @@ import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
 import { useContext } from 'react';
 
-import { DrawingContext } from './contexts/DrawingState';
+import { EditorContext } from './contexts/DrawingState';
 import { TopMenu } from './components/portals/TopMenu';
 import { LeftMenu } from './components/portals/LeftMenu';
 import { RightMenu } from './components/portals/RightMenu';
 import { BottomMenu } from './components/portals/BottomMenu';
 
 function App() {
-    const [drawing] = useContext(DrawingContext);
+    const [drawing] = useContext(EditorContext);
     return (
         <>
             <div className="App">

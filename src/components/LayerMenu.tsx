@@ -6,12 +6,11 @@ import pushUpIcon from '../icons/push-chevron-up-r-svgrepo-com.svg';
 import pushDownIcon from '../icons/push-chevron-down-r-svgrepo-com.svg';
 import eyeIcon from '../icons/eye-alt-svgrepo-com.svg';
 import { useState, useContext, useEffect } from 'react';
-import { LayerState } from '../types/LayerState';
 import { Drawable } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
 import ReactModal from 'react-modal';
+import { EditorContext } from '../contexts/DrawingState';
 import { createLayer } from '../generators/createLayer';
-import { DrawingContext } from '../contexts/DrawingState';
 
 function LayerMenu() {
     const [sideMenu, setSideMenu] = useState({
@@ -23,7 +22,8 @@ function LayerMenu() {
         isValid: true,
         errors: { layerName: new Array<string> }
     });
-    const [drawing, setDrawing] = useContext(DrawingContext);
+    const [editor, editorDispatch] = useContext(EditorContext);
+    const { drawing } = editor;
     useEffect(() => {
         const errors = { layerName: new Array<string>() };
         if(newLayerPopup.layerName.length<1)
@@ -33,49 +33,45 @@ function LayerMenu() {
         setNewLayerPopup({ ...newLayerPopup, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
     }, [newLayerPopup.layerName]);
     if(!drawing) return <></>;
-    const { selectedLayer, layers } = drawing;
+    const { selectedLayer, layers, height, width } = drawing;
     const onAddLayer = () => {
-        if(!drawing) return;
-        const { width, height } = drawing;
-        const newLayers:LayerState[] = [...layers,
-            createLayer(
-                newLayerPopup.layerName,
-                {
-                    position: [0, 0],
-                    size: [width, height]
-                }
-            )
-        ];
         setNewLayerPopup({ ...newLayerPopup, isOpen: false });
-        setDrawing(drawing && { ...drawing, layers: newLayers });
+        editorDispatch({ type: 'editor/do', payload: {
+            type: 'drawing/addLayer',
+            payload: {
+                at: selectedLayer,
+                layer: createLayer(
+                    newLayerPopup.layerName,
+                    {
+                        position: [0, 0],
+                        size: [width, height]
+                    }
+                )
+            } } });
     };
     const onRemoveLayer = () => {
-        onUpdate([...layers.filter((x, i) => selectedLayer !== i)], selectedLayer%(layers.length -1));
+        editorDispatch({ type: 'editor/do', payload: { type: 'drawing/removeLayer', payload: { at: selectedLayer } } });
     };
-    const onOpacityChange = (opacity:number) => {
+    const onOpacityChangePrev = (opacity:number) => {
         const layer = layers[selectedLayer];
         layer.opacity = opacity;
-        onUpdate([...layers]);
+        editorDispatch({ type: 'editor/forceUpdate', payload: { drawing: { ...drawing } } });
+    };
+    const onSelect = (index:number) => {
+        editorDispatch({ type: 'editor/do', payload: { type: 'drawing/selectLayer', payload: index } });
+    };
+    const onOpacityChange = (opacity:number) => {
+        editorDispatch({ type: 'editor/do', payload: { type: 'drawing/updateLayer', payload: { at: selectedLayer, layer: { opacity } } } });
+    };
+    const onVisiviltyChange = (index:number, visible:boolean) => {
+        editorDispatch({ type: 'editor/do', payload: { type: 'drawing/updateLayer', payload: { at: index, layer: { visible } } } });
     };
     const onModeChange = (mixBlendMode:BlendMode) => {
-        const layer = layers[selectedLayer];
-        layer.mixBlendMode = mixBlendMode;
-        onUpdate([...layers]);
+        editorDispatch({ type: 'editor/do', payload: { type: 'drawing/updateLayer', payload: { at: selectedLayer, layer: { mixBlendMode } } } });
     };
     const onMove = (change:number) => {
-        const newPosirion = selectedLayer + change;
-        if(newPosirion < 0) return;
-        if(newPosirion >= layers.length) return;
-        const layer = layers[selectedLayer];
-        const otherLayer = layers[newPosirion];
-        onUpdate(Object.assign([...layers], { [selectedLayer]: otherLayer, [newPosirion]: layer }), newPosirion);
-    };
-    const onUpdate = (newLayers: LayerState[], selectedLayer?: number) => {
-        if(selectedLayer !== undefined){
-            setDrawing(drawing && { ...drawing, layers: [...newLayers], selectedLayer });
-        }
-        else
-            setDrawing(drawing && { ...drawing, layers: [...newLayers] });
+        const to = selectedLayer + change;
+        editorDispatch({ type: 'editor/do', payload: { type: 'drawing/moveLayer', payload: { at: selectedLayer, to } } });
     };
     return (
         <div className="LayerMenu">
@@ -110,18 +106,19 @@ function LayerMenu() {
                                 <label>
                                 opacity
                                     <input type="range" value={layers[selectedLayer]?.opacity} min="0" max="1" step="0.004" onChange={(e) => {
-                                        onOpacityChange(parseFloat(e.target.value));
+                                        onOpacityChangePrev(parseFloat(e.target.value));
+                                    }} onMouseUp={(e) => {
+                                        onOpacityChange(layers[selectedLayer]?.opacity);
                                     }} />
                                 </label>
                             </div>
                             <div className="scroller">
                                 <div className="list">
                                     {layers.map((layer, i) => (
-                                        <div key={`${layer.key}-item`} className={`layer ${selectedLayer === i ? 'selected' : ''}`} onClick={() => onUpdate(layers, i)}>
+                                        <div key={`${layer.key}-item`} className={`layer ${selectedLayer === i ? 'selected' : ''}`} onClick={() => onSelect(i)}>
                                             <label>
                                                 <input type="checkbox" checked={layer.visible} value="visible" onChange={()=>{
-                                                    layer.visible=!layer.visible;
-                                                    onUpdate([...layers]);
+                                                    onVisiviltyChange(i, !layer.visible);
                                                 }} />
                                                 <div className='checkbox'>
                                                     <img src={eyeIcon} alt="visible" />

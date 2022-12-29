@@ -1,7 +1,7 @@
-import { DrawingState } from '../contexts/DrawingState';
+import { EditorAction, EditorState } from '../contexts/DrawingState';
 import { StatePair } from './StatePair';
 
 export type ToolEvent<O> = {
-    drawingContext:StatePair<DrawingState|undefined>;
+    editorContext:[EditorState, React.Dispatch<EditorAction>];
     menuContext:StatePair<O>;
 }

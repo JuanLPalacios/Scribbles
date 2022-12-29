@@ -42,26 +42,26 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
     skewMode = false;
     action: 'none' | 'scale' | 'rotate' | 'skew' | 'translate' | 'rect-cut' | 'transform' = 'none';
 
-    setup({ drawingContext: [drawing, setDrawing] }:ToolEvent<TransformOptions>): void {
-        if(!drawing) return;
+    setup({ editorContext: [drawing, setDrawing] }:ToolEvent<TransformOptions>): void {
+        if(!drawing.drawing) return;
         this.action = 'none';
-        setDrawing({ ...drawing });
+        setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
     dispose(e:ToolEvent<TransformOptions>): void {
         this.action = 'none';
-        const { drawingContext: [drawing, setDrawing] } = e;
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+        const { editorContext: [drawing, setDrawing] } = e;
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         this.endTranform(e, layer);
-        setDrawing({ ...drawing });
+        setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
     mouseDown(e: CanvasEvent<TransformOptions>,): void {
-        const { drawingContext: [drawing] } = e;
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+        const { editorContext: [drawing] } = e;
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
 
         switch(this.action){
@@ -75,9 +75,9 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
     }
 
     mouseUp(e: CanvasEvent<TransformOptions>,): void {
-        const { drawingContext: [drawing, setDrawing] } = e;
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+        const { editorContext: [drawing, setDrawing] } = e;
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         switch(this.action){
         case 'rect-cut':
@@ -91,13 +91,13 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             break;
         }
 
-        setDrawing({ ...drawing });
+        setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
     mouseMove(e: CanvasEvent<TransformOptions>,): void {
-        const { drawingContext: [drawing, setDrawing] } = e;
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+        const { editorContext: [drawing, setDrawing] } = e;
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
 
         switch(this.action){
@@ -118,12 +118,12 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             break;
         }
 
-        setDrawing({ ...drawing });
+        setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
-    click({ point, drawingContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>,): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    click({ point, editorContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>,): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         const { x: projectionX, y: projectionY } = point.matrixTransform(this.inverseMatrix);
@@ -139,7 +139,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         if(dt > 500) return;
         this.skewMode = !this.skewMode;
         this.render(layer);
-        setDrawing({ ...drawing });
+        setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
     startTranslation(e: CanvasEvent<TransformOptions>, layer:LayerState){
@@ -331,7 +331,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         buffer.ctx.strokeRect(Math.min(x, cx)-dx, Math.min(y, cy)-dy, Math.abs(x-cx), Math.abs(y-cy));
     }
 
-    startTransform({ drawingContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>, layer:LayerState, dx = 0, dy = 0){
+    startTransform({ editorContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>, layer:LayerState, dx = 0, dy = 0){
         const { canvas, buffer, rect: { position: [x, y] } } = layer;
 
         const mw = buffer.canvas.width/2;
@@ -366,9 +366,9 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             position,
             rotation: new DOMMatrix(),
             onMouseDown: (i%2 === 0)?(e) => {
-                const { drawingContext: [drawing, setDrawing] } = e;
-                if(!drawing) return;
-                const { layers, selectedLayer } = drawing;
+                const { editorContext: [drawing, setDrawing] } = e;
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
                 const layer = layers[selectedLayer];
                 this.axis = [true, true];
                 if(this.skewMode){
@@ -379,11 +379,11 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
                     this.pivot = this.handles[(i+4)%8];
                     this.startScaling(e, layer);
                 }
-                setDrawing({ ...drawing });
+                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
             }:(e) => {
-                const { drawingContext: [drawing, setDrawing] } = e;
-                if(!drawing) return;
-                const { layers, selectedLayer } = drawing;
+                const { editorContext: [drawing, setDrawing] } = e;
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
                 const layer = layers[selectedLayer];
                 this.axis = [(i%4 === 1), (i%4 !== 1)];
                 this.pivot = this.handles[(i+4)%8];
@@ -393,7 +393,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
                 else{
                     this.startScaling(e, layer);
                 }
-                setDrawing({ ...drawing });
+                setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
             }
         });
         this.handleH = this.handles.map(createHandle);
@@ -402,12 +402,12 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             .translate(x, y)
             .toString();
         this.render(layer);
-        setDrawing(drawing && { ...drawing });
+        setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
-    endTranform({ drawingContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState) {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    endTranform({ editorContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState) {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const { canvas, buffer } = layers[selectedLayer];
         if(canvas.ctx){
             canvas.ctx.globalCompositeOperation = 'source-over';
@@ -425,7 +425,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         layer.handles = [];
         this.action = 'none';
         this.renderThumbnail(layer);
-        setDrawing({ ...drawing });
+        setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
     render(layer: LayerState) {

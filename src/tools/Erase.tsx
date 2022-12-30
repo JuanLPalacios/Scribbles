@@ -57,11 +57,12 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.mask.canvas.height = 0;
     }
 
-    mouseDown({ point, editorContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
+    mouseDown({ point, editorContext: [drawing, setDrawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
+        setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
         const { canvas, buffer } = layer;

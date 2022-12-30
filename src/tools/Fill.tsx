@@ -40,10 +40,11 @@ export const fill = new (class Fill extends Tool<FillOptions> {
     dispose(): void {
     }
 
-    click({ point, editorContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
+    click({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
+        setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
         const px = x - dx, py = y - dy;

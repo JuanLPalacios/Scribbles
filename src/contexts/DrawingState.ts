@@ -131,7 +131,7 @@ const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction
         canvas.ctx?.drawImage(layers[action.payload.at].canvas.canvas, 0, 0);
         return {  type: 'drawing/loadlayer', payload: { at: action.payload.at, canvas } };
     default:
-        throw action;
+        return action;
     }
 };
 

@@ -38,11 +38,12 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         buffer.ctx?.restore();
     }
 
-    mouseDown({ point, editorContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
+    mouseDown({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
+        setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
         this.down = true;
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;

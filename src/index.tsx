@@ -13,9 +13,6 @@ ReactModal.defaultStyles = {
 
 const root = ReactDOM.createRoot(document.getElementById('root') || document.body);
 root.render(
-    <React.StrictMode>
-        <AppStateProvider>
-            <App />
-        </AppStateProvider>
-    </React.StrictMode>,
-);
+    <AppStateProvider>
+        <App />
+    </AppStateProvider>);

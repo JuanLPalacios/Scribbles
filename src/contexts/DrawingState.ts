@@ -125,13 +125,14 @@ const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction
     case 'drawing/selectLayer':
         return {  type: 'drawing/selectLayer', payload: selectedLayer };
     case 'drawing/workLayer':
+    case 'drawing/loadlayer':
         // eslint-disable-next-line no-case-declarations
         const canvas = createDrawable({ size: [width, height] });
         if(canvas.ctx) canvas.ctx.globalCompositeOperation = 'copy';
         canvas.ctx?.drawImage(layers[action.payload.at].canvas.canvas, 0, 0);
         return {  type: 'drawing/loadlayer', payload: { at: action.payload.at, canvas } };
     default:
-        return action;
+        throw action;
     }
 };
 
@@ -141,9 +142,9 @@ export const reducer = (state:EditorState, action: EditorAction):EditorState => 
     case 'editor/do':
         return drawing? { ...state, drawing: dreducer(drawing, action.payload), prev: [...prev, antidreducer(drawing, action.payload)], next: [] } : state ;
     case 'editor/undo':
-        return (drawing && (prev.length > 0)) ? { ...state, drawing: dreducer(drawing, prev[prev.length-1]), prev: prev.slice(0, prev.length -1), next: [...next, antidreducer(drawing, prev[prev.length-1])] } : state;
+        return (drawing && (prev.length > 0)) ? { ...state, prev: prev.slice(0, prev.length -1), next: [...next, antidreducer(drawing, prev[prev.length-1])], drawing: dreducer(drawing, prev[prev.length-1]) } : state;
     case 'editor/redo':
-        return (drawing && (prev.length > 0)) ? { ...state, drawing: dreducer(drawing, next[next.length-1]), next: next.slice(0, next.length -1), prev: [...prev, antidreducer(drawing, next[prev.length-1])] } : state;
+        return (drawing && (next.length > 0)) ? { ...state, next: next.slice(0, next.length -1), prev: [...prev, antidreducer(drawing, next[next.length-1])], drawing: dreducer(drawing, next[next.length-1]) } : state;
     case 'editor/forceUpdate':
         return { ...state, ...action.payload };
     case 'editor/load':

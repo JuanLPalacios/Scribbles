@@ -265,7 +265,9 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.render(layer);
     }
 
-    startRectCut({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    startRectCut({ editorContext: [drawing, setDrawing], point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+        if(!drawing.drawing) return;
+        const { selectedLayer } = drawing.drawing;
         this.center = e;
         this.action = 'rect-cut';
         const { buffer } = layer;
@@ -283,6 +285,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         buffer.ctx.strokeStyle = buffer.ctx.createPattern(tile, 'repeat') || '';
         buffer.ctx.lineWidth = 1;
         buffer.ctx.fillStyle = '#000000';
+        setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
     }
 
     endRectCut(e: CanvasEvent<TransformOptions>, layer:LayerState){
@@ -393,7 +396,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
                 else{
                     this.startScaling(e, layer);
                 }
-                setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
+                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
             }
         });
         this.handleH = this.handles.map(createHandle);

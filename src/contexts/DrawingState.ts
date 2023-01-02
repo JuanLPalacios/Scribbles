@@ -167,11 +167,11 @@ const dreducer = (drawing:DrawingState, action: DrawingAction):DrawingState => {
     case 'drawing/moveLayer':
         return drawing &&
         { ...drawing,
-            layers: [...layers.slice(0, action.payload.to).filter((x, i) => action.payload.at !== i),
+            layers: [...layers.slice(0, action.payload.to + (action.payload.at < action.payload.to ?1:0)).filter((x, i) => action.payload.at !== i),
                 layers[action.payload.at],
-                ...layers.slice(action.payload.to).filter((x, i) => action.payload.at !== (i + action.payload.to))
+                ...layers.slice(action.payload.to + (action.payload.at < action.payload.to ?1:0)).filter((x, i) => action.payload.at !== (i + action.payload.to))
             ],
-            selectedLayer: selectedLayer + (selectedLayer > action.payload.to ?1:0) - (selectedLayer > action.payload.at ?1:0)
+            selectedLayer: (selectedLayer !== action.payload.at ?selectedLayer + (selectedLayer > action.payload.to ?1:0) - (selectedLayer > action.payload.at ?1:0):action.payload.to)
         };
     case 'drawing/updateLayer':
         return drawing && { ...drawing,

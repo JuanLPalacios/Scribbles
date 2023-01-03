@@ -1,11 +1,11 @@
 import { useCallback, useContext, useState } from 'react';
 import '../../css/Menu.css';
 import optionsIcon from '../../icons/options-svgrepo-com.svg';
-import { DrawingContext } from '../../contexts/DrawingState';
+import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 
 export const Properties = () => {
-    const [drawing, setDrawing] = useContext(DrawingContext);
+    const [editor, editorDispatch] = useContext(EditorContext);
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600 });
     const { isOpen, name } = state;
     const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
@@ -24,16 +24,16 @@ export const Properties = () => {
         setState({ ...state, isOpen: false });
     }, [state]);
     const openModal = useCallback(() => {
-        if(!drawing) return;
-        const { name } = drawing;
+        if(!editor.name) return;
+        const { name } = editor;
         setState({ ...state, isOpen: true, name });
-    }, [drawing, state]);
+    }, [editor, state]);
     const updateFile = useCallback(() => {
-        if(drawing)setDrawing({ ...drawing,
+        if(editor)editorDispatch({ type: 'editor/forceUpdate', payload: { ...editor,
             name
-        });
+        } });
         close();
-    }, [close, drawing, name, setDrawing]);
+    }, [close, editor, name, editorDispatch]);
     return <>
         <li>
             <button className='round-btn' onClick={openModal}>

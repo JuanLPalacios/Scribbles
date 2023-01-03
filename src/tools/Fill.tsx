@@ -24,9 +24,9 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         </div>;
     };
 
-    setup({ drawingContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: ToolEvent<FillOptions>): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    setup({ editorContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: ToolEvent<FillOptions>): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
         if(!canvas.ctx || !buffer.ctx) return;
@@ -40,9 +40,16 @@ export const fill = new (class Fill extends Tool<FillOptions> {
     dispose(): void {
     }
 
-    click({ point, drawingContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    mouseDown({ editorContext: [drawing, setDrawing] }: CanvasEvent<FillOptions>): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
+        const layer = layers[selectedLayer];
+        setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
+    }
+
+    click({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;

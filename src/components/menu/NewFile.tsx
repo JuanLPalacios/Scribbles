@@ -2,11 +2,11 @@ import { useCallback, useContext, useState, useEffect } from 'react';
 import '../../css/Menu.css';
 import addFileIcon from '../../icons/file-add-svgrepo-com.svg';
 import { createLayer } from '../../generators/createLayer';
-import { DrawingContext } from '../../contexts/DrawingState';
+import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 
 export const NewFile = () => {
-    const [drawing, setDrawing] = useContext(DrawingContext);
+    const [editor, editorDispatch] = useContext(EditorContext);
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, name, width, height, isValid, errors } = state;
     const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
@@ -25,27 +25,32 @@ export const NewFile = () => {
         setState({ ...state, isOpen: false });
     }, [state]);
     const openModal = useCallback(() => {
-        const { width, height } = drawing || { width: 600, height: 600 };
+        const { width, height } = editor.drawing || { width: 600, height: 600 };
         setState({ ...state, isOpen: true, width, height });
-    }, [drawing, state]);
+    }, [editor, state]);
     const newfile = useCallback(() => {
-        setDrawing({
-            name,
-            width,
-            height,
-            layers: [
-                createLayer(
-                    'Image',
-                    {
-                        position: [0, 0],
-                        size: [width, height]
-                    }
-                ),
-            ],
-            selectedLayer: 0
+        editorDispatch({
+            type: 'editor/load',
+            payload: {
+                name,
+                drawing: {
+                    width,
+                    height,
+                    layers: [
+                        createLayer(
+                            'Image',
+                            {
+                                position: [0, 0],
+                                size: [width, height]
+                            }
+                        ),
+                    ],
+                    selectedLayer: 0
+                }
+            }
         });
         close();
-    }, [close, height, name, setDrawing, width]);
+    }, [close, height, name, editorDispatch, width]);
     useEffect(() => {
         const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
         if(name.length<1)

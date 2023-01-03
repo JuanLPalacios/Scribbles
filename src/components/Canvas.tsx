@@ -3,15 +3,15 @@ import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
 import { MenuContext } from '../contexts/MenuOptions';
 import Layer from './Layer';
-import { DrawingContext } from '../contexts/DrawingState';
+import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
 
 export const CanvasContext = createContext({});
 
 function Canvas() {
-    const drawingContext = useContext(DrawingContext);
+    const editorContext = useContext(EditorContext);
     const menuContext = useContext(MenuContext);
-    const [drawing, setDrawing] = drawingContext;
+    const [editor, editorDispatch] = editorContext;
     const [options, onChange] = menuContext;
     const [prevTool, setTool] = useState<Tool>();
     const {
@@ -23,17 +23,16 @@ function Canvas() {
 
     useEffect(()=>{
         let temp = options;
-        let temp2 = drawing;
+        let temp2 = editor;
         prevTool?.dispose({
             menuContext: [temp, (o)=>{
                 if(typeof o == 'function') temp = o(temp);
                 else temp = o;
                 return temp;
             }],
-            drawingContext: [temp2, (o) => {
-                if(typeof o == 'function') temp2 = o(temp2);
-                else temp2 = o;
-                return temp2;
+            editorContext: [temp2, (o) => {
+                if(o.type == 'editor/forceUpdate')
+                    temp2 = { ...temp2, ...o.payload };
             }]
         });
         tool.setup({
@@ -42,32 +41,31 @@ function Canvas() {
                 else temp = o;
                 return temp;
             }],
-            drawingContext: [temp2, (o) => {
-                if(typeof o == 'function') temp2 = o(temp2);
-                else temp2 = o;
-                return temp2;
+            editorContext: [temp2, (o) => {
+                if(o.type == 'editor/forceUpdate')
+                    temp2 = { ...temp2, ...o.payload };
             }]
         });
         setTool(tool);
         onChange(temp);
-        setDrawing(temp2);
+        editorDispatch({ type: 'editor/forceUpdate', payload: temp2 });
     }, [tool]);
 
     useEffect(()=>{
-        if(drawing){
-            document.documentElement.style.setProperty('--doc-width', `${drawing.width}px`);
-            document.documentElement.style.setProperty('--doc-height', `${drawing.height}px`);
+        if(editor.drawing){
+            document.documentElement.style.setProperty('--doc-width', `${editor.drawing.width}px`);
+            document.documentElement.style.setProperty('--doc-height', `${editor.drawing.height}px`);
         }
-    }, [drawing]);
+    }, [editor]);
 
     const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>):CanvasEvent<any>=>{
         e.preventDefault();
         e.stopPropagation();
-        if(!ref.current) return { point: new DOMPoint(0, 0), drawingContext, menuContext };
+        if(!ref.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext };
         const { clientX, clientY } = e;
         const { top, left } = ref.current.getBoundingClientRect();
-        return { point: new DOMPoint(clientX - left, clientY - top), drawingContext, menuContext };
-    }, [drawingContext, menuContext]);
+        return { point: new DOMPoint(clientX - left, clientY - top), editorContext: editorContext, menuContext };
+    }, [editorContext, menuContext]);
 
     const causeBlur = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>)=>{
         (document.activeElement as HTMLElement).blur();
@@ -75,8 +73,8 @@ function Canvas() {
     }, []);
 
     let viewPort = undefined;
-    if(drawing){
-        const { width, height, layers, selectedLayer } = drawing;
+    if(editor.drawing){
+        const { width, height, layers, selectedLayer } = editor.drawing;
         viewPort = <div>
             <div
                 ref={ref}

@@ -1,6 +1,6 @@
 {
-  "name": "scribles",
-  "version": "0.1.0",
+  "name": "scribbles",
+  "version": "0.2.0",
   "private": true,
   "homepage": ".",
   "dependencies": {

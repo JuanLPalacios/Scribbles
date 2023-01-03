@@ -1,8 +1,8 @@
-import { JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useState } from 'react';
+import { JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useReducer, useState } from 'react';
 import Marker from '../brushes/Marker';
 import Solid from '../brushes/Solid';
 import StiffBrush from '../brushes/StiffBrush';
-import { DrawingContext, DrawingState } from './DrawingState';
+import { reducer, EditorContext } from './DrawingState';
 import { MenuOptions, MenuContext } from './MenuOptions';
 import { uid } from '../lib/uid';
 import { draw } from '../tools/Draw';
@@ -50,7 +50,7 @@ for (let i = 0; i < roundFibersNumber/2; i++) {
 }
 
 export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) => {
-    const useDrawing = useState<DrawingState | undefined>();
+    const useDrawing = useReducer(reducer, { prev: [], next: [], });
     const useMenuOptions = useState<MenuOptions>({
         brushes: [
             new Solid(),
@@ -74,9 +74,9 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
         alpha: 255,
         tolerance: 0.15,
     });
-    return<DrawingContext.Provider value={useDrawing}>
+    return<EditorContext.Provider value={useDrawing}>
         <MenuContext.Provider value={useMenuOptions}>
             {props.children}
         </MenuContext.Provider>
-    </DrawingContext.Provider>;
+    </EditorContext.Provider>;
 };

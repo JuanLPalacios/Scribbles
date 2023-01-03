@@ -34,9 +34,9 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         }
     }
 
-    setup({ drawingContext: [drawing] }:ToolEvent<EraseOptions>): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    setup({ editorContext: [drawing] }:ToolEvent<EraseOptions>): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
         this.mask.canvas.width = canvas.canvas.width;
@@ -46,9 +46,9 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.down = false;
     }
 
-    dispose({ drawingContext: [drawing] }:ToolEvent<EraseOptions>): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    dispose({ editorContext: [drawing] }:ToolEvent<EraseOptions>): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
         canvas.ctx?.restore();
@@ -57,11 +57,12 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.mask.canvas.height = 0;
     }
 
-    mouseDown({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    mouseDown({ point, editorContext: [drawing, setDrawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
+        setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
         const { canvas, buffer } = layer;
@@ -71,9 +72,9 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.down = true;
     }
 
-    mouseUp({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    mouseUp({ point, editorContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         const { x, y } = point;
@@ -93,9 +94,9 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.down = false;
     }
 
-    mouseMove({ point, drawingContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
-        if(!drawing) return;
-        const { layers, selectedLayer } = drawing;
+    mouseMove({ point, editorContext: [drawing], menuContext: [{ brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
+        if(!drawing.drawing) return;
+        const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
         const layer = layers[selectedLayer];
         const { x, y } = point;

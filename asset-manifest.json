@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "./static/css/main.41169519.css",
-    "main.js": "./static/js/main.d61b030c.js",
+    "main.css": "./static/css/main.05fa0fb0.css",
+    "main.js": "./static/js/main.8d5739a2.js",
     "static/media/color-bucket-svgrepo-com.svg": "./static/media/color-bucket-svgrepo-com.6ef816b5653f12d3bed8755e319704de.svg",
     "index.html": "./index.html",
     "static/media/options-svgrepo-com.svg": "./static/media/options-svgrepo-com.983f39dc7221774e7db869fd9cb6350f.svg",
@@ -14,21 +14,23 @@
     "static/media/file-add-svgrepo-com.svg": "./static/media/file-add-svgrepo-com.9d49fc1547d5c9f500d2319fa80cafae.svg",
     "static/media/brush-f-svgrepo-com.svg": "./static/media/brush-f-svgrepo-com.92e2a9c34a38354837a4bdcc07ccace5.svg",
     "static/media/corner-double-bottom-left-svgrepo-com.svg": "./static/media/corner-double-bottom-left-svgrepo-com.053fedf6fa8c5654e7946c5b5e67bb81.svg",
+    "static/media/mail-reply-svgrepo-com.svg": "./static/media/mail-reply-svgrepo-com.ca1383f77258248afb833c94c7b5f078.svg",
     "static/media/corner-double-top-right-svgrepo-com.svg": "./static/media/corner-double-top-right-svgrepo-com.650ab05eca768810ff12e27de8673ac4.svg",
     "static/media/file-svgrepo-com.svg": "./static/media/file-svgrepo-com.bad07ba30147533564eeec8289da808a.svg",
     "static/media/corner-double-bottom-right-svgrepo-com.svg": "./static/media/corner-double-bottom-right-svgrepo-com.4fde008252e64d72e3313e26dc262bfa.svg",
     "static/media/corner-double-top-left-svgrepo-com.svg": "./static/media/corner-double-top-left-svgrepo-com.47a1863050a489f6545655cddfd97091.svg",
+    "static/media/mail-forward-svgrepo-com.svg": "./static/media/mail-forward-svgrepo-com.0e866bc80e3dd4e2afcd336f7411d31f.svg",
     "static/media/nametag-svgrepo-com.svg": "./static/media/nametag-svgrepo-com.1b55f49d5e9e8bad2f09400e08c83fa2.svg",
     "static/media/external-svgrepo-com.svg": "./static/media/external-svgrepo-com.676666068d44c03827f30ad653fde166.svg",
     "static/media/extension-add-svgrepo-com.svg": "./static/media/extension-add-svgrepo-com.d78b1d0438b4c30b8aed9f1e1d2c3beb.svg",
     "static/media/stack-svgrepo-com.svg": "./static/media/stack-svgrepo-com.405ea4b2f482a40132a609207bc0e2cb.svg",
     "static/media/arrows-v-alt-svgrepo-com.svg": "./static/media/arrows-v-alt-svgrepo-com.c6d6ca445ddfea7db40de525afbe4e4b.svg",
     "static/media/arrows-h-alt-svgrepo-com.svg": "./static/media/arrows-h-alt-svgrepo-com.627c376463c2b50e4efb159620b1c303.svg",
-    "main.41169519.css.map": "./static/css/main.41169519.css.map",
-    "main.d61b030c.js.map": "./static/js/main.d61b030c.js.map"
+    "main.05fa0fb0.css.map": "./static/css/main.05fa0fb0.css.map",
+    "main.8d5739a2.js.map": "./static/js/main.8d5739a2.js.map"
   },
   "entrypoints": [
-    "static/css/main.41169519.css",
-    "static/js/main.d61b030c.js"
+    "static/css/main.05fa0fb0.css",
+    "static/js/main.8d5739a2.js"
   ]
 }

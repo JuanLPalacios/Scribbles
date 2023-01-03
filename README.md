@@ -1,8 +1,22 @@
-# Scribles
-
-![Scribbles](./src/logo.svg)
+# ![Scribbles](./src/logo.svg)
 
 A simple PWA for drawing ilustrations with multilayer support
+
+![Scribbles](./screenshot.png)
+
+## Live Demo
+
+[Live Demo Link](https://juanlpalacios.github.io/Scribbles/)
+
+### Features
+
+- tools
+  - draw
+  - erase
+  - fill
+  - transform(move/scale/rotate)
+- multilayer support
+- export to png
 
 ### Setup
 
@@ -23,10 +37,6 @@ npm start
 - React
 - TypeScript
 - CSS
-
-## Live Demo
-
-[Live Demo Link](https://juanlpalacios.github.io/Scribbles/)
 
 ## Author
 

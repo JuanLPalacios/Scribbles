@@ -1,7 +1,7 @@
 import { useCallback, useContext } from 'react';
 import '../../css/Menu.css';
 import redoIcon from '../../icons/mail-forward-svgrepo-com.svg';
-import { EditorContext } from '../../contexts/DrawingState';
+import { EditorContext } from '../../contexts/EditorState';
 import { useShortcut } from '../../hooks/useShortcut';
 
 export const Redo = () => {

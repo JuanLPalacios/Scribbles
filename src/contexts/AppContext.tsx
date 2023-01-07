@@ -2,7 +2,7 @@ import { JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useRed
 import Marker from '../brushes/Marker';
 import Solid from '../brushes/Solid';
 import StiffBrush from '../brushes/StiffBrush';
-import { reducer, EditorContext } from './DrawingState';
+import { reducer, EditorContext } from './EditorState';
 import { MenuOptions, MenuContext } from './MenuOptions';
 import { uid } from '../lib/uid';
 import { draw } from '../tools/Draw';

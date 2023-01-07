@@ -9,7 +9,7 @@ import { useState, useContext, useEffect } from 'react';
 import { Drawable } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
 import ReactModal from 'react-modal';
-import { EditorContext } from '../contexts/DrawingState';
+import { EditorContext } from '../contexts/EditorState';
 import { createLayer } from '../generators/createLayer';
 
 function LayerMenu() {

@@ -2,7 +2,7 @@ import { useCallback, useContext } from 'react';
 import '../../css/Menu.css';
 import exportIcon from '../../icons/external-svgrepo-com.svg';
 import { createLayer } from '../../generators/createLayer';
-import { EditorContext } from '../../contexts/DrawingState';
+import { EditorContext } from '../../contexts/EditorState';
 import { mergeLayers } from '../../lib/Graphics';
 
 export const ExportPNG = () => {

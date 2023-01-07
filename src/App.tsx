@@ -4,8 +4,7 @@ import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
 import { useContext } from 'react';
-
-import { EditorContext } from './contexts/DrawingState';
+import { EditorContext } from './contexts/EditorState';
 import { TopMenu } from './components/portals/TopMenu';
 import { LeftMenu } from './components/portals/LeftMenu';
 import { RightMenu } from './components/portals/RightMenu';

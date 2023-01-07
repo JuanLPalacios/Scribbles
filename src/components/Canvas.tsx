@@ -3,7 +3,7 @@ import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
 import { MenuContext } from '../contexts/MenuOptions';
 import Layer from './Layer';
-import { EditorContext } from '../contexts/DrawingState';
+import { EditorContext } from '../contexts/EditorState';
 import { CanvasEvent } from '../types/CanvasEvent';
 
 export const CanvasContext = createContext({});

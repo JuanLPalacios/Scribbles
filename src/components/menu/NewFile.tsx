@@ -2,7 +2,7 @@ import { useCallback, useContext, useState, useEffect } from 'react';
 import '../../css/Menu.css';
 import addFileIcon from '../../icons/file-add-svgrepo-com.svg';
 import { createLayer } from '../../generators/createLayer';
-import { EditorContext } from '../../contexts/DrawingState';
+import { EditorContext } from '../../contexts/EditorState';
 import ReactModal from 'react-modal';
 
 export const NewFile = () => {

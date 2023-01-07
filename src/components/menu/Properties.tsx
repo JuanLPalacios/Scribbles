@@ -1,7 +1,7 @@
 import { useCallback, useContext, useState } from 'react';
 import '../../css/Menu.css';
 import optionsIcon from '../../icons/options-svgrepo-com.svg';
-import { EditorContext } from '../../contexts/DrawingState';
+import { EditorContext } from '../../contexts/EditorState';
 import ReactModal from 'react-modal';
 
 export const Properties = () => {

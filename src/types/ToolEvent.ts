@@ -1,4 +1,4 @@
-import { EditorAction, EditorState } from '../contexts/DrawingState';
+import { EditorAction, EditorState } from '../contexts/EditorState';
 import { StatePair } from './StatePair';
 
 export type ToolEvent<O> = {

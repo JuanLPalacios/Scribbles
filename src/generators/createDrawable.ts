@@ -10,7 +10,8 @@ export const createDrawable = (initial:DrawableState | {size:[number, number]}) 
         canvas.width = size[0];
         canvas.height = size[1];
         ctx = canvas.getContext('2d');
-        ctx?.save();
+        if(!ctx) throw new Error('CanvasRenderingContext2D could not be accesed');
+        ctx.save();
         return { canvas, ctx };
     }
     return initial as DrawableState;

@@ -9,8 +9,9 @@ export const createDrawable = (initial:DrawableState | {size:[number, number]}) 
         canvas.id = ''+uid();
         canvas.width = size[0];
         canvas.height = size[1];
-        ctx = canvas.getContext('2d');
-        if(!ctx) throw new Error('CanvasRenderingContext2D could not be accesed');
+        const tempCtx = canvas.getContext('2d');
+        if(!tempCtx) throw new Error('CanvasRenderingContext2D could not be accesed');
+        ctx = tempCtx;
         ctx.save();
         return { canvas, ctx };
     }

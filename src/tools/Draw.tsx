@@ -24,6 +24,7 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
+        if(!buffer) return;
         canvas.ctx?.save();
         buffer.ctx?.save();
         this.down = false;
@@ -34,6 +35,7 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
+        if(!buffer) return;
         canvas.ctx?.restore();
         buffer.ctx?.restore();
     }
@@ -47,6 +49,7 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         this.down = true;
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
+        if(!layer.buffer) return;
         brush.startStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
     }
 
@@ -59,7 +62,8 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
         const { canvas, buffer } = layer;
-        brush.endStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
+        if(!buffer) return;
+        brush.endStroke(buffer, [x-dx, y-dy], color, alpha, brushWidth);
         canvas.ctx?.drawImage(buffer.canvas, 0, 0);
         buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
         this.down = false;
@@ -74,6 +78,7 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
+        if(!layer.buffer) return;
         brush.drawStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
     }
 })();

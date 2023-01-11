@@ -16,6 +16,7 @@ import drawIcon from '../icons/brush-f-svgrepo-com.svg';
 import eraseIcon from '../icons/erase-svgrepo-com.svg';
 import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
 import transformIcon from '../icons/nametag-svgrepo-com.svg';
+import { createDrawable } from '../generators/createDrawable';
 
 const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
 const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
@@ -50,7 +51,12 @@ for (let i = 0; i < roundFibersNumber/2; i++) {
 }
 
 export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) => {
-    const useDrawing = useReducer(reducer, { prev: [], next: [], });
+    const useDrawing = useReducer(reducer, {
+        prev: [],
+        next: [],
+        layerCanvases: [],
+        buffer: createDrawable({ size: [1, 1] }),
+    });
     const useMenuOptions = useState<MenuOptions>({
         brushes: [
             new Solid(),

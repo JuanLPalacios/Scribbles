@@ -1,10 +1,10 @@
 import { Dispatch, SetStateAction } from 'react';
 import { CanvasEvent } from '../types/CanvasEvent';
-import { LayerState } from '../types/LayerState';
+import { CompositeLayerState } from '../types/LayerState';
 import { ToolEvent } from '../types/ToolEvent';
 
 export default abstract class Tool< P = any > {
-    renderThumbnail(layer:LayerState){
+    renderThumbnail(layer:CompositeLayerState){
         const { canvas, thumbnail } = layer;
         if(thumbnail.ctx){
             thumbnail.ctx.globalCompositeOperation = 'copy';

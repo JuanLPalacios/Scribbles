@@ -1,10 +1,9 @@
-import { DrawableState } from '../types/DrawableState';
-import { LayerState } from '../types/LayerState';
+import { CompositeLayerState } from '../types/LayerState';
 
 export type DrawingState = {
     width:number,
     height:number,
-    layers:LayerState[]
+    layers:CompositeLayerState[]
     selectedLayer:number
 };
 
@@ -21,7 +20,7 @@ type WorkLayer = {
     type: 'drawing/workLayer',
     payload:{
         at:number,
-        layer:LayerState
+        layer:CompositeLayerState
     }
 }
 
@@ -29,7 +28,7 @@ type Loadlayer = {
     type: 'drawing/loadlayer',
     payload:{
         at:number,
-        canvas:ImageData
+        imageData:ImageData
     }
 }
 
@@ -42,7 +41,7 @@ type AddLayer = {
     type: 'drawing/addLayer',
     payload:{
         at:number,
-        layer:LayerState
+        layer:CompositeLayerState
     }
 }
 
@@ -65,7 +64,7 @@ type UpdateLayer = {
     type: 'drawing/updateLayer',
     payload:{
         at:number,
-        layer: Partial<Omit<LayerState, 'canvas' >>
+        layer: Partial<Omit<CompositeLayerState, 'canvas' >>
     }
 }
 
@@ -84,7 +83,7 @@ export const antidReducer = (drawing:DrawingState, action: DrawingAction):Drawin
         return {  type: 'drawing/selectLayer', payload: selectedLayer };
     case 'drawing/workLayer':
     case 'drawing/loadlayer':
-        return {  type: 'drawing/loadlayer', payload: { at: action.payload.at, canvas: layers[action.payload.at].canvas.ctx!.getImageData(0, 0, width, height) } };
+        return {  type: 'drawing/loadlayer', payload: { at: action.payload.at, imageData: layers[action.payload.at].canvas.ctx!.getImageData(0, 0, width, height) } };
     default:
         throw action;
     }
@@ -127,7 +126,7 @@ export const drawingReducer = (drawing:DrawingState, action: DrawingAction):Draw
         };
     case 'drawing/loadlayer':
         layers[action.payload.at].canvas.ctx!.putImageData(
-            action.payload.canvas,
+            action.payload.imageData,
             0, 0);
         return { ...drawing };
     default:

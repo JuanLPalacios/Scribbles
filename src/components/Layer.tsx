@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { Drawable } from './Drawable';
-import { LayerState } from '../types/LayerState';
+import { CompositeLayerState } from '../types/LayerState';
 import { createDrawable } from '../generators/createDrawable';
 
-const Layer = ({ values }:{values:LayerState}) => {
+const Layer = ({ values }:{values:CompositeLayerState}) => {
     const { rect, canvas, buffer, thumbnail, visible, opacity, mixBlendMode } = values;
     const {
         position: [x, y],
@@ -34,8 +34,8 @@ const Layer = ({ values }:{values:LayerState}) => {
 
     return (
         <div style={{ display: visible?'block':'none', left: `${x}px`, top: `${y}px`, opacity, mixBlendMode }}>
-            <Drawable canvas={canvas?.canvas}/>
-            <Drawable canvas={buffer?.canvas}/>
+            <Drawable canvas={canvas.canvas}/>
+            {buffer && <Drawable canvas={buffer.canvas}/>}
         </div>
     );
 };

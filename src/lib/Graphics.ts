@@ -1,6 +1,6 @@
-import { LayerState } from '../types/LayerState';
+import { CompositeLayerState } from '../types/LayerState';
 
-export const mergeLayers = (from: LayerState, to: LayerState) => {
+export const mergeLayers = (from: CompositeLayerState, to: CompositeLayerState) => {
     const { canvas: { canvas }, rect: { position: fromRect } } = from;
     const { canvas: { ctx }, rect: { position: toRect }, mixBlendMode, opacity } = to;
     if(!ctx) return;
@@ -9,7 +9,7 @@ export const mergeLayers = (from: LayerState, to: LayerState) => {
     ctx.drawImage(canvas, fromRect[0] - toRect[0], fromRect[1] - toRect[1]);
 };
 
-export const renderThumbnail = (layer:LayerState) => {
+export const renderThumbnail = (layer:CompositeLayerState) => {
     const { canvas, thumbnail } = layer;
     if(thumbnail.ctx){
         thumbnail.ctx.globalCompositeOperation = 'copy';

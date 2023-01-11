@@ -41,6 +41,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { canvas, buffer } = layer;
         this.mask.canvas.width = canvas.canvas.width;
         this.mask.canvas.height = canvas.canvas.height;
+        if(!buffer) return;
         canvas.ctx?.save();
         buffer.ctx?.save();
         this.down = false;
@@ -51,6 +52,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
+        if(!buffer) return;
         canvas.ctx?.restore();
         buffer.ctx?.restore();
         this.mask.canvas.width = 0;
@@ -66,6 +68,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
         const { canvas, buffer } = layer;
+        if(!buffer) return;
         layer.canvas.canvas.style.display = 'none';
         this.renderMask(canvas, buffer);
         brush.startStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
@@ -81,6 +84,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
         const { canvas, buffer } = layer;
+        if(!buffer) return;
         brush.endStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
         this.renderMask(canvas, buffer);
         if(canvas.ctx){
@@ -103,6 +107,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
         const { canvas, buffer } = layer;
+        if(!buffer) return;
         brush.drawStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
         this.renderMask(canvas, buffer);
     }

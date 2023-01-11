@@ -1,11 +1,16 @@
 import { createContext } from 'react';
+import { createDrawable } from '../generators/createDrawable';
+import { DrawableState } from '../types/DrawableState';
+import { LayerCanvases } from '../types/LayerState';
 import { DrawingState, DrawingAction, drawingReducer, antidReducer } from './DrawingState';
 
 export type EditorState = {
-    name?: string;
-    drawing?: DrawingState;
-    prev: DrawingAction[];
-    next: DrawingAction[];
+    name?: string
+    drawing?: DrawingState
+    buffer: DrawableState
+    layerCanvases: LayerCanvases[]
+    prev: DrawingAction[]
+    next: DrawingAction[]
 };
 
 export type EditorAction =
@@ -58,5 +63,7 @@ export const EditorContext = createContext<[EditorState, React.Dispatch<EditorAc
     {
         prev: [],
         next: [],
+        layerCanvases: [],
+        buffer: createDrawable({ size: [1, 1] }),
     }, () => undefined
 ]);

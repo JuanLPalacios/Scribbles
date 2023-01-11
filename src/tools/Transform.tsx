@@ -2,7 +2,7 @@ import Tool from '../abstracts/Tool';
 import { uid } from '../lib/uid';
 import { scalePoint, sub } from '../lib/DOMMath';
 import { Handle } from '../types/Handle';
-import { LayerState } from '../types/LayerState';
+import { CompositeLayerState } from '../types/LayerState';
 import square from '../icons/square-svgrepo-com.svg';
 import hSkew from '../icons/arrows-h-alt-svgrepo-com.svg';
 import vSkew from '../icons/arrows-v-alt-svgrepo-com.svg';
@@ -142,7 +142,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
-    startTranslation(e: CanvasEvent<TransformOptions>, layer:LayerState){
+    startTranslation(e: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         const { point }  = e;
         const { x: projectionX, y: projectionY } = point.matrixTransform(this.inverseMatrix);
@@ -162,7 +162,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.action = 'translate';
     }
 
-    translate({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    translate({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         const movement =
         sub(
             this.pivot,
@@ -175,7 +175,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.render(layer);
     }
 
-    startSkewering({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    startSkewering({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         this.center = this.pivot.matrixTransform(this.matrix);
         this.prevMatrix = this.matrix;
@@ -185,7 +185,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.action = 'skew';
     }
 
-    skew({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    skew({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         const angle = Math.atan2(e.y - this.center.y, e.x - this.center.x) - this.initAngle;
 
         if(this.axis[0])
@@ -201,7 +201,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.render(layer);
     }
 
-    startScaling({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    startScaling({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         this.center = this.pivot.matrixTransform(this.matrix);
         const dv = sub(
@@ -223,7 +223,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.action = 'scale';
     }
 
-    scale({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    scale({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         const dv = sub(
             new DOMPoint(0, 0).matrixTransform(this.inverseMatrix),
             new DOMPoint(e.x -this.center.x, e.y -this.center.y).matrixTransform(this.inverseMatrix)
@@ -242,7 +242,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.render(layer);
     }
 
-    startRotation({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    startRotation({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         this.inverseMatrix = DOMMatrix.fromFloat32Array(this.matrix.inverse().toFloat32Array());
         this.center = this.pivot.matrixTransform(this.matrix);
         this.prevMatrix = this.matrix;
@@ -252,7 +252,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.action = 'rotate';
     }
 
-    rotate({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    rotate({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         const angle = Math.atan2(e.y - this.center.y, e.x - this.center.x) - this.initAngle;
         const subPivot = this.pivot.matrixTransform(this.prevMatrix);
 
@@ -265,13 +265,13 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.render(layer);
     }
 
-    startRectCut({ editorContext: [drawing, setDrawing], point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    startRectCut({ editorContext: [drawing, setDrawing], point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         if(!drawing.drawing) return;
         const { selectedLayer } = drawing.drawing;
         this.center = e;
         this.action = 'rect-cut';
         const { buffer } = layer;
-        if(!buffer.ctx) return;
+        if(!buffer) return;
         const tile = document.createElement('canvas');
         const square = 5;
         tile.width = tile.height = 2*square;
@@ -288,7 +288,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
     }
 
-    endRectCut(e: CanvasEvent<TransformOptions>, layer:LayerState){
+    endRectCut(e: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         const { x: cx, y: cy } = this.center;
         const { point: { x: px, y: py } } = e;
         const { rect: { position: [dx, dy], size: [dw, dh] } } = layer;
@@ -302,8 +302,8 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             return;
         }
         const { buffer, canvas } = layer;
+        if(!buffer) return;
         const mask = createDrawable({ size: [buffer.canvas.width, buffer.canvas.height] });
-        if(!buffer.ctx || !mask.ctx || !canvas.ctx) return;
         buffer.ctx.clearRect(0, 0, dw, dh);
         //this is unnecesary but is ment to be a reference, once the other selection are bing implemented
         buffer.ctx.fillRect(x, y, w, h);
@@ -324,19 +324,20 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         this.startTransform(e, layer, x, y);
     }
 
-    rectCut({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+    rectCut({ point: e }: CanvasEvent<TransformOptions>, layer:CompositeLayerState){
         const { x: cx, y: cy } = this.center;
         const { x, y } = e;
         const { rect: { position: [dx, dy], size: [w, h] } } = layer;
         const { buffer } = layer;
-        if(!buffer.ctx) return;
+        if(!buffer) return;
         buffer.ctx.clearRect(0, 0, w, h);
         buffer.ctx.strokeRect(Math.min(x, cx)-dx, Math.min(y, cy)-dy, Math.abs(x-cx), Math.abs(y-cy));
     }
 
-    startTransform({ editorContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>, layer:LayerState, dx = 0, dy = 0){
+    startTransform({ editorContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>, layer:CompositeLayerState, dx = 0, dy = 0){
         const { canvas, buffer, rect: { position: [x, y] } } = layer;
 
+        if(!buffer) return;
         const mw = buffer.canvas.width/2;
         const mh = buffer.canvas.height/2;
 
@@ -362,7 +363,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             new DOMPoint(2*mw, 0),
             new DOMPoint(mw, 0)
         ];
-        layer.buffer.canvas.style.transformOrigin = 'top left';
+        buffer.canvas.style.transformOrigin = 'top left';
         const createHandle = (position: DOMPoint, i: number):Handle<TransformOptions> => ({
             key: uid(),
             icon: '',
@@ -408,11 +409,11 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
-    endTranform({ editorContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState) {
+    endTranform({ editorContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: CompositeLayerState) {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const { canvas, buffer } = layers[selectedLayer];
-        if(canvas.ctx){
+        if(canvas.ctx&&buffer){
             canvas.ctx.globalCompositeOperation = 'source-over';
             canvas.ctx.globalAlpha = 1;
             canvas.ctx.setTransform(this.matrix);
@@ -431,7 +432,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
         setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
     }
 
-    render(layer: LayerState) {
+    render(layer: CompositeLayerState) {
         const hx = Math.sqrt(this.matrix.b*this.matrix.b+this.matrix.a*this.matrix.a);
         const hy = Math.sqrt(this.matrix.d*this.matrix.d+this.matrix.c*this.matrix.c);
         const handleMatrix = new DOMMatrix([
@@ -439,6 +440,7 @@ export const transform = new (class Transform extends Tool<TransformOptions> {
             this.matrix.c, this.matrix.d,
             0, 0
         ]).scale(1/hx, 1/hy);
+        if(!layer.buffer) return;
         layer.handles = this.handleH.map((handle, i)=>({
             ...handle,
             icon: this.skewMode? SKEW_ICONS[i] : square,

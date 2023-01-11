@@ -29,7 +29,7 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
         const { canvas, buffer } = layer;
-        if(!canvas.ctx || !buffer.ctx) return;
+        if(!buffer) return;
         canvas.ctx.restore();
         canvas.ctx.globalCompositeOperation = 'source-over';
         buffer.ctx.restore();
@@ -55,7 +55,7 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         const px = x - dx, py = y - dy;
         const { canvas, buffer } = layer;
-        if(!buffer.ctx) return;
+        if(!buffer) return;
         buffer.ctx.fillStyle = color;
         buffer.ctx.globalAlpha = alpha;
         this.fill(

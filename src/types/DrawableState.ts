@@ -1,5 +1,5 @@
 
 export interface DrawableState {
   canvas:HTMLCanvasElement,
-  ctx:CanvasRenderingContext2D | null
+  ctx:CanvasRenderingContext2D
 }

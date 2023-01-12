@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Drawable } from './Drawable';
+import { Canvas } from './Drawable';
 import { CompositeLayerState } from '../types/LayerState';
 import { createDrawable } from '../generators/createDrawable';
 
@@ -34,8 +34,8 @@ const Layer = ({ values }:{values:CompositeLayerState}) => {
 
     return (
         <div style={{ display: visible?'block':'none', left: `${x}px`, top: `${y}px`, opacity, mixBlendMode }}>
-            <Drawable canvas={canvas.canvas}/>
-            {buffer && <Drawable canvas={buffer.canvas}/>}
+            <Canvas canvas={canvas.canvas}/>
+            {buffer && <Canvas canvas={buffer.canvas}/>}
         </div>
     );
 };

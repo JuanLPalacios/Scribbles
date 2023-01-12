@@ -6,7 +6,7 @@ import pushUpIcon from '../icons/push-chevron-up-r-svgrepo-com.svg';
 import pushDownIcon from '../icons/push-chevron-down-r-svgrepo-com.svg';
 import eyeIcon from '../icons/eye-alt-svgrepo-com.svg';
 import { useState, useContext, useEffect } from 'react';
-import { Drawable } from './Drawable';
+import { Canvas } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
 import ReactModal from 'react-modal';
 import { EditorContext } from '../contexts/EditorState';
@@ -124,7 +124,7 @@ function LayerMenu() {
                                                     <img src={eyeIcon} alt="visible" />
                                                 </div>
                                             </label>
-                                            <Drawable
+                                            <Canvas
                                                 canvas={layer.thumbnail?.canvas}
                                                 className='thumbnail'
                                                 key={`${layer.key}-thumb`}

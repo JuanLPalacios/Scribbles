@@ -2,7 +2,7 @@ import { useRef, useEffect } from 'react';
 type DrawableProps = {
     canvas:HTMLCanvasElement|undefined
 } & React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
-export const Drawable = (props:DrawableProps) => {
+export const Canvas = (props:DrawableProps) => {
     const { canvas } = props;
     const ref = useRef<HTMLDivElement>(null);
     useEffect(()=>{

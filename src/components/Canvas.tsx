@@ -17,6 +17,7 @@ function Canvas() {
     const {
         tools, selectedTool
     } = options;
+    const { buffer } = editor;
     const tool = tools[selectedTool].Tool;
 
     const ref = useRef<HTMLDivElement>(null);
@@ -84,7 +85,7 @@ function Canvas() {
                 onMouseUp={(e) => tool.mouseUp(preventAll(e))}
                 style={{ width: `${width}px`, height: `${height}px` }}
             >
-                {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
+                { layers.map((layer, i) => <Layer values={i ===  selectedLayer? { ...layer, buffer } : layer} key={layer.key} />)}
                 {layers[selectedLayer].handles.map(({ key, icon, position, rotation, onMouseDown }) => <img
                     key={key}
                     src={icon}

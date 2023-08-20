@@ -74,7 +74,7 @@ export const NewFile = () => {
                 </div>
                 <label>
                     Name
-                    <input type="text" name='name' value={name} onChange={update} />
+                    <input type="text" name='name' autoComplete="off" value={name} onChange={update} />
                 </label>
                 <label>
                     Width

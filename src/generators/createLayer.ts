@@ -10,6 +10,11 @@ export const createLayer = (name:string, rect:Rect):LayerState => {
     const canvas = createDrawable({ size });
     const buffer = createDrawable({ size });
     const thumbnail = createDrawable({ size: [40, 40 * (height / width)] });
+
+    // dummy context and canvas for creating initial imageData state
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) throw new Error('2d context could not be created');
+
     return {
         key: uid(),
         name,
@@ -20,6 +25,7 @@ export const createLayer = (name:string, rect:Rect):LayerState => {
         visible: true,
         opacity: 1,
         mixBlendMode: blendModes[0],
-        handles: []
+        handles: [],
+        imageData: ctx.createImageData(width, height)
     };
 };

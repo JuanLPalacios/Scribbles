@@ -14,5 +14,6 @@ export interface LayerState {
   opacity: number
   mixBlendMode: BlendMode
   handles: Handle[]
+  imageData: ImageData
 }
 

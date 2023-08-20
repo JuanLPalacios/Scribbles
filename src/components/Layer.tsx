@@ -13,7 +13,7 @@ const Layer = ({ values }:{values:LayerState}) => {
 
     //update state of layer
     useEffect(()=>{
-        canvas.ctx.putImageData(imageData, 0, 0);
+        canvas.ctx?.putImageData(imageData, 0, 0);
     }, [canvas, imageData]);
     // resizeCanvas
     useEffect(()=>{

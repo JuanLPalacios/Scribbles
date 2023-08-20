@@ -4,6 +4,7 @@ import ReactModal from 'react-modal';
 import App from './App';
 import { AppStateProvider } from './contexts/AppContext';
 import { content, overlay } from './css/Modal.css';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import './css/index.css';
 
 ReactModal.defaultStyles = {
@@ -16,3 +17,5 @@ root.render(
     <AppStateProvider>
         <App />
     </AppStateProvider>);
+
+serviceWorkerRegistration.register();

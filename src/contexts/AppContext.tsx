@@ -71,7 +71,7 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
         ],
         selectedTool: 0,
         color: '#000000',
-        alpha: 255,
+        alpha: 1,
         tolerance: 0.15,
     });
     return<EditorContext.Provider value={useDrawing}>

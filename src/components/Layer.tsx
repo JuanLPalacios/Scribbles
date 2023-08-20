@@ -5,11 +5,16 @@ import { createDrawable } from '../generators/createDrawable';
 
 const Layer = ({ values }:{values:LayerState}) => {
     const { rect, canvas, buffer, thumbnail, visible, opacity, mixBlendMode } = values;
+    const { imageData } = values;
     const {
         position: [x, y],
         size: [width, height]
     } = rect;
 
+    //update state of layer
+    useEffect(()=>{
+        canvas.ctx?.putImageData(imageData, 0, 0);
+    }, [canvas, imageData]);
     // resizeCanvas
     useEffect(()=>{
         if(buffer&&canvas){

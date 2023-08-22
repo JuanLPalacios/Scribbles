@@ -103,13 +103,13 @@ function Canvas() {
                 onClick={(e) => tool.click(preventAll(causeBlur(e)))}
                 onMouseDown={(e) => tool.mouseDown(preventAll(e))}
                 onMouseUp={(e) => tool.mouseUp(preventAll(e))}
-                onTouchMove={(e) => {
-                    console.log('a');
-                    tool.mouseMove(getTouch(e as any));
-                    console.log('b');
-                }}
+                onTouchMove={(e) => tool.mouseMove(getTouch(e as any))}
                 onTouchStart={(e) => tool.mouseDown(getTouch(e as any))}
-                onTouchEnd={(e) => tool.mouseUp(getTouch(e as any))}
+                onTouchEnd={(e) => {
+                    const touch = getTouch(e);
+                    tool.mouseUp(touch);
+                    tool.click(touch);
+                }}
                 style={{ width: `${width}px`, height: `${height}px` }}
             >
                 {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
@@ -136,6 +136,7 @@ function Canvas() {
                 onMouseMove={(e) => tool.mouseMove(preventAll(e))}
                 onMouseDown={(e) => tool.mouseDown(preventAll(e))}
                 onMouseUp={(e) => tool.mouseUp(preventAll(causeBlur(e)))}
+                onClick={(e) => tool.click(preventAll(causeBlur(e)))}
             >
                 {viewPort}
             </div>

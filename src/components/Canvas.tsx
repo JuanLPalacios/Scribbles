@@ -83,7 +83,7 @@ function Canvas() {
 
     const getTouch = useCallback((e:React.TouchEvent<HTMLDivElement>):CanvasEvent<any>=>{
         if(!ref.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext };
-        const { clientX, clientY } = e.touches[0];
+        const { clientX, clientY } = e.touches[0] || e.changedTouches[0];
         const { top, left } = ref.current.getBoundingClientRect();
         return { point: new DOMPoint(clientX - left, clientY - top), editorContext: editorContext, menuContext };
     }, [editorContext, menuContext]);

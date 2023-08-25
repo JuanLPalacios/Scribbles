@@ -21,6 +21,8 @@ function Canvas() {
 
     const ref = useRef<HTMLDivElement>(null);
 
+    const containerRef = useRef<HTMLDivElement>(null);
+
     useEffect(()=>{
         let temp = options;
         let temp2 = editor;
@@ -58,11 +60,28 @@ function Canvas() {
         }
     }, [editor]);
 
+    useEffect(()=>{
+        if(containerRef.current){
+            containerRef.current.addEventListener('touchstart', function(e) {
+                if (e.targetTouches.length < 2){
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        }
+    }, [containerRef.current]);
+
     const preventAll = useCallback((e:React.MouseEvent<HTMLDivElement, MouseEvent>):CanvasEvent<any>=>{
         e.preventDefault();
         e.stopPropagation();
         if(!ref.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext };
         const { clientX, clientY } = e;
+        const { top, left } = ref.current.getBoundingClientRect();
+        return { point: new DOMPoint(clientX - left, clientY - top), editorContext: editorContext, menuContext };
+    }, [editorContext, menuContext]);
+
+    const getTouch = useCallback((e:React.TouchEvent<HTMLDivElement>):CanvasEvent<any>=>{
+        if(!ref.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext };
+        const { clientX, clientY } = e.touches[0] || e.changedTouches[0];
         const { top, left } = ref.current.getBoundingClientRect();
         return { point: new DOMPoint(clientX - left, clientY - top), editorContext: editorContext, menuContext };
     }, [editorContext, menuContext]);
@@ -82,6 +101,13 @@ function Canvas() {
                 onClick={(e) => tool.click(preventAll(causeBlur(e)))}
                 onMouseDown={(e) => tool.mouseDown(preventAll(e))}
                 onMouseUp={(e) => tool.mouseUp(preventAll(e))}
+                onTouchMove={(e) => tool.mouseMove(getTouch(e))}
+                onTouchStart={(e) => tool.mouseDown(getTouch(e))}
+                onTouchEnd={(e) => {
+                    const touch = getTouch(e);
+                    tool.mouseUp(touch);
+                    tool.click(touch);
+                }}
                 style={{ width: `${width}px`, height: `${height}px` }}
             >
                 {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
@@ -97,6 +123,7 @@ function Canvas() {
                     }}
                     alt=""
                     onMouseDown={e => onMouseDown(preventAll(e))}
+                    onTouchStart={(e) => onMouseDown(getTouch(e))}
                 />)}
             </div>
         </div>;
@@ -104,9 +131,11 @@ function Canvas() {
     return (
         <CanvasContext.Provider value={{ brush: tool }}>
             <div className="Canvas"
+                ref={containerRef}
                 onMouseMove={(e) => tool.mouseMove(preventAll(e))}
                 onMouseDown={(e) => tool.mouseDown(preventAll(e))}
                 onMouseUp={(e) => tool.mouseUp(preventAll(causeBlur(e)))}
+                onClick={(e) => tool.click(preventAll(causeBlur(e)))}
             >
                 {viewPort}
             </div>

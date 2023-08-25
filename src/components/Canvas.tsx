@@ -14,7 +14,6 @@ function Canvas() {
     const [editor, editorDispatch] = editorContext;
     const [options, onChange] = menuContext;
     const [prevTool, setTool] = useState<Tool>();
-    const [nTouch, setNTouch] = useState<number>(0);
     const {
         tools, selectedTool
     } = options;
@@ -64,10 +63,9 @@ function Canvas() {
     useEffect(()=>{
         if(containerRef.current){
             containerRef.current.addEventListener('touchstart', function(e) {
-                setNTouch(e.targetTouches.length);if (e.targetTouches.length < 2)e.preventDefault();
-            }, { passive: false });
-            containerRef.current.addEventListener('scroll', function(e) {
-                if (nTouch < 2)e.preventDefault();
+                if (e.targetTouches.length < 2){
+                    e.preventDefault();
+                }
             }, { passive: false });
         }
     }, [containerRef.current]);
@@ -103,8 +101,8 @@ function Canvas() {
                 onClick={(e) => tool.click(preventAll(causeBlur(e)))}
                 onMouseDown={(e) => tool.mouseDown(preventAll(e))}
                 onMouseUp={(e) => tool.mouseUp(preventAll(e))}
-                onTouchMove={(e) => tool.mouseMove(getTouch(e as any))}
-                onTouchStart={(e) => tool.mouseDown(getTouch(e as any))}
+                onTouchMove={(e) => tool.mouseMove(getTouch(e))}
+                onTouchStart={(e) => tool.mouseDown(getTouch(e))}
                 onTouchEnd={(e) => {
                     const touch = getTouch(e);
                     tool.mouseUp(touch);
@@ -125,6 +123,7 @@ function Canvas() {
                     }}
                     alt=""
                     onMouseDown={e => onMouseDown(preventAll(e))}
+                    onTouchStart={(e) => onMouseDown(getTouch(e))}
                 />)}
             </div>
         </div>;

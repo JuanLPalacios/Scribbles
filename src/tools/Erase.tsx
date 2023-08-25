@@ -66,6 +66,7 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
         const { canvas, buffer } = layer;
+        this.mask.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
         layer.canvas.canvas.style.display = 'none';
         this.renderMask(canvas, buffer);
         brush.startStroke(this.mask, [x-dx, y-dy], '#000000', alpha, brushWidth);

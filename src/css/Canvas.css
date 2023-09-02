@@ -1,16 +1,12 @@
 .Canvas {
-  overflow: auto;
+  overflow: hidden;
   height: calc(100vh - var(--button-diameter) * 2 - 21px);
   width: calc(100% - var(--button-diameter) * 2);
-  scroll-padding: 100px;
-  scroll-snap-type: both mandatory;
-  box-sizing: border-box;
   background: var(--background-color);
 }
 
 .Canvas > * {
   width: var(--doc-width);
-  padding: max(calc(50vh - ((var(--doc-height)/2) + 23px)), 100px) max(calc(50% - (var(--doc-width)/2)), 100px);
 }
 
 .Canvas > * > * {

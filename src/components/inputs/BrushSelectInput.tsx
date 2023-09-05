@@ -8,6 +8,11 @@ import { DrawableState } from '../../types/DrawableState';
 import { Drawable } from '../Drawable';
 import { LeftMenuPortal } from '../portals/LeftMenu';
 import { TopMenuPortal } from '../portals/TopMenu';
+import Brush from '../../abstracts/Brush';
+
+let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
+
+let lastBrushes: Brush[];
 
 const style:CSSProperties = {
     display: 'flex',
@@ -16,25 +21,30 @@ const style:CSSProperties = {
 
 export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:Dispatch<SetStateAction<BrushOptions & AlphaOptions>>}) => {
     const { brushes, selectedBrush, brushWidth, onChange } = props;
-    const [{ previews, selectedPreview }, setPreviews] = useState<{previews:DrawableState[], selectedPreview:DrawableState}>({ previews: [], selectedPreview: createPreview() });
     const [id] = useState(uid());
     useEffect(()=>{
-        setPreviews({ previews: brushes.map(() => createPreview()), selectedPreview });
-    }, [brushes, selectedPreview]);
+        if(lastBrushes !== brushes){
+            lastBrushes = brushes;
+            console.log('render previews');
+            previews = { previews: brushes.map(() => createPreview()), selectedPreview: createPreview() };
+            brushes[selectedBrush]?.renderPreview(previews.selectedPreview, demoStroke as any, '#ffffff', .5 || 1, 15);
+            previews.previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5 || 1, 15));
+        }
+    }, [brushes]);
     useEffect(()=>{
-        previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5 || 1, 15));
-    }, [brushes, previews, selectedBrush]);
-    useEffect(()=>{
-        brushes[selectedBrush]?.renderPreview(selectedPreview, demoStroke as any, '#ffffff', .5 || 1, 15);
-    }, [brushes, selectedBrush, selectedPreview]);
+        if(previews){
+            console.log('render selected preview');
+            brushes[selectedBrush]?.renderPreview(previews.selectedPreview, demoStroke as any, '#ffffff', .5 || 1, 15);
+        }
+    }, [selectedBrush]);
     return <>
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
                 <button>
-                    <Drawable canvas={selectedPreview.canvas} />Brush
+                    <Drawable canvas={previews?.selectedPreview.canvas} />Brush
                 </button>
                 <ul>
-                    {previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrush ? 'selected' : ''} onMouseDown={()=>onChange({ ...props, selectedBrush: i })} /></li>)}
+                    {previews?.previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrush ? 'selected' : ''} onMouseDown={()=>onChange({ ...props, selectedBrush: i })} /></li>)}
                 </ul>
             </div>
         </TopMenuPortal>

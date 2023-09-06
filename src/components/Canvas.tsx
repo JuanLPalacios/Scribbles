@@ -156,14 +156,14 @@ function Canvas() {
         console.log(ev.type, ev.deltaY);
         const x = ev.clientX - left;
         const y = ev.clientY - top;
-        const scale = transform.a;
-        if(keys.CTRL)
+        if(keys.CTRL && (0.01 <= transform.a && transform.a < 10)){
             setTransform(new DOMMatrix()
                 .translate(x, y)
-                .scale(scale -.01*ev.deltaY)
+                .scale(1 -.01*ev.deltaY)
                 .translate(-x, -y)
                 .multiply(transform)
             );
+        }
         else if (keys.ALT)
             setTransform(new DOMMatrix()
                 .translate(x, y)
@@ -172,12 +172,14 @@ function Canvas() {
                 .multiply(transform)
             );
         else if (keys.SHIFT)
-            setTransform((
-                transform.translate(-ev.deltaY, -ev.deltaX))
+            setTransform(new DOMMatrix()
+                .translate(-ev.deltaY, -ev.deltaX)
+                .multiply(transform)
             );
         else
-            setTransform((
-                transform.translate(-ev.deltaX, -ev.deltaY))
+            setTransform(new DOMMatrix()
+                .translate(-ev.deltaX, -ev.deltaY)
+                .multiply(transform)
             );
     };
 
@@ -193,10 +195,10 @@ function Canvas() {
         document.addEventListener('keyup', keyUpHandler);
 
         return () => {
-            //document.removeEventListener('keydown', keyDownHandler);
-            //document.removeEventListener('keyup', keyUpHandler);
+            document.removeEventListener('keydown', keyDownHandler);
+            document.removeEventListener('keyup', keyUpHandler);
         };
-    }, []);
+    }, [keys]);
 
     let viewPort = undefined;
     if(editor.drawing){
@@ -224,6 +226,7 @@ function Canvas() {
                             transform: `translate(${-12}px, ${-12}px) ${rotation}`
                         }}
                         alt=""
+                        onPointerDown={e => onMouseDown(getPointer(e))}
                     />)}
                 </div>
             </div>

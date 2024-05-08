@@ -1,5 +1,22 @@
 import { SequentialDataView } from '../lib/SequentialDataView';
-import { AbrHeader } from './AbrInfo';
+
+export const INT16_MAX = 65535;
+
+export const abrBrushes = {
+    map: <{ [key: string]: AbrBrush; }>{},
+    get(key: string): AbrBrush {
+        return this.map[key];
+    },
+    set(key: string, value: AbrBrush) {
+        this.map[key] = value;
+    },
+    clear() {
+        this.map = {};
+    },
+    list() {
+        return Object.values(this.map);
+    }
+};
 
 export async function loadAbrBrushes(file: File) {
     const buffer:ArrayBuffer = await (new Promise((resolve, reject) => {
@@ -30,7 +47,7 @@ export async function loadAbrFromArrayBuffer(buffer: ArrayBuffer, filename:strin
         const imageId = 123456;
 
         for (let i = 0; i < abrHeader.count; i++) {
-            const layerId = await abrBrushLoad(abrSdv, abrHeader, filename, imageId, i + 1);
+            const layerId = await loadAbrBrush(abrSdv, abrHeader, filename, imageId, i + 1);
             if (layerId == -1) {
                 console.warn(`Warning: problem loading brush #${i} in ${filename}`);
             }
@@ -127,6 +144,7 @@ export function abrSupportedContent(abrHeader: AbrHeader): boolean {
     }
     return false;
 }
+
 export function abrReach8BimSection(abrSdv: SequentialDataView, name: string):void {
     let sectionSize = 0;
     // find 8BIMname section
@@ -170,7 +188,63 @@ export function charCodeComparison(buffer: number[], str: string, num: number): 
     return false;
 }
 
-function abrBrushLoad(abrSdv: SequentialDataView, abrHeader: AbrHeader, name: string, imageId: number, arg4: number):number {
+export async function loadAbrBrush(abrSdv: SequentialDataView, abrHeader: AbrHeader, filename: string, imageId: number, id: number){
+    let layerId = -1;
+    switch (abrHeader.version) {
+    case 1:
+        // fall through, version 1 and 2 are compatible
+    case 2:
+        layerId = await loadAbrBrushV12(abrSdv, abrHeader, filename, imageId, id);
+        break;
+    case 6:
+        layerId = await loadAbrBrushV6(abrSdv, abrHeader, filename, imageId, id);
+        break;
+    }
+    return layerId;
+}
+
+async function loadAbrBrushV6(abrSdv: SequentialDataView, abrHeader: AbrHeader, filename: string, imageId: number, id: number): Promise<number> {
     throw new Error('Function not implemented.');
 }
 
+async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader, filename: string, imageId: number, id: number): Promise<number> {
+    let name = '';
+
+    let layerId = -1;
+
+    // short
+    const brushType = abrSdv.getUint16();
+    // long
+    const brushSize = abrSdv.getUint32();
+    const nextBrush = abrSdv.getPos() + brushSize;
+
+    if (brushType == 1) {
+        // computed brush
+        abrSdv.setPos(abrSdv.getPos() + 4); //miscellaneous Long integer. Ignored
+        const spacing = abrSdv.getUint16(); // 2 bytes Short integer from 0...999 where 0=no spacing.
+        const diameter = abrSdv.getUint16(); // 2 bytes Short integer from 1...999.
+        const roundness = abrSdv.getUint16(); // 2 bytes Short integer from 0...100.
+        const angle = abrSdv.getInt16(); // 2 bytes Short integer from -180...180.
+        const hardness = abrSdv.getUint16(); // 2 bytes Short integer from 0...100.
+        name = abrV1BrushName(filename, id);
+        abrBrushes.set(name, { brushType: brushType, spacing, diameter, roundness, angle, hardness, name });
+        abrSdv.setPos(nextBrush);
+        layerId = 1;
+    }
+    else if (brushType == 2) {
+        throw new Error('Function not implemented.');
+    }
+    else {
+        console.warn('Unknown ABR brush type, skipping.');
+        abrSdv.setPos(nextBrush);
+    }
+
+    return layerId;
+}
+
+function abrV1BrushName(filename: string, id: number): string {
+    const result = filename.split('');
+    const pos = filename.lastIndexOf('.');
+    result.splice(pos, 4);
+    return result.join('') + '_' + id;
+}

@@ -1,6 +1,8 @@
 import { SequentialDataView } from '../lib/SequentialDataView';
 
 export const INT16_MAX = 65535;
+// FIXME: this needs to be not empty
+const defaultBrushTipImage = document.createElement('canvas');
 
 export const abrBrushes = {
     map: <{ [key: string]: AbrBrush; }>{},
@@ -17,6 +19,10 @@ export const abrBrushes = {
         return Object.values(this.map);
     }
 };
+
+function getDefaultSampledBrush(name: string): AbrSampledBrush {
+    return { brushType: 2, brushTipImage: defaultBrushTipImage, md5Sum: new ArrayBuffer(0), name, valid: false, spacing: 1, antiAliasing: true };
+}
 
 export async function loadAbrBrushes(file: File) {
     const buffer:ArrayBuffer = await (new Promise((resolve, reject) => {
@@ -158,7 +164,7 @@ export function abrReach8BimSection(abrSdv: SequentialDataView, name: string):vo
         }
 
         if (charCodeComparison(tag, '8BIM', 4)) {
-            throw new Error('Error: Start tag not 8BIM but ' + String.fromCharCode(...tag) + ' at position ' + abrSdv.getPos());
+            throw new Error(`Error: Start tag not 8BIM but ${String.fromCharCode(...tag)} at position ${abrSdv.getPos()}`);
         }
 
         r = abrSdv.readRawData(tagname, 4);
@@ -232,7 +238,69 @@ async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader,
         layerId = 1;
     }
     else if (brushType == 2) {
-        throw new Error('Function not implemented.');
+        // sampled brush
+        // discard 4 misc bytes
+        abrSdv.setPos(abrSdv.getPos() + 4);
+
+        const spacing = abrSdv.getUint16();
+
+        if (abrHeader.version == 2)
+            name = readAbrUcs2Text(abrSdv);
+        if (name === null) {
+            name = abrV1BrushName(filename, id);
+        }
+
+        const antiAliasing = !!abrSdv.getUint8();
+
+        // discard 4 short for short bounds
+        abrSdv.setPos(abrSdv.getPos() + 8);
+
+        // long bounds
+        const top = abrSdv.getUint32();
+        const left = abrSdv.getUint32();
+        const bottom = abrSdv.getUint32();
+        const right = abrSdv.getUint32();
+        // short
+        const depth = abrSdv.getUint16();
+        // char
+        const compression = abrSdv.getUint8();
+
+        const width = right - left;
+        const height = bottom - top;
+        const size = width * (depth >> 3) * height;
+
+        // FIXME: support wide brushes
+        if (height > 16384) {
+            console.warn('WARNING: wide brushes not supported');
+            abrSdv.setPos(nextBrush);
+        }
+        else {
+            const buffer: number[] = [];
+            if (!compression) {
+                // not compressed - read raw bytes as brush data
+                abrSdv.readRawData(buffer, size);
+            } else {
+                rleDecode(abrSdv, buffer, height);
+            }
+
+            let abrBrush: AbrSampledBrush;
+            const brushTipImage = convertCanvas(buffer, width, height);
+            if (Object.keys(abrBrushes.map).includes(name)) {
+                abrBrush = getDefaultSampledBrush(name);
+            }
+            else {
+                abrBrush = getDefaultSampledBrush(name);
+                const buf = new SequentialDataView(new ArrayBuffer(0));
+                // FIXME: it should use a slice containing the brush sample to be useful
+                abrBrush = { ...abrBrush, md5Sum: await crypto.subtle.digest('SHA-256', buf.data()) };
+            }
+
+            abrBrush = { ...abrBrush, brushTipImage };
+            abrBrush = { ...abrBrush, valid: true };
+            abrBrush = { ...abrBrush, name, spacing, antiAliasing };
+            abrBrushes.set(name, abrBrush);
+            layerId = 1;
+        }
     }
     else {
         console.warn('Unknown ABR brush type, skipping.');
@@ -247,4 +315,16 @@ function abrV1BrushName(filename: string, id: number): string {
     const pos = filename.lastIndexOf('.');
     result.splice(pos, 4);
     return result.join('') + '_' + id;
+}
+
+function rleDecode(abrSdv: SequentialDataView, data: number[], height: number) {
+    throw new Error('Function not implemented.');
+}
+
+function convertCanvas(buffer: number[], width: number, height: number): HTMLCanvasElement {
+    throw new Error('Function not implemented.');
+}
+
+function readAbrUcs2Text(abrSdv: SequentialDataView): string {
+    throw new Error('Function not implemented.');
 }

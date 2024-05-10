@@ -38,27 +38,21 @@ export async function loadAbrBrushes(file: File) {
 
 export async function loadAbrFromArrayBuffer(buffer: ArrayBuffer, filename:string) {
     const abrSdv = new SequentialDataView(buffer);
-
     try {
         const abrHeader:AbrHeader = abrReadContent(abrSdv);
         if (!abrSupportedContent(abrHeader)) {
             throw new Error(`ERROR: unable to decode abr format version ${abrHeader.version}(subver ${abrHeader.subversion})`);
         }
-
         if (abrHeader.count == 0) {
             throw new Error(`ERROR: no brushes found in ${filename}`);
-            return false;
         }
-
         const imageId = 123456;
-
         for (let i = 0; i < abrHeader.count; i++) {
             const layerId = await loadAbrBrush(abrSdv, abrHeader, filename, imageId, i + 1);
             if (layerId == -1) {
                 console.warn(`Warning: problem loading brush #${i} in ${filename}`);
             }
         }
-
         return true;
     } catch (error) {
         throw new Error(`Error: cannot parse ABR file: ${filename}`, { cause: error });
@@ -97,7 +91,6 @@ function findSampleCountV6(abrSdv: SequentialDataView, abrHeader: AbrHeader): nu
 
     if (!abrSupportedContent(abrHeader))
         return 0;
-
     const origin = abrSdv.getPos();
     try {
         abrReach8BimSection(abrSdv, 'samp');
@@ -105,14 +98,11 @@ function findSampleCountV6(abrSdv: SequentialDataView, abrHeader: AbrHeader): nu
         abrSdv.setPos(origin);
         return 0;
     }
-
     // long
     const sampleSectionSize = abrSdv.getUint32();
     const sampleSectionEnd = sampleSectionSize + abrSdv.getPos();
-
     if(sampleSectionEnd < 0 || sampleSectionEnd > abrSdv.size())
         return 0;
-
     const dataStart = abrSdv.getPos();
     let samples = 0;
     while ((!abrSdv.atEnd()) && (abrSdv.getPos() < sampleSectionEnd)) {
@@ -121,20 +111,16 @@ function findSampleCountV6(abrSdv: SequentialDataView, abrHeader: AbrHeader): nu
         brushEnd = brushSize;
         // complement to 4
         while (brushEnd % 4 != 0) brushEnd++;
-
         const newPos = abrSdv.getPos() + brushEnd;
         if(newPos > 0 && newPos < abrSdv.size()) {
             abrSdv.setPos(newPos);
         }
         else
             return 0;
-
         samples++;
     }
-
     // set StreamDataViewer to samples data
     abrSdv.setPos(dataStart);
-
     return samples;
 }
 
@@ -162,23 +148,17 @@ export function abrReach8BimSection(abrSdv: SequentialDataView, name: string):vo
         if (r != 4) {
             throw new Error('Error: Cannot read 8BIM tag ');
         }
-
         if (charCodeComparison(tag, '8BIM', 4)) {
             throw new Error(`Error: Start tag not 8BIM but ${String.fromCharCode(...tag)} at position ${abrSdv.getPos()}`);
         }
-
         r = abrSdv.readRawData(tagname, 4);
-
         if (r != 4) {
             throw new Error('Error: Cannot read 8BIM tag name');
         }
-
         const s1: string = String.fromCharCode(...tagname);
-
         if (s1 == name) {
             return;
         }
-
         // long
         sectionSize = abrSdv.getUint32();
         abrSdv.setPos(abrSdv.getPos() + sectionSize);
@@ -215,7 +195,6 @@ async function loadAbrBrushV6(abrSdv: SequentialDataView, abrHeader: AbrHeader, 
 
 async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader, filename: string, imageId: number, id: number): Promise<number> {
     let name = '';
-
     let layerId = -1;
 
     // short
@@ -223,7 +202,6 @@ async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader,
     // long
     const brushSize = abrSdv.getUint32();
     const nextBrush = abrSdv.getPos() + brushSize;
-
     if (brushType == 1) {
         // computed brush
         abrSdv.setPos(abrSdv.getPos() + 4); //miscellaneous Long integer. Ignored
@@ -241,20 +219,15 @@ async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader,
         // sampled brush
         // discard 4 misc bytes
         abrSdv.setPos(abrSdv.getPos() + 4);
-
         const spacing = abrSdv.getUint16();
-
         if (abrHeader.version == 2)
             name = readAbrUcs2Text(abrSdv);
         if (name === null) {
             name = abrV1BrushName(filename, id);
         }
-
         const antiAliasing = !!abrSdv.getUint8();
-
         // discard 4 short for short bounds
         abrSdv.setPos(abrSdv.getPos() + 8);
-
         // long bounds
         const top = abrSdv.getUint32();
         const left = abrSdv.getUint32();
@@ -264,11 +237,9 @@ async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader,
         const depth = abrSdv.getUint16();
         // char
         const compression = abrSdv.getUint8();
-
         const width = right - left;
         const height = bottom - top;
         const size = width * (depth >> 3) * height;
-
         // FIXME: support wide brushes
         if (height > 16384) {
             console.warn('WARNING: wide brushes not supported');
@@ -282,7 +253,6 @@ async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader,
             } else {
                 rleDecode(abrSdv, buffer, height);
             }
-
             let abrBrush: AbrSampledBrush;
             const brushTipImage = convertCanvas(buffer, width, height);
             if (Object.keys(abrBrushes.map).includes(name)) {
@@ -294,7 +264,6 @@ async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader,
                 // FIXME: it should use a slice containing the brush sample to be useful
                 abrBrush = { ...abrBrush, md5Sum: await crypto.subtle.digest('SHA-256', buf.data()) };
             }
-
             abrBrush = { ...abrBrush, brushTipImage };
             abrBrush = { ...abrBrush, valid: true };
             abrBrush = { ...abrBrush, name, spacing, antiAliasing };
@@ -306,7 +275,6 @@ async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader,
         console.warn('Unknown ABR brush type, skipping.');
         abrSdv.setPos(nextBrush);
     }
-
     return layerId;
 }
 
@@ -318,13 +286,95 @@ function abrV1BrushName(filename: string, id: number): string {
 }
 
 function rleDecode(abrSdv: SequentialDataView, data: number[], height: number) {
-    throw new Error('Function not implemented.');
+    // read compressed size foreach scan line
+    const scanLines = Array.from({ length: height }, () => 0);
+    for (let i = 0; i < height; i++) {
+        // short
+        scanLines[i] = abrSdv.getUint16();
+    }
+    // unpack each scan line data
+    for (let i = 0; i < height; i++) {
+        for (let j = 0; j < scanLines[i];) {
+            // char
+            if (abrSdv.atEnd()) {
+                break;
+            }
+            let n = abrSdv.getUint8();
+            j++;
+            if (n >= 128) // force sign
+                n -= 256;
+            if (n < 0) { // copy the following char -n + 1 times
+                if (n == -128) // it's a nop
+                    continue;
+                n = -n + 1;
+                // char
+                const ch = abrSdv.getUint8();
+                if (abrSdv.atEnd()) {
+                    break;
+                }
+                j++;
+                for (let k = 0; k < n; k++) {
+                    data.push(ch);
+                }
+            }
+            else {
+                // read the following n + 1 chars (no compr)
+                for (let c = 0; c < n + 1; c++, j++) {
+                    // char
+                    const ct = abrSdv.getUint8();
+                    data.push(ct);
+                    //data.pos++;
+                    if (abrSdv.atEnd()) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
 }
 
 function convertCanvas(buffer: number[], width: number, height: number): HTMLCanvasElement {
-    throw new Error('Function not implemented.');
+    const img = document.createElement('canvas');
+    img.width = width;
+    img.height = height;
+    const ctx = img.getContext('2d');
+    if (!ctx) throw new Error('Failed to construct context.');
+    const pixel = ctx.getImageData(0, 0, width, height);
+    let pos = 0;
+    let value = 0;
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++, pos++) {
+            value = 255 - buffer[pos];
+            for (let i = 0; i < 3; i++) {
+                pixel.data[y * width * 4 + x * 4 + i] = value;
+            }
+            pixel.data[y * width * 4 + x * 4 + 3] = 255;
+        }
+    }
+    ctx.putImageData(pixel, 0, 0);
+    return img;
 }
 
 function readAbrUcs2Text(abrSdv: SequentialDataView): string {
-    throw new Error('Function not implemented.');
+    let i: number;
+    /* two-bytes characters encoded (UCS-2)
+    *  format:
+    *   long : size - number of characters in string
+    *   data : zero terminated UCS-2 string
+    */
+    // long
+    const nameSize = abrSdv.getUint32();
+    if (nameSize == 0) {
+        return '';
+    }
+    const bufSize = nameSize;
+    const nameUcs2: number[] = [];
+    for (i = 0; i < bufSize; i++) {
+        //* char*/
+        // I will use uint16 as that is input to fromUtf16
+        nameUcs2[i] = abrSdv.getUint16();
+    }
+    const nameUtf8 = String.fromCharCode(...nameUcs2);
+    return nameUtf8;
 }

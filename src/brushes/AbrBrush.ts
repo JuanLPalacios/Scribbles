@@ -53,7 +53,9 @@ export async function loadAbrFromArrayBuffer(buffer: ArrayBuffer, filename:strin
                 console.warn(`Warning: problem loading brush #${i} in ${filename}`);
             }
         }
-        return true;
+        const brushes = abrBrushes.list();
+        abrBrushes.clear();
+        return brushes;
     } catch (error) {
         throw new Error(`Error: cannot parse ABR file: ${filename}`, { cause: error });
     }
@@ -190,7 +192,68 @@ export async function loadAbrBrush(abrSdv: SequentialDataView, abrHeader: AbrHea
 }
 
 async function loadAbrBrushV6(abrSdv: SequentialDataView, abrHeader: AbrHeader, filename: string, imageId: number, id: number): Promise<number> {
-    throw new Error('Function not implemented.');
+    let brushSize = 0;
+    let brushEnd = 0;
+    let layerId = -1;
+
+    brushSize = abrSdv.getUint32();
+    brushEnd = brushSize;
+    // complement to 4
+    while (brushEnd % 4 != 0) {
+        brushEnd++;
+    }
+    const nextBrush = abrSdv.getPos() + brushEnd;
+    // discard key
+    abrSdv.setPos(abrSdv.getPos() + 37);
+    if (abrHeader.subversion == 1)
+        // discard short coordinates and unknown short
+        abrSdv.setPos(abrSdv.getPos() + 10);
+    else {
+        // discard unknown bytes
+        abrSdv.setPos(abrSdv.getPos() + 264);
+    }
+    // long bounds
+    const top = abrSdv.getUint32();
+    const left = abrSdv.getUint32();
+    const bottom = abrSdv.getUint32();
+    const right = abrSdv.getUint32();
+    // short
+    const depth = abrSdv.getUint16();
+    // char
+    const compression = abrSdv.getUint8();
+    const width = right - left;
+    const height = bottom - top;
+    const size = width * (depth >> 3) * height;
+    // remove .abr and add some id, so something like test.abr . test_12345
+    const name: string = abrV1BrushName(filename, id);
+    const buffer:number[] = [];
+    // data decoding
+    if (!compression) {
+        // not compressed - read raw bytes as brush data
+        abrSdv.readRawData(buffer, size);
+    } else {
+        rleDecode(abrSdv, buffer, height);
+    }
+    if (width < INT16_MAX && height < INT16_MAX) {
+        // [filename]_[test number of the brush], e.g test_1, test_2
+        let abrBrush: AbrSampledBrush;
+        const brushTipImage = convertCanvas(buffer, width, height);
+        if (Object.keys(abrBrushes.map).includes(name)) {
+            abrBrush = getDefaultSampledBrush(name);
+        }
+        else {
+            abrBrush = getDefaultSampledBrush(name);
+            const buf = new SequentialDataView(new ArrayBuffer(0));
+            abrBrush = { ...abrBrush, md5Sum: await crypto.subtle.digest('SHA-256', buf.data()) };
+        }
+        abrBrush = { ...abrBrush, brushTipImage };
+        abrBrush = { ...abrBrush, valid: true };
+        abrBrush = { ...abrBrush, name };
+        abrBrushes.set(name, abrBrush);
+    }
+    abrSdv.setPos(nextBrush);
+    layerId = id;
+    return layerId;
 }
 
 async function loadAbrBrushV12(abrSdv: SequentialDataView, abrHeader: AbrHeader, filename: string, imageId: number, id: number): Promise<number> {

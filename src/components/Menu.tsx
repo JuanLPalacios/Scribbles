@@ -3,6 +3,7 @@ import fileIcon from '../icons/file-svgrepo-com.svg';
 import { NewFile } from './menu/NewFile';
 import { ExportPNG } from './menu/ExportPNG';
 import { Properties } from './menu/Properties';
+import { ImportBrush } from './menu/ImportBrush';
 import { Undo } from './menu/Undo';
 import { Redo } from './menu/Redo';
 
@@ -16,6 +17,7 @@ function Menu() {
                 <ul>
                     <NewFile />
                     <ExportPNG />
+                    <ImportBrush />
                     <Properties />
                 </ul>
             </li>

@@ -45,3 +45,30 @@
   align-items: center;
   gap: 0.5rem;
 }
+
+.import-brush input {
+  min-width: 1rem;
+}
+
+.brush-list {
+  height: calc(100vh - 15rem);
+  overflow-y: auto;
+}
+
+.brush-list .selected {
+  background: var(--overlay-color);
+}
+
+.brush-list ul.brushes {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  list-style: none;
+  padding: 2px 0;
+}
+
+ul.brushes li > div {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}

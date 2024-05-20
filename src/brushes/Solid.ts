@@ -2,7 +2,12 @@ import Brush from '../abstracts/Brush';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
+type SerializedSolidBrush ={
+    scribbleBrushType: 2,
+}
+
 export default class Solid extends Brush {
+    name = 'Solid';
     startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
         const { ctx } = drawable;
         if (!ctx) return;
@@ -27,5 +32,13 @@ export default class Solid extends Brush {
     endStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
         const { ctx, } = drawable;
         ctx?.restore();
+    }
+
+    toObj(): SerializedSolidBrush {
+        return { scribbleBrushType: 2 };
+    }
+
+    static formObj(data:SerializedSolidBrush):Solid {
+        return new Solid();
     }
 }

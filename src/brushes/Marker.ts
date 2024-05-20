@@ -3,7 +3,12 @@ import { createDrawable } from '../generators/createDrawable';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
+type SerializedMarkerBrush ={
+    scribbleBrushType: 1,
+}
+
 export default class Marker extends Brush {
+    name = 'Marker';
     prevToLastPoint: Point = [0, 0];
     lastPoint: Point = [0, 0];
     buffer:DrawableState = createDrawable({ size: [1, 1] });
@@ -76,5 +81,13 @@ export default class Marker extends Brush {
         canvas2.width = 0;
         canvas2.height = 0;
         canvas.style.filter = 'none';
+    }
+
+    toObj(): SerializedMarkerBrush {
+        return { scribbleBrushType: 1 };
+    }
+
+    static formObj(data:SerializedMarkerBrush):Marker {
+        return new Marker();
     }
 }

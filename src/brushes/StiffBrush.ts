@@ -4,13 +4,26 @@ import { scalePoint } from '../lib/DOMMath';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
+type SerializedSolidBrush ={
+    scribbleBrushType: 3,
+    name:string
+    fibers: {
+        position: DOMPoint;
+        width: number;
+        alpha: number;
+    }[]
+}
+
 export default class StiffBrush extends Brush {
     buffer:DrawableState = createDrawable({ size: [1, 1] });
     fibers: { position: DOMPoint, width: number, alpha:number }[];
     scaledFibers: { position: DOMPoint, width: number, alpha:number }[];
 
-    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[]){
+    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[])
+    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[], name:string)
+    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[], name?:string){
         super();
+        this.name = name || '';
         this.fibers = fibers;
         this.scaledFibers = fibers;
     }
@@ -67,5 +80,15 @@ export default class StiffBrush extends Brush {
         ctx?.restore();
         canvas.width = 0;
         canvas.height = 0;
+    }
+
+    toObj(): SerializedSolidBrush {
+        const { fibers, name } =this;
+        return { scribbleBrushType: 3, fibers, name };
+    }
+
+    static formObj(data:SerializedSolidBrush):StiffBrush {
+        const { name, fibers } = data;
+        return new StiffBrush(fibers, name);
     }
 }

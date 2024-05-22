@@ -1,4 +1,3 @@
-import { Serializable } from 'child_process';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
@@ -17,14 +16,15 @@ export default abstract class Brush {
     abstract startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number):void
     abstract drawStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number):void
     abstract endStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number):void
+    abstract loadObj(obj:object):void
     toJSON():string{
         return JSON.stringify(this.toObj());
     }
-    abstract toObj():Serializable
+    abstract toObj():object
     static formJson(json:string):Brush {
         return this.formObj(JSON.parse(json));
     }
-    static formObj(obj:Serializable):Brush {
+    static formObj(obj:object):Brush {
         throw new Error('not implemented');
     }
 }

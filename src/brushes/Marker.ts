@@ -5,6 +5,7 @@ import { Point } from '../types/Point';
 
 type SerializedMarkerBrush ={
     scribbleBrushType: 1,
+    name:string;
 }
 
 export default class Marker extends Brush {
@@ -84,7 +85,12 @@ export default class Marker extends Brush {
     }
 
     toObj(): SerializedMarkerBrush {
-        return { scribbleBrushType: 1 };
+        const { name } = this;
+        return { scribbleBrushType: 1, name };
+    }
+
+    loadObj({ name }:SerializedMarkerBrush) {
+        this.name = name;
     }
 
     static formObj(data:SerializedMarkerBrush):Marker {

@@ -4,6 +4,7 @@ import { Point } from '../types/Point';
 
 type SerializedSolidBrush ={
     scribbleBrushType: 2,
+    name:string
 }
 
 export default class Solid extends Brush {
@@ -35,7 +36,12 @@ export default class Solid extends Brush {
     }
 
     toObj(): SerializedSolidBrush {
-        return { scribbleBrushType: 2 };
+        const { name } = this;
+        return { scribbleBrushType: 2, name };
+    }
+
+    loadObj({ name }:SerializedSolidBrush) {
+        this.name = name;
     }
 
     static formObj(data:SerializedSolidBrush):Solid {

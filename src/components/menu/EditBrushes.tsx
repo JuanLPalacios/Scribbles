@@ -2,36 +2,27 @@ import { useCallback, useContext, useState, useEffect } from 'react';
 import '../../css/Menu.css';
 import demoStroke from '../../demo/strokePreview.json';
 import importIcon from '../../icons/brush-f-svgrepo-com.svg';
-import { createLayer } from '../../generators/createLayer';
 import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 import { DrawableState } from '../../types/DrawableState';
 import { MenuContext } from '../../contexts/MenuOptions';
 import { createDrawable } from '../../generators/createDrawable';
-import Brush from '../../abstracts/Brush';
 import { Drawable } from '../Drawable';
 import { uid } from '../../lib/uid';
-import { abrBrushes } from 'abr-js';
-
-type ScribbleBrush = {
-    scribbleBrushType: 1
-}
-type AbrBrushWrapper = {
-    scribbleBrushType: 2
-} & AbrBrush;
-type Brush = ScribbleBrush | AbrBrushWrapper
+//import { abrBrushes } from 'abr-js';
+import Brush from '../../abstracts/Brush';
 
 let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
 let lastBrushes: Brush[];
 
-export const ImportBrush = () => {
+export const EditBrushes = () => {
     const menuContext = useContext(MenuContext);
     const [options] = menuContext;
     const {
         brushes
     } = options;
     const [id] = useState(uid());
-    const [currentBrush, setBrush] = useState<Brush>({
+    const [currentBrush, setBrush] = useState<object>({
         scribbleBrushType: 2,
         brushType: 1,
         angle: 0,
@@ -43,7 +34,7 @@ export const ImportBrush = () => {
     });
     const [state2, onChange] = useState({ selectedBrush: 0 });
     const { selectedBrush } = state2;
-    const [editor, editorDispatch] = useContext(EditorContext);
+    const [editor] = useContext(EditorContext);
     const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, isValid, errors } = state;
     const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
@@ -64,36 +55,20 @@ export const ImportBrush = () => {
     const openModal = useCallback(() => {
         setState({ ...state, isOpen: true });
     }, [editor, state]);
-    const newfile = useCallback(() => {
-        editorDispatch({
-            type: 'editor/load',
-            payload: {
-                name,
-                drawing: {
-                    width,
-                    height,
-                    layers: [
-                        createLayer(
-                            'Image',
-                            {
-                                position: [0, 0],
-                                size: [width, height]
-                            }
-                        ),
-                    ],
-                    selectedLayer: 0
-                }
-            }
-        });
-        close();
-    }, [close, editorDispatch]);
+    useEffect(() => {
+        setBrush(brushes[selectedBrush].toObj());
+    }, [selectedBrush]);
     useEffect(() => {
         const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
-        if(currentBrush.scribbleBrushType==2)
-            if(currentBrush.brushType==1)
-                if(currentBrush.name.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
-                    errors.name.push('Shuld not contain forbidden characters');
-        setState({ ...state, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
+        if(('name' in currentBrush)&&(typeof currentBrush.name == 'string'))
+            if(currentBrush.name.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
+                errors.name.push('Shuld not contain forbidden characters');
+        const isValid = Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0;
+        if(isValid){
+            brushes[selectedBrush].loadObj(currentBrush);
+            if(previews)brushes[selectedBrush].renderPreview(previews.previews[selectedBrush], demoStroke as any, '#ffffff', .5 || 1, 15);
+        }
+        setState({ ...state, errors, isValid });
     }, [currentBrush]);
     useEffect(()=>{
         if(lastBrushes !== brushes){
@@ -122,27 +97,17 @@ export const ImportBrush = () => {
                             {previews?.previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrush ? 'selected' : ''} onMouseDown={()=>onChange({ ...state2, selectedBrush: i })} /></li>)}
                         </ul>
                     </div>
-                    {currentBrush.scribbleBrushType==2 &&
-                        currentBrush.brushType==1 &&
-                        <div style={{ width: '7rem' }}>
+                    <div style={{ width: '7rem' }}>
+                        {('name' in currentBrush)&&(typeof currentBrush.name == 'string') &&
                             <label>
                                 Name
                                 <input type="text" name='name' autoComplete="off" value={currentBrush.name} onChange={update} />
-                            </label>
-                            <label>
-                                Diameter
-                                <input type="number" min={1} name='diameter' value={currentBrush.diameter} onChange={update} />
-                            </label>
-                            <label>
-                                Spacing
-                                <input type="number" min={0} name='spacing' value={currentBrush.spacing} onChange={update} />
-                            </label>
+                            </label>}
 
-                        </div>
-                    }
+                    </div>
                 </div>
                 <div className='actions'>
-                    <button onClick={newfile} disabled={!isValid}>create</button>
+                    <button disabled={!isValid}>save</button>
                     <button onClick={close}>cancel</button>
                 </div>
             </div>

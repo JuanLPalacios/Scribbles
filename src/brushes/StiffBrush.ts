@@ -87,6 +87,11 @@ export default class StiffBrush extends Brush {
         return { scribbleBrushType: 3, fibers, name };
     }
 
+    loadObj({ name, fibers }:SerializedSolidBrush) {
+        this.name = name;
+        this.fibers = fibers;
+    }
+
     static formObj(data:SerializedSolidBrush):StiffBrush {
         const { name, fibers } = data;
         return new StiffBrush(fibers, name);

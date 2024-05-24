@@ -13,13 +13,14 @@ type SerializedSolidBrush ={
 }
 
 export default class Solid extends Brush {
-    lastPoint:Point = [0, 0]
-    segments:[Point, Point][] = []
+    lastPoint:Point = [0, 0];
+    segments:[Point, Point][] = [];
     name = 'Solid';
-    angle = 1;
+    angle = 0;
+    strokeAngle = [0, -1];
     diameter = 1;
     hardness = 1;
-    roundness = 1;
+    roundness = .5;
     spacing = 1;
     startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
         const { ctx } = drawable;
@@ -31,17 +32,19 @@ export default class Solid extends Brush {
         ctx.strokeStyle = color;
         ctx.lineWidth = width;
         this.lastPoint = point;
-        ctx.beginPath();
-        ctx.moveTo(...point);
     }
 
     drawStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
         const { ctx } = drawable;
+        const v2 = [point[0]-this.lastPoint[0],  point[1]-this.lastPoint[1]];
+        const v1 = this.strokeAngle;
         if (!ctx) return;
         ctx.beginPath();
         ctx.moveTo(...this.lastPoint);
+        ctx.lineWidth = width*(1-(1-this.roundness)*(v1[0]*v2[1] - v1[1]*v2[0])*(Math.sqrt((v2[0]**2)+(v2[1]**2))));
         ctx.lineTo(...point);
         ctx.stroke();
+        this.lastPoint = point;
         //ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
@@ -65,6 +68,7 @@ export default class Solid extends Brush {
     loadObj({ name, angle, diameter, hardness, roundness, spacing }:SerializedSolidBrush) {
         this.name = name;
         this.angle = angle;
+        this.strokeAngle = [Math.sin(angle*Math.PI/180), -Math.cos(angle*Math.PI/180)];
         this.diameter = diameter;
         this.hardness = hardness;
         this.roundness = roundness;

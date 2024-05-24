@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useContext, useState, useEffect } from 'react';
 import '../../css/Menu.css';
 import demoStroke from '../../demo/strokePreview.json';
@@ -22,7 +23,7 @@ export const EditBrushes = () => {
         brushes
     } = options;
     const [id] = useState(uid());
-    const [currentBrush, setBrush] = useState<object>({
+    const [currentBrush, setBrush] = useState<any>({
         scribbleBrushType: 2,
         brushType: 1,
         angle: 0,
@@ -62,7 +63,7 @@ export const EditBrushes = () => {
         const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
         if(('name' in currentBrush)&&(typeof currentBrush.name == 'string'))
             if(currentBrush.name.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
-                errors.name.push('Shuld not contain forbidden characters');
+                errors.name.push('Should not contain forbidden characters');
         const isValid = Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0;
         if(isValid){
             brushes[selectedBrush].loadObj(currentBrush);

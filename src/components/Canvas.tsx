@@ -5,6 +5,7 @@ import { MenuContext } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
+import { QuickStart } from './QuickStart';
 
 export const CanvasContext = createContext({});
 
@@ -243,10 +244,13 @@ function Canvas() {
                 onPointerLeave={pointermoveHandler}
                 onWheel={wheelHandler}
             >
-                {viewPort}
+                {editor.drawing?
+                    viewPort
+                    :<QuickStart/>}
             </div>
         </CanvasContext.Provider>
     );
 }
 
 export default Canvas;
+

@@ -20,7 +20,7 @@ export default abstract class Brush {
     toJSON():string{
         return JSON.stringify(this.toObj());
     }
-    abstract toObj():object
+    abstract toObj():any
     static formJson(json:string):Brush {
         return this.formObj(JSON.parse(json));
     }

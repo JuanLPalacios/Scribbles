@@ -1,0 +1,8 @@
+.QuickStart,
+.QuickStart > * {
+  background: var(--background2-color);
+}
+
+.QuickStart button {
+  color: var(--main-color);
+}

@@ -33,12 +33,13 @@ export default class Solid extends Brush {
         bufferCtx.lineCap = 'round';
         bufferCtx.lineJoin = 'round';
         bufferCtx.strokeStyle = color;
-        bufferCtx.lineWidth = width;
+        bufferCtx.lineWidth = width*this.roundness;
         if (!ctx) return;
         ctx.globalCompositeOperation = 'source-over';
         bufferCtx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = alpha;
         this.lastPoint = point;
+        bufferCtx.filter = `blur(${~~(width*(1-this.hardness)/2)}px)`;
         bufferCtx.beginPath();
         bufferCtx.moveTo(...point);
         bufferCtx.lineTo(...point);
@@ -56,6 +57,7 @@ export default class Solid extends Brush {
         bufferCtx.beginPath();
         bufferCtx.moveTo(...this.lastPoint);
         bufferCtx.lineWidth = width*(1-(1-this.roundness)*(Math.abs(v1[0]*v2[1] - v1[1]*v2[0]))/(Math.sqrt((v2[0]**2)+(v2[1]**2))));
+        bufferCtx.filter = `blur(${~~(width*(1-this.hardness)/2)}px)`;
         bufferCtx.lineTo(...point);
         bufferCtx.stroke();
         this.lastPoint = point;

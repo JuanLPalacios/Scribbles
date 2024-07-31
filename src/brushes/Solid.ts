@@ -54,6 +54,7 @@ export default class Solid extends Brush {
         const v2 = [point[0]-this.lastPoint[0],  point[1]-this.lastPoint[1]];
         const v1 = this.strokeAngle;
         if (!ctx || !bufferCtx) return;
+        if (Math.abs(Math.sqrt((point[0]-this.lastPoint[0])**2+(point[1]-this.lastPoint[1]**2)))<width*this.spacing) return;
         bufferCtx.beginPath();
         bufferCtx.moveTo(...this.lastPoint);
         bufferCtx.lineWidth = width*(1-(1-this.roundness)*(Math.abs(v1[0]*v2[1] - v1[1]*v2[0]))/(Math.sqrt((v2[0]**2)+(v2[1]**2))));

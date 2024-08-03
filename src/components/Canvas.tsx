@@ -96,12 +96,12 @@ function Canvas() {
         setTouches({ ...touches, [ev.pointerId]: ev });
         setOldTouches({ ...oldTouches, [ev.pointerId]: ev });
         setOldTransform(new DOMMatrix(transform.toString()));
-        console.log('pointerDown', ev);
+        //console.log('pointerDown', ev);
     }
 
     const pointermoveHandler = function(ev:React.PointerEvent<HTMLDivElement>) {
         if(ev.buttons!==1)return;
-        if(ev.buttons===1)console.log('pointerMove', ev);
+        //if(ev.buttons===1)console.log('pointerMove', ev);
         setTouches({ ...touches, [ev.pointerId]: ev });
         touches[ev.pointerId]= ev;
         const keys = Object.keys(touches);
@@ -139,7 +139,7 @@ function Canvas() {
     };
 
     const pointerupHandler = function(ev:React.PointerEvent<HTMLDivElement>) {
-        console.log(ev.type, ev);
+        //console.log(ev.type, ev);
         if(!touches[ev.pointerId])return;
         delete touches[ev.pointerId];
         delete oldTouches[ev.pointerId];
@@ -154,10 +154,10 @@ function Canvas() {
     };
 
     const wheelHandler = function(ev:React.WheelEvent<HTMLDivElement>) {
-        console.log(ev.type, ev.deltaY);
+        console.log(ev.type, ev.ctrlKey, ev.deltaY);
         const x = ev.clientX - left;
         const y = ev.clientY - top;
-        if(keys.CTRL && (0.01 <= transform.a && transform.a < 10)){
+        if((ev.ctrlKey||keys.CTRL) && (0.01 <= transform.a && transform.a < 10)){
             setTransform(new DOMMatrix()
                 .translate(x, y)
                 .scale(1 -.01*ev.deltaY)

@@ -157,10 +157,11 @@ function Canvas() {
         console.log(ev.type, ev.ctrlKey, ev.deltaY);
         const x = ev.clientX - left;
         const y = ev.clientY - top;
-        if((ev.ctrlKey||keys.CTRL) && (0.01 <= transform.a && transform.a < 10)){
+        const pinchScale = 1 -.01*ev.deltaY;
+        if((ev.ctrlKey||keys.CTRL) && (0.01 <= transform.a*pinchScale && transform.a*pinchScale < 10)){
             setTransform(new DOMMatrix()
                 .translate(x, y)
-                .scale(1 -.01*ev.deltaY)
+                .scale(pinchScale)
                 .translate(-x, -y)
                 .multiply(transform)
             );
@@ -227,6 +228,7 @@ function Canvas() {
                             transform: `translate(${-12}px, ${-12}px) ${rotation}`
                         }}
                         alt=""
+                        draggable="false"
                         onPointerDown={e => onMouseDown(getPointer(e))}
                     />)}
                 </div>

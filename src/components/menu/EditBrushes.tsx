@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback, useContext, useState, useEffect } from 'react';
 import '../../css/Menu.css';
+import '../../css/menu/EditBrushes.css';
 import demoStroke from '../../demo/strokePreview.json';
 import importIcon from '../../icons/brush-f-svgrepo-com.svg';
 import { EditorContext } from '../../contexts/DrawingState';
@@ -92,19 +93,60 @@ export const EditBrushes = () => {
                 <div className='errors'>
                     {errors.name.map((error, i) => <div key={'error.name-'+i} className='error'>Name: {error}</div>)}
                 </div>
-                <div style={{ width: '19rem', display: 'flex' }}>
+                <div style={{ display: 'flex' }}>
                     <div className='brush-list' style={{ width: '10rem', flex: '1 1 auto' }}>
                         <ul className='brushes'>
                             {previews?.previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrush ? 'selected' : ''} onMouseDown={()=>onChange({ ...state2, selectedBrush: i })} /></li>)}
                         </ul>
                     </div>
-                    <div style={{ width: '7rem' }}>
+                    <div style={{ width: '8rem' }} className='brush-props'>
                         {('name' in currentBrush)&&(typeof currentBrush.name == 'string') &&
                             <label>
+                                <div>
                                 Name
+                                </div>
                                 <input type="text" name='name' autoComplete="off" value={currentBrush.name} onChange={update} />
                             </label>}
-
+                        {('roundness' in currentBrush)&&(typeof currentBrush.roundness == 'number') &&
+                            <label>
+                                <div>
+                                Roundness
+                                </div>
+                                <input type="number" name='roundness' value={currentBrush.roundness} min={0} max={1} step={0.01} onChange={update} style={{ width: '5rem' }} />
+                            </label>
+                        }
+                        {('hardness' in currentBrush)&&(typeof currentBrush.hardness == 'number') &&
+                            <label>
+                                <div>
+                                Hardness
+                                </div>
+                                <input type="number" name='hardness' value={currentBrush.hardness} min={0} max={1} step={0.01} onChange={update} style={{ width: '5rem' }} />
+                            </label>
+                        }
+                        {('angle' in currentBrush)&&(typeof currentBrush.angle == 'number') &&
+                            <label>
+                                <div>
+                                Angle
+                                </div>
+                                <input type="number" name='angle' value={currentBrush.angle} min={0} max={359} onChange={update} style={{ width: '5rem' }} />
+                            </label>
+                        }
+                        {('diameter' in currentBrush)&&(typeof currentBrush.diameter == 'number') &&
+                            <label>
+                                <div>
+                                Diameter
+                                </div>
+                                <input type="number" name='diameter' value={currentBrush.diameter} min={0} max={5} step={0.05} onChange={update} style={{ width: '5rem' }} />
+                            </label>
+                        }
+                        {('spacing' in currentBrush)&&(typeof currentBrush.spacing == 'number') &&
+                            <label>
+                                <div>
+                                Spacing
+                                </div>
+                                <input type="number" name='spacing' value={currentBrush.spacing} min={0} max={30} step={0.1} onChange={update} style={{ width: '5rem' }} />
+                            </label>
+                        }
                     </div>
                 </div>
                 <div className='actions'>

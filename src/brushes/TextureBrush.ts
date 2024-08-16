@@ -5,17 +5,15 @@ import { createBezier, createPerpendicularVector } from '../lib/DOMMath';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
-type SerializedSolidBrush ={
-    scribbleBrushType: BrushList.Solid,
+type SerializedTextureBrush ={
+    scribbleBrushType: BrushList.Texture,
     name:string
-    angle: number,
-    diameter: number,
-    hardness: number,
-    roundness: number,
-    spacing: number
+    spacing: number;
+    antiAliasing: boolean;
+    brushTipImage: HTMLCanvasElement;
 }
 
-export default class Solid extends Brush {
+export default class TextureBrush extends Brush {
     lastPoint:Point = [0, 0];
     segments:[Point, Point][] = [];
     lastSegments:Point[] = [];
@@ -23,13 +21,10 @@ export default class Solid extends Brush {
     buffer:DrawableState = createDrawable({ size: [1, 1] });
     previewBuffer:DrawableState = createDrawable({ size: [1, 1] });
     currentLength = 0;
-    name = 'Solid';
-    angle = 0;
-    strokeAngle = [0, -1];
-    diameter = 1;
-    hardness = 1;
-    roundness = 1;
+    name = 'Texture';
     spacing = 15;
+    antiAliasing = false;
+    brushTipImage:DrawableState = createDrawable({ size: [1, 1] });
     startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: buffer } = this.buffer;
@@ -41,27 +36,18 @@ export default class Solid extends Brush {
         preview.width = canvas.width;
         preview.height = canvas.height;
         if (!ctx || !bufferCtx || !previewCtx) return;
-        bufferCtx.lineCap = 'round';
-        bufferCtx.lineJoin = 'round';
-        bufferCtx.strokeStyle = color;
         bufferCtx.fillStyle = color;
-        bufferCtx.lineWidth = width*this.roundness;
-        previewCtx.lineCap = 'round';
-        previewCtx.lineJoin = 'round';
         previewCtx.strokeStyle = color;
         previewCtx.fillStyle = color;
-        previewCtx.lineWidth = width*this.roundness;
         ctx.globalCompositeOperation = 'source-over';
         bufferCtx.globalCompositeOperation = 'source-over';
         previewCtx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = alpha;
         this.lastPoint = point;
         this.lastSegments = [point];
-        bufferCtx.filter = `blur(${~~(width*(1-this.hardness)/2)}px)`;
         bufferCtx.beginPath();
         bufferCtx.moveTo(...point);
         bufferCtx.lineTo(...point);
-        previewCtx.filter = `blur(${~~(width*(1-this.hardness)/2)}px)`;
         previewCtx.beginPath();
         previewCtx.moveTo(...point);
         previewCtx.lineTo(...point);
@@ -75,8 +61,6 @@ export default class Solid extends Brush {
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: buffer } = this.buffer;
         const { ctx: previewCtx, canvas: preview } = this.previewBuffer;
-        const v2 = [point[0]-this.lastPoint[0],  point[1]-this.lastPoint[1]];
-        const v1 = this.strokeAngle;
         this.finished = false;
         this.lastSegments.push(point);
         if (!ctx || !bufferCtx || !previewCtx) return;
@@ -84,13 +68,13 @@ export default class Solid extends Brush {
         if (this.currentLength<this.spacing) {
             previewCtx.clearRect(0, 0, canvas.width, canvas.height);
             previewCtx.drawImage(buffer, 0, 0);
-            this.drawSegment(previewCtx, width, v1, v2, point);
+            this.drawSegment(previewCtx, width, point);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(preview, 0, 0);
             return;
         }
         this.currentLength = 0;
-        this.drawSegment(bufferCtx, width, v1, v2, point);
+        this.drawSegment(bufferCtx, width, point);
         this.finished = true;
         this.lastPoint = point;
         this.lastSegments = [point];
@@ -98,18 +82,11 @@ export default class Solid extends Brush {
         ctx.drawImage(buffer, 0, 0);
     }
 
-    private drawSegment(bufferCtx: CanvasRenderingContext2D, width: number, v1: number[], v2: number[], point: Point) {
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(...this.lastPoint);
-        const previousWidth = bufferCtx.lineWidth;
-        bufferCtx.lineWidth = width * (1 - (1 - this.roundness) * (Math.abs(v1[0] * v2[1] - v1[1] * v2[0])) / (Math.sqrt((v2[0] ** 2) + (v2[1] ** 2))));
-        bufferCtx.filter = `blur(${~~(width * (1 - this.hardness) / 2)}px)`;
-        if (this.lastSegments.length > 2) {
-            this.drawBezier(previousWidth, bufferCtx);
-        }
-        else {
-            this.drawLine(bufferCtx, point);
-        }
+    private drawSegment(bufferCtx: CanvasRenderingContext2D, width: number, [x, y]: Point) {
+        const texture = this.brushTipImage.canvas;
+        const { width: sWidth, height: sHeight } = texture;
+        const dWidth=sWidth*width/10, dHeight = sHeight*width/10;
+        bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x-dWidth/2, y-dHeight/2, dWidth, dHeight);
     }
 
     private drawLine(bufferCtx: CanvasRenderingContext2D, point: Point) {
@@ -146,29 +123,27 @@ export default class Solid extends Brush {
         ctx?.restore();
     }
 
-    toObj(): SerializedSolidBrush {
-        const { name, angle, diameter, hardness, roundness, spacing } = this;
-        return { scribbleBrushType: BrushList.Solid,
+    toObj(): SerializedTextureBrush {
+        const { name, antiAliasing, brushTipImage, spacing } = this;
+        return { scribbleBrushType: BrushList.Texture,
             name,
-            angle,
-            diameter,
-            hardness,
-            roundness,
-            spacing
+            antiAliasing,
+            brushTipImage: brushTipImage.canvas,
+            spacing,
         };
     }
 
-    loadObj({ name, angle, diameter, hardness, roundness, spacing }:SerializedSolidBrush) {
+    loadObj({ name, antiAliasing, brushTipImage, spacing }:SerializedTextureBrush) {
         this.name = name;
-        this.angle = angle;
-        this.strokeAngle = [Math.sin(angle*Math.PI/180), -Math.cos(angle*Math.PI/180)];
-        this.diameter = diameter;
-        this.hardness = hardness;
-        this.roundness = roundness;
+        this.antiAliasing = antiAliasing;
+        const { canvas, ctx } = this.brushTipImage;
+        canvas.width = brushTipImage.width;
+        canvas.height = brushTipImage.height;
+        ctx?.drawImage(brushTipImage, 0, 0);
         this.spacing = spacing;
     }
 
-    static formObj(data:SerializedSolidBrush):Solid {
-        return new Solid();
+    static formObj(data:SerializedTextureBrush):TextureBrush {
+        return new TextureBrush();
     }
 }

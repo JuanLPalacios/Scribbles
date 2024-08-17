@@ -1,7 +1,6 @@
 import Brush from '../abstracts/Brush';
 import { createDrawable } from '../generators/createDrawable';
 import { BrushList } from '../lib/BrushList';
-import { createBezier, createPerpendicularVector } from '../lib/DOMMath';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
@@ -87,28 +86,6 @@ export default class TextureBrush extends Brush {
         const { width: sWidth, height: sHeight } = texture;
         const dWidth=sWidth*width/10, dHeight = sHeight*width/10;
         bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x-dWidth/2, y-dHeight/2, dWidth, dHeight);
-    }
-
-    private drawLine(bufferCtx: CanvasRenderingContext2D, point: Point) {
-        bufferCtx.lineTo(...point);
-        bufferCtx.stroke();
-    }
-
-    private drawBezier(previousWidth: number, bufferCtx: CanvasRenderingContext2D) {
-        const [[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]] = createBezier(this.lastSegments);
-        const [w0x, w0y] = createPerpendicularVector([p1x - p0x, p1y - p0y], previousWidth / 2);
-        const [w1x, w1y] = createPerpendicularVector([p2x - x, p2y - y], bufferCtx.lineWidth / 2);
-        bufferCtx.moveTo(p0x + w0x, p0y + w0y);
-        bufferCtx.bezierCurveTo(p1x + w0x, p1y + w0y, p2x - w1x, p2y - w1y, x - w1x, y - w1y);
-        bufferCtx.lineTo(x + w1x, y + w1y);
-        bufferCtx.bezierCurveTo(p2x + w1x, p2y + w1y, p1x - w0x, p1y - w0y, p0x - w0x, p0y - w0y);
-        bufferCtx.fill();
-        bufferCtx.beginPath();
-        bufferCtx.arc(p0x, p0y, previousWidth / 2, 0, 2 * Math.PI);
-        bufferCtx.fill();
-        bufferCtx.beginPath();
-        bufferCtx.arc(x, y, bufferCtx.lineWidth / 2, 0, 2 * Math.PI);
-        bufferCtx.fill();
     }
 
     endStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {

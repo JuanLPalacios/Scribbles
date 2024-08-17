@@ -13,6 +13,7 @@ import { Drawable } from '../Drawable';
 import { uid } from '../../lib/uid';
 //import { abrBrushes } from 'abr-js';
 import Brush from '../../abstracts/Brush';
+import { InputImage } from '../inputs/InputImage';
 
 let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
 let lastBrushes: Brush[];
@@ -26,13 +27,9 @@ export const EditBrushes = () => {
     const [id] = useState(uid());
     const [currentBrush, setBrush] = useState<any>({
         scribbleBrushType: 2,
-        brushType: 1,
-        angle: 0,
-        diameter: 1,
-        hardness: 1,
-        name: '',
-        roundness: 1,
-        spacing: 2
+        spacing: 15,
+        antiAliasing: false,
+        brushTipImage: {},
     });
     const [state2, onChange] = useState({ selectedBrush: 0 });
     const { selectedBrush } = state2;
@@ -44,6 +41,9 @@ export const EditBrushes = () => {
         switch (e.target.type){
         case('number'):
             value = +e.target.value;
+            break;
+        case('checkbox'):
+            value = e.target.checked;
             break;
         default:
             value = e.target.value;
@@ -107,6 +107,14 @@ export const EditBrushes = () => {
                                 </div>
                                 <input type="text" name='name' autoComplete="off" value={currentBrush.name} onChange={update} />
                             </label>}
+                        {('brushTipImage' in currentBrush)&&(typeof currentBrush.brushTipImage == 'number') &&
+                            <label>
+                                <div>
+                                Roundness
+                                </div>
+                                <InputImage name='brushTipImage' value={currentBrush.brushTipImage} onChange={update} style={{ width: '5rem' }} />
+                            </label>
+                        }
                         {('roundness' in currentBrush)&&(typeof currentBrush.roundness == 'number') &&
                             <label>
                                 <div>
@@ -147,6 +155,15 @@ export const EditBrushes = () => {
                                 <input type="number" name='spacing' value={currentBrush.spacing} min={0} max={30} step={0.1} onChange={update} style={{ width: '5rem' }} />
                             </label>
                         }
+                        {('antiAliasing' in currentBrush)&&(typeof currentBrush.antiAliasing == 'number') &&
+                            <label>
+                                <div>
+                                Anti aliasing
+                                </div>
+                                <input type="checkbox" name='antiAliasing' value={currentBrush.antiAliasing} onChange={update} style={{ width: '5rem' }} />
+                            </label>
+                        }
+                        antiAliasing
                     </div>
                 </div>
                 <div className='actions'>

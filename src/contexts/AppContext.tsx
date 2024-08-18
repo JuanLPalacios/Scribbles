@@ -16,6 +16,7 @@ import drawIcon from '../icons/brush-f-svgrepo-com.svg';
 import eraseIcon from '../icons/erase-svgrepo-com.svg';
 import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
 import transformIcon from '../icons/nametag-svgrepo-com.svg';
+import TextureBrush from '../brushes/TextureBrush';
 
 const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
 const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
@@ -54,6 +55,7 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
     const useMenuOptions = useState<MenuOptions>({
         brushes: [
             new Solid(),
+            new TextureBrush(),
             new Marker(),
             new StiffBrush(round as any),
             new StiffBrush(oldRound as any),

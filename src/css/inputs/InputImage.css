@@ -1,0 +1,7 @@
+.InputImage {
+  width: 20px;
+  height: 20px;
+  background: url(../Transparency10.png);
+  display: flex;
+  justify-content: center;
+}

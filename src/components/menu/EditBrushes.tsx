@@ -107,10 +107,10 @@ export const EditBrushes = () => {
                                 </div>
                                 <input type="text" name='name' autoComplete="off" value={currentBrush.name} onChange={update} />
                             </label>}
-                        {('brushTipImage' in currentBrush)&&(typeof currentBrush.brushTipImage == 'number') &&
+                        {('brushTipImage' in currentBrush)&&(typeof currentBrush.brushTipImage == 'object') &&
                             <label>
                                 <div>
-                                Roundness
+                                Tip
                                 </div>
                                 <InputImage name='brushTipImage' value={currentBrush.brushTipImage} onChange={update} style={{ width: '5rem' }} />
                             </label>

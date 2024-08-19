@@ -21,7 +21,7 @@ export default class TextureBrush extends Brush {
     previewBuffer:DrawableState = createDrawable({ size: [1, 1] });
     currentLength = 0;
     name = 'Texture';
-    spacing = 15;
+    spacing = 0;
     antiAliasing = false;
     tBrushTipImage:DrawableState = createDrawable({ size: [1, 1] });
     public get brushTipImage(){
@@ -29,11 +29,14 @@ export default class TextureBrush extends Brush {
     }
     public set brushTipImage(value:string){
         const { ctx, canvas } = this.tBrushTipImage;
+        if(!ctx) return;
         const img = new Image;
         img.onload = function(){
+            canvas.width = 0; //forces the canvas to clear
             canvas.width = img.width;
             canvas.height = img.height;
-            ctx?.drawImage(img, 0, 0);
+            ctx.globalCompositeOperation = 'source-over';
+            ctx.drawImage(img, 0, 0);
         };
         img.src = value;
     }
@@ -47,31 +50,23 @@ export default class TextureBrush extends Brush {
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: buffer } = this.buffer;
         const { ctx: previewCtx, canvas: preview } = this.previewBuffer;
+        const { ctx: brushTipCtx, canvas: brushTip } = this.tBrushTipImage;
         this.finished = true;
         this.currentLength = 0;
         buffer.width = canvas.width;
         buffer.height = canvas.height;
         preview.width = canvas.width;
         preview.height = canvas.height;
-        if (!ctx || !bufferCtx || !previewCtx) return;
-        bufferCtx.fillStyle = color;
-        previewCtx.strokeStyle = color;
-        previewCtx.fillStyle = color;
+        if (!ctx || !bufferCtx || !previewCtx || !brushTipCtx) return;
+        brushTipCtx.fillStyle = color;
         ctx.globalCompositeOperation = 'source-over';
         bufferCtx.globalCompositeOperation = 'source-over';
         previewCtx.globalCompositeOperation = 'source-over';
+        brushTipCtx.globalCompositeOperation = 'source-in';
+        brushTipCtx.fillRect(0, 0, brushTip.width, brushTip.height);
         ctx.globalAlpha = alpha;
         this.lastPoint = point;
         this.lastSegments = [point];
-        bufferCtx.beginPath();
-        bufferCtx.moveTo(...point);
-        bufferCtx.lineTo(...point);
-        previewCtx.beginPath();
-        previewCtx.moveTo(...point);
-        previewCtx.lineTo(...point);
-        // FIXME: draw tip shape to create the illusion of the more complex brush
-        bufferCtx.stroke();
-        previewCtx.stroke();
         ctx.drawImage(buffer, 0, 0);
     }
 

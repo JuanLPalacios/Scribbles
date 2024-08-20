@@ -1,7 +1,12 @@
 .InputImage {
   width: 20px;
   height: 20px;
-  background: url(../Transparency10.png);
+  padding: 5px;
+  background: var(--background2-color);
   display: flex;
   justify-content: center;
+}
+
+.InputImage > img {
+  filter: brightness(0) invert(1);
 }

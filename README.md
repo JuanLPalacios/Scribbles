@@ -60,6 +60,9 @@ Give a ⭐️ if you like this project!
 ## Acknowledgments
 
 - [TurboColors](https://instagram.com/turbocolors?igshid=ZDdkNTZiNTM=) for the logo original design
+- [Michaelampr](https://github.com/michaelampr/jam?ref=svgrepo.com) Vectors and icons in MIT License via [SVG Repo](https://www.svgrepo.com/)
+- [Css.gg](https://github.com/astrit/css.gg?ref=svgrepo.com) Vectors and icons in MIT License via [SVG Repo](https://www.svgrepo.com/)
+
 
 ## 📝 License
 

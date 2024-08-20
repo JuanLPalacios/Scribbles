@@ -21,6 +21,7 @@ export default class TextureBrush extends Brush {
     previewBuffer:DrawableState = createDrawable({ size: [1, 1] });
     currentLength = 0;
     name = 'Texture';
+    textureWith = 20;
     spacing = 0;
     antiAliasing = false;
     tBrushTipImage:DrawableState = createDrawable({ size: [1, 1] });
@@ -31,10 +32,11 @@ export default class TextureBrush extends Brush {
         const { ctx, canvas } = this.tBrushTipImage;
         if(!ctx) return;
         const img = new Image;
-        img.onload = function(){
+        img.onload = ()=>{
             canvas.width = 0; //forces the canvas to clear
             canvas.width = img.width;
             canvas.height = img.height;
+            this.textureWith = Math.max(img.width, img.height);
             ctx.globalCompositeOperation = 'source-over';
             ctx.drawImage(img, 0, 0);
         };
@@ -97,8 +99,9 @@ export default class TextureBrush extends Brush {
 
     private drawSegment(bufferCtx: CanvasRenderingContext2D, width: number, [x, y]: Point) {
         const texture = this.tBrushTipImage.canvas;
+        const { textureWith } = this;
         const { width: sWidth, height: sHeight } = texture;
-        const dWidth=sWidth*width/10, dHeight = sHeight*width/10;
+        const dWidth=sWidth*width/textureWith, dHeight = sHeight*width/textureWith;
         bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x-dWidth/2, y-dHeight/2, dWidth, dHeight);
     }
 

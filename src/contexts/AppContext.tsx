@@ -1,6 +1,6 @@
 import { JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useReducer, useState } from 'react';
 import Marker from '../brushes/Marker';
-import Solid from '../brushes/Solid';
+import SolidBrush from '../brushes/Solid';
 import StiffBrush from '../brushes/StiffBrush';
 import { reducer, EditorContext } from './DrawingState';
 import { MenuOptions, MenuContext } from './MenuOptions';
@@ -17,6 +17,7 @@ import eraseIcon from '../icons/erase-svgrepo-com.svg';
 import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
 import transformIcon from '../icons/nametag-svgrepo-com.svg';
 import TextureBrush from '../brushes/TextureBrush';
+import { SingletonElementReferencesContextProvider } from './SingletonElementReferences';
 
 const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
 const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
@@ -54,7 +55,7 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
     const useDrawing = useReducer(reducer, { prev: [], next: [], });
     const useMenuOptions = useState<MenuOptions>({
         brushes: [
-            new Solid(),
+            new SolidBrush(),
             new TextureBrush(),
             new Marker(),
             new StiffBrush(round as any),
@@ -78,7 +79,9 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
     });
     return<EditorContext.Provider value={useDrawing}>
         <MenuContext.Provider value={useMenuOptions}>
-            {props.children}
+            <SingletonElementReferencesContextProvider>
+                {props.children}
+            </SingletonElementReferencesContextProvider>
         </MenuContext.Provider>
     </EditorContext.Provider>;
 };

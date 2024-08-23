@@ -5,7 +5,7 @@ import { createBezier, createPerpendicularVector } from '../lib/DOMMath';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
-type SerializedSolidBrush ={
+export type SerializedSolidBrush = {
     scribbleBrushType: BrushList.Solid,
     name:string
     angle: number,
@@ -15,7 +15,7 @@ type SerializedSolidBrush ={
     spacing: number
 }
 
-export default class Solid extends Brush {
+export default class SolidBrush extends Brush {
     lastPoint:Point = [0, 0];
     segments:[Point, Point][] = [];
     lastSegments:Point[] = [];
@@ -168,7 +168,9 @@ export default class Solid extends Brush {
         this.spacing = spacing;
     }
 
-    static formObj(data:SerializedSolidBrush):Solid {
-        return new Solid();
+    static formObj(data:SerializedSolidBrush):SolidBrush {
+        const brush = new SolidBrush();
+        brush.loadObj(data);
+        return brush;
     }
 }

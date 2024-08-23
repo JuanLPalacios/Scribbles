@@ -4,7 +4,7 @@ import { BrushList } from '../lib/BrushList';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
-type SerializedTextureBrush ={
+export type SerializedTextureBrush ={
     scribbleBrushType: BrushList.Texture,
     name:string
     spacing: number;
@@ -135,6 +135,8 @@ export default class TextureBrush extends Brush {
     }
 
     static formObj(data:SerializedTextureBrush):TextureBrush {
-        return new TextureBrush();
+        const brush = new TextureBrush();
+        brush.loadObj(data);
+        return brush;
     }
 }

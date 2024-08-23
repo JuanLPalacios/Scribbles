@@ -3,7 +3,8 @@ import { useCallback, useContext, useState, useEffect } from 'react';
 import '../../css/Menu.css';
 import '../../css/menu/EditBrushes.css';
 import demoStroke from '../../demo/strokePreview.json';
-import importIcon from '../../icons/brush-f-svgrepo-com.svg';
+import brushIcon from '../../icons/brush-f-svgrepo-com.svg';
+import importIcon from '../../icons/internal-svgrepo-com.svg';
 import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 import { DrawableState } from '../../types/DrawableState';
@@ -14,13 +15,16 @@ import { uid } from '../../lib/uid';
 //import { abrBrushes } from 'abr-js';
 import Brush from '../../abstracts/Brush';
 import { InputImage } from '../inputs/InputImage';
+import { useOpenFile } from '../../hooks/useOpenFile';
+import { loadAbrBrushes } from 'abr-js';
+import { abrToScribblesSerializable, brushFormObj } from '../../lib/Serialization';
 
 let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
 let lastBrushes: Brush[];
 
 export const EditBrushes = () => {
     const menuContext = useContext(MenuContext);
-    const [options] = menuContext;
+    const [options, setOptions] = menuContext;
     const {
         brushes
     } = options;
@@ -31,6 +35,23 @@ export const EditBrushes = () => {
         antiAliasing: false,
         brushTipImage: {},
     });
+    const importBrush = useOpenFile((files)=>{
+        if(files.length==0)return;
+        const file = files[0];
+        if(file.name.endsWith('.abr')) {
+            loadAbrBrushes(file)
+                .then(brushesData=>{
+                    setOptions({ ...options,
+                        brushes: [
+                            ...brushes,
+                            ...brushesData
+                                .map(x=>(x as AbrBrush))
+                                .map(abrToScribblesSerializable)
+                                .map(brushFormObj)] });
+                })
+                .catch();
+        }
+    }, { accept: '.abr' });
     const [state2, onChange] = useState({ selectedBrush: 0 });
     const { selectedBrush } = state2;
     const [editor] = useContext(EditorContext);
@@ -83,13 +104,14 @@ export const EditBrushes = () => {
     return <>
         <li>
             <button className='round-btn' onClick={openModal}>
-                <img src={importIcon} alt="Import Brushes" />
+                <img src={brushIcon} alt="Import Brushes" />
             </button>
             <div className="text">Import Brushes</div>
         </li>
         <ReactModal isOpen={isOpen} onRequestClose={close} style={{ content: { width: '20rem' } }}>
             <div className="fields import-brush">
                 <h2>Brushes</h2>
+                <div><button onClick={importBrush}><img src={importIcon} alt="Import Brushes" /></button></div>
                 <div className='errors'>
                     {errors.name.map((error, i) => <div key={'error.name-'+i} className='error'>Name: {error}</div>)}
                 </div>
@@ -112,7 +134,7 @@ export const EditBrushes = () => {
                                 <div>
                                 Tip
                                 </div>
-                                <InputImage name='brushTipImage' value={currentBrush.brushTipImage} onChange={update} style={{ width: '5rem' }} />
+                                <InputImage name='brushTipImage' value={currentBrush.brushTipImage} onChange={update} style={{ width: '3rem', height: '3rem' }} />
                             </label>
                         }
                         {('roundness' in currentBrush)&&(typeof currentBrush.roundness == 'number') &&
@@ -176,3 +198,4 @@ export const EditBrushes = () => {
 };
 
 const createPreview = () => createDrawable({ size: [150, 30] });
+

@@ -3,7 +3,7 @@
     "development"
   ],
   "hints": {
-    "no-inline-styles": "off",
-    "meta-viewport": "off"
+    "typescript-config/consistent-casing": "off",
+    "typescript-config/strict": "off"
   }
 }

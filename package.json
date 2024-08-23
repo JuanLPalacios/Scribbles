@@ -1,80 +1,59 @@
 {
   "name": "scribbles",
   "version": "0.2.0",
-  "private": true,
-  "homepage": ".",
+  "homepage": "https://github.com/JuanLPalacios/Scribbles#readme",
+  "description": "A simple PWA (Progressive Web App) for drawing illustrations with multilayer support is a web-based application that allows users to create and edit digital illustrations with multiple layers.",
+  "main": "index.html",
+  "directories": {
+    "test": "tests"
+  },
+  "keywords": [
+    "react",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
   "dependencies": {
-    "@testing-library/jest-dom": "^5.16.5",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^29.2.2",
-    "@types/node": "^18.11.9",
-    "@types/react": "^18.0.25",
-    "@types/react-dom": "^18.0.8",
-    "@types/react-modal": "^3.13.1",
+    "@types/react-modal": "^3.16.3",
     "abr-js": "^0.1.1",
+    "file-saver": "^2.0.5",
+    "gh-pages": "^6.1.1",
+    "jszip": "^3.10.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^5.0.1",
     "react-modal": "^3.16.1",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.8.4",
-    "workbox-background-sync": "^6.6.0",
-    "workbox-broadcast-update": "^6.6.0",
-    "workbox-cacheable-response": "^6.6.0",
-    "workbox-core": "^6.6.0",
-    "workbox-expiration": "^6.6.0",
-    "workbox-google-analytics": "^6.6.0",
-    "workbox-navigation-preload": "^6.6.0",
-    "workbox-precaching": "^6.6.0",
-    "workbox-range-requests": "^6.6.0",
-    "workbox-routing": "^6.6.0",
-    "workbox-strategies": "^6.6.0",
-    "workbox-streams": "^6.6.0"
+    "react-router-dom": "^6.23.1",
+    "vite-plugin-svgr": "^4.1.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "publish": "gh-pages -d build"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "start": "vite",
+    "build": "tsc && vite build",
+    "tsc": "tsc --w",
+    "lint": "eslint --ext .js --ignore-path .gitignore .",
+    "preview": "vite preview",
+    "publish": "gh-pages -d dist"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.2",
-    "@babel/eslint-parser": "^7.19.1",
-    "@babel/plugin-syntax-jsx": "^7.18.6",
-    "@babel/preset-react": "^7.18.6",
-    "@typescript-eslint/eslint-plugin": "^5.44.0",
-    "@typescript-eslint/parser": "^5.44.0",
-    "eslint": "^7.32.0",
-    "eslint-config-airbnb": "^18.2.1",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-jsx-a11y": "^6.6.1",
-    "eslint-plugin-react": "^7.31.11",
+    "@types/file-saver": "^2.0.7",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^20.8.2",
+    "@types/react": "^18.2.15",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.0.3",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.45.0",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "gh-pages": "^4.0.0",
-    "stylelint": "^13.13.1",
-    "stylelint-config-standard": "^21.0.0",
-    "stylelint-csstree-validator": "^1.9.0",
-    "stylelint-scss": "^3.21.0",
-    "tailwindcss": "^3.3.5",
-    "web-vitals": "^3.1.0"
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "postcss": "^8.4.31",
+    "stylelint": "^16.3.1",
+    "stylelint-config-standard": "^36.0.0",
+    "stylelint-webpack-plugin": "^5.0.0",
+    "tailwindcss": "^3.3.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5",
+    "vite-plugin-pwa": "^0.19.8"
   }
 }

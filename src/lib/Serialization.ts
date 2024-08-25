@@ -3,7 +3,7 @@ import SolidBrush, { SerializedSolidBrush } from '../brushes/Solid';
 import TextureBrush, { SerializedTextureBrush } from '../brushes/TextureBrush';
 import { BrushList } from './BrushList';
 
-type SerializedBrush = SerializedSolidBrush | SerializedTextureBrush;
+export type SerializedBrush = SerializedSolidBrush | SerializedTextureBrush;
 export const abrToScribblesSerializable = (abrBrush: AbrBrush): SerializedBrush => {
     const { brushType } = abrBrush;
     switch (brushType) {

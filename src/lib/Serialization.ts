@@ -2,7 +2,12 @@ import Brush from '../abstracts/Brush';
 import SolidBrush, { SerializedSolidBrush } from '../brushes/Solid';
 import TextureBrush, { SerializedTextureBrush } from '../brushes/TextureBrush';
 import { BrushList } from './BrushList';
+/*
+type Hash<T> = {[key: string]: T};
+type extractGeneric<Type> = Type extends Hash<infer X> ? X : never
 
+type AbrBrush = extractGeneric<(typeof abrBrushes)['map']>;
+*/
 export type SerializedBrush = SerializedSolidBrush | SerializedTextureBrush;
 export const abrToScribblesSerializable = (abrBrush: AbrBrush): SerializedBrush => {
     const { brushType } = abrBrush;

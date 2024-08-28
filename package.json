@@ -1,20 +1,25 @@
 {
   "name": "scribbles",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "homepage": "https://github.com/JuanLPalacios/Scribbles#readme",
   "description": "A simple PWA (Progressive Web App) for drawing illustrations with multilayer support is a web-based application that allows users to create and edit digital illustrations with multiple layers.",
   "main": "index.html",
-  "directories": {
-    "test": "tests"
-  },
+  "type": "module",
   "keywords": [
     "react",
     "typescript"
   ],
   "author": "",
   "license": "MIT",
+  "scripts": {
+    "start": "vite",
+    "build": "tsc -b && vite build",
+    "tsc": "tsc --w",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "publish": "gh-pages -d dist"
+  },
   "dependencies": {
-    "@types/react-modal": "^3.16.3",
     "abr-js": "^0.1.1",
     "file-saver": "^2.0.5",
     "gh-pages": "^6.1.1",
@@ -23,37 +28,25 @@
     "react-dom": "^18.2.0",
     "react-icons": "^5.0.1",
     "react-modal": "^3.16.1",
-    "react-router-dom": "^6.23.1",
-    "vite-plugin-svgr": "^4.1.0"
-  },
-  "scripts": {
-    "start": "vite",
-    "build": "tsc && vite build",
-    "tsc": "tsc --w",
-    "lint": "eslint --ext .js --ignore-path .gitignore .",
-    "preview": "vite preview",
-    "publish": "gh-pages -d dist"
+    "react-router-dom": "^6.23.1"
   },
   "devDependencies": {
-    "@types/file-saver": "^2.0.7",
-    "@types/jest": "^27.0.2",
-    "@types/node": "^20.8.2",
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0",
-    "@vitejs/plugin-react": "^4.0.3",
-    "autoprefixer": "^10.4.16",
-    "eslint": "^8.45.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.4.3",
-    "postcss": "^8.4.31",
+    "@eslint/js": "^9.9.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@types/react-modal": "^3.16.3",
+    "@vitejs/plugin-react": "^4.3.1",
+    "eslint": "^9.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "eslint-plugin-react-hooks": "^5.1.0-rc.0",
+    "eslint-plugin-react-refresh": "^0.4.9",
+    "globals": "^15.9.0",
     "stylelint": "^16.3.1",
     "stylelint-config-standard": "^36.0.0",
-    "stylelint-webpack-plugin": "^5.0.0",
-    "tailwindcss": "^3.3.3",
-    "typescript": "^5.0.2",
-    "vite": "^4.4.5",
-    "vite-plugin-pwa": "^0.19.8"
+    "typescript": "^5.5.3",
+    "typescript-eslint": "^8.0.1",
+    "vite": "^5.4.1",
+    "vite-plugin-pwa": "^0.19.8",
+    "vite-plugin-svgr": "^4.1.0"
   }
 }

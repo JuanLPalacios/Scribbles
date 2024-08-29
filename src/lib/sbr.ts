@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import { SerializedBrush } from './Serialization';
+import { SerializedImage } from '../brushes/SerializedOject';
 
 type SbrVersionInfo = {
     version:number
@@ -7,8 +8,7 @@ type SbrVersionInfo = {
 };
 
 type Serialized = {[key:string]:JSONValue};
-type JSONValue = number | string | boolean | Obj;
-type Obj = { type: 'img', value:string };
+type JSONValue = number | string | boolean | SerializedImage;
 type Cont = {
     zip: JSZip
     types:{
@@ -42,6 +42,7 @@ export const SBR = {
                                         }
                                     }
                                 }
+                                return brushes;
                             })
                     )
             );
@@ -51,6 +52,11 @@ export const SBR = {
         const zip = new JSZip();
         const dir = zip.folder('images');
         if((!dir))throw new Error('JSZip folder could not be created');
+        const version:SbrVersionInfo = {
+            version: 1,
+            subVersion: 1
+        };
+        zip.file('version.json', JSON.stringify(version));
         const context = { zip, types: { img: { dir, count: 0 } } };
         for (let i = 0; i < brushes.length; i++) {
             const
@@ -58,15 +64,16 @@ export const SBR = {
                 zipedBrush:Serialized = {};
             for (const key in brush) {
                 if (Object.prototype.hasOwnProperty.call(brush, key)) {
-                    zipedBrush[key] = await zipDataV1(brush[key], context);
+                    zipedBrush[key] = await zipDataV1S1(brush[key], context);
                 }
             }
         }
+        zip.file('content.json', JSON.stringify(brushes));
         return zip.generateAsync({ type: 'blob' });
     }
 };
 
-function zipDataV1(value: JSONValue, context: Cont):Promise<JSONValue> {
+function zipDataV1S1(value: JSONValue, context: Cont):Promise<JSONValue> {
     return new Promise<JSONValue>((resolve, reject) => {
         if(typeof value !=  'object')return resolve(value);
         if(!isDataUrl(value.value))return resolve(value);
@@ -124,165 +131,165 @@ function getContentType(file: string) {
     //FIXME: some extensions may need to parse contents identify if they are audio or video.
     const extension = file.split('.').pop();
     switch (extension) {
-    case '.aac':
+    case 'aac':
         return 'audio/aac';
-    case '.abw':
+    case 'abw':
         return 'application/x-abiword';
-    case '.apng':
+    case 'apng':
         return 'image/apng';
-    case '.arc':
+    case 'arc':
         return 'application/x-freearc';
-    case '.avif':
+    case 'avif':
         return 'image/avif';
-    case '.avi':
+    case 'avi':
         return 'video/x-msvideo';
-    case '.azw':
+    case 'azw':
         return 'application/vnd.amazon.ebook';
-    case '.bin':
+    case 'bin':
         return 'application/octet-stream';
-    case '.bmp':
+    case 'bmp':
         return 'image/bmp';
-    case '.bz':
+    case 'bz':
         return 'application/x-bzip';
-    case '.bz2':
+    case 'bz2':
         return 'application/x-bzip2';
-    case '.cda':
+    case 'cda':
         return 'application/x-cdf';
-    case '.csh':
+    case 'csh':
         return 'application/x-csh';
-    case '.css':
+    case 'css':
         return 'text/css';
-    case '.csv':
+    case 'csv':
         return 'text/csv';
-    case '.doc':
+    case 'doc':
         return 'application/msword';
-    case '.docx':
+    case 'docx':
         return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-    case '.eot':
+    case 'eot':
         return 'application/vnd.ms-fontobject';
-    case '.epub':
+    case 'epub':
         return 'application/epub+zip';
-    case '.gz':
+    case 'gz':
         return 'application/gzip';
-    case '.gif':
+    case 'gif':
         return 'image/gif';
-    case '.htm':
-    case '.html':
+    case 'htm':
+    case 'html':
         return 'text/html';
-    case '.ico':
+    case 'ico':
         return 'image/vnd.microsoft.icon';
-    case '.ics':
+    case 'ics':
         return 'text/calendar';
-    case '.jar':
+    case 'jar':
         return 'application/java-archive';
-    case '.jpeg':
-    case '.jpg':
+    case 'jpeg':
+    case 'jpg':
         return 'image/jpeg';
-    case '.js':
+    case 'js':
         return 'text/javascript';
-    case '.json':
+    case 'json':
         return 'application/json';
-    case '.jsonld':
+    case 'jsonld':
         return 'application/ld+json';
-    case '.mid':
-    case '.midi':
+    case 'mid':
+    case 'midi':
         return 'audio/midi';
         //FIXME: maybe audio/x-midi needs to be included
-    case '.mjs':
+    case 'mjs':
         return 'text/javascript';
-    case '.mp3':
+    case 'mp3':
         return 'audio/mpeg';
-    case '.mp4':
+    case 'mp4':
         return 'video/mp4';
-    case '.mpeg':
+    case 'mpeg':
         return 'video/mpeg';
-    case '.mpkg':
+    case 'mpkg':
         return 'application/vnd.apple.installer+xml';
-    case '.odp':
+    case 'odp':
         return 'application/vnd.oasis.opendocument.presentation';
-    case '.ods':
+    case 'ods':
         return 'application/vnd.oasis.opendocument.spreadsheet';
-    case '.odt':
+    case 'odt':
         return 'application/vnd.oasis.opendocument.text';
-    case '.oga':
+    case 'oga':
         return 'audio/ogg';
-    case '.ogv':
+    case 'ogv':
         return 'video/ogg';
-    case '.ogx':
+    case 'ogx':
         return 'application/ogg';
-    case '.opus':
+    case 'opus':
         return 'audio/ogg';
-    case '.otf':
+    case 'otf':
         return 'font/otf';
-    case '.png':
+    case 'png':
         return 'image/png';
-    case '.pdf':
+    case 'pdf':
         return 'application/pdf';
-    case '.php':
+    case 'php':
         return 'application/x-httpd-php';
-    case '.ppt':
+    case 'ppt':
         return 'application/vnd.ms-powerpoint';
-    case '.pptx':
+    case 'pptx':
         return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-    case '.rar':
+    case 'rar':
         return 'application/vnd.rar';
-    case '.rtf':
+    case 'rtf':
         return 'application/rtf';
-    case '.sh':
+    case 'sh':
         return 'application/x-sh';
-    case '.svg':
+    case 'svg':
         return 'image/svg+xml';
-    case '.tar':
+    case 'tar':
         return 'application/x-tar';
-    case '.tif':
-    case '.tiff':
+    case 'tif':
+    case 'tiff':
         return 'image/tiff';
-    case '.ts':
+    case 'ts':
         return 'video/mp2t';
-    case '.ttf':
+    case 'ttf':
         return 'font/ttf';
-    case '.txt':
+    case 'txt':
         return 'text/plain';
-    case '.vsd':
+    case 'vsd':
         return 'application/vnd.visio';
-    case '.wav':
+    case 'wav':
         return 'audio/wav';
-    case '.weba':
+    case 'weba':
         return 'audio/webm';
-    case '.webm':
+    case 'webm':
         return 'video/webm';
-    case '.webp':
+    case 'webp':
         return 'image/webp';
-    case '.woff':
+    case 'woff':
         return 'font/woff';
-    case '.woff2':
+    case 'woff2':
         return 'font/woff2';
-    case '.xhtml':
+    case 'xhtml':
         return 'application/xhtml+xml';
-    case '.xls':
+    case 'xls':
         return 'application/vnd.ms-excel';
-    case '.xlsx':
+    case 'xlsx':
         return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    case '.xml':
+    case 'xml':
         return 'application/xml';
-    case '.xul':
+    case 'xul':
         return 'application/vnd.mozilla.xul+xml';
-    case '.zip':
+    case 'zip':
         return 'application/zip';
-    case '.3gp':
+    case '3gp':
         return 'video/3gpp';
         // audio/3gpp if it doesn't contain video
-    case '.3g2':
+    case '3g2':
         return 'video/3gpp2';
         // audio/3gpp2 if it doesn't contain video
-    case '.7z':
+    case '7z':
         return 'application/x-7z-compressed';
     default:
         throw new Error('extension not supported');
     }
 }
 
-function dataURLFormat(contentType: string, base64: string): string | PromiseLike<string> {
+function dataURLFormat(contentType: string, base64: string): string {
     return `data:${contentType};base64,${base64}`;
 }
 

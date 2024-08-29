@@ -5,6 +5,7 @@ import '../../css/menu/EditBrushes.css';
 import demoStroke from '../../demo/strokePreview.json';
 import brushIcon from '../../icons/brush-f-svgrepo-com.svg';
 import importIcon from '../../icons/internal-svgrepo-com.svg';
+import exportIcon from '../../icons/external-svgrepo-com.svg';
 import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 import { DrawableState } from '../../types/DrawableState';
@@ -17,7 +18,9 @@ import Brush from '../../abstracts/Brush';
 import { InputImage } from '../inputs/InputImage';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { loadAbrBrushes } from 'abr-js';
-import { abrToScribblesSerializable, brushFormObj } from '../../lib/Serialization';
+import { abrToScribblesSerializable, brushFormObj, SerializedBrush } from '../../lib/Serialization';
+import { SBR } from '../../lib/sbr';
+import { saveAs } from 'file-saver';
 
 let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
 let lastBrushes: Brush[];
@@ -38,7 +41,9 @@ export const EditBrushes = () => {
     const importBrush = useOpenFile((files)=>{
         if(files.length==0)return;
         const file = files[0];
-        if(file.name.endsWith('.abr')) {
+        const extension = file.name.split('.').pop();
+        switch (extension) {
+        case 'abr':
             loadAbrBrushes(file)
                 .then(brushesData=>{
                     setOptions({ ...options,
@@ -50,8 +55,27 @@ export const EditBrushes = () => {
                                 .map(brushFormObj)] });
                 })
                 .catch();
+
+            break;
+        case 'sbr':
+            SBR.jsonObj(file)
+                .then(brushesData=>{
+                    setOptions({ ...options,
+                        brushes: [
+                            ...brushes,
+                            ...brushesData
+                                .map(x=>(x as SerializedBrush))
+                                .map(brushFormObj)] });
+                })
+                .catch();
+
+            break;
         }
     }, { accept: '.abr' });
+    const exportBrush = async ()=>{
+        const blob = await SBR.binary(brushes.map(brush=>brush.toObj()));
+        saveAs(blob);
+    };
     const [state2, onChange] = useState({ selectedBrush: 0 });
     const { selectedBrush } = state2;
     const [editor] = useContext(EditorContext);
@@ -71,15 +95,18 @@ export const EditBrushes = () => {
             break;
         }
         setBrush({ ...currentBrush, [e.target?.name]: value });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state]);
     const close = useCallback(() => {
         setState({ ...state, isOpen: false });
     }, [state]);
     const openModal = useCallback(() => {
         setState({ ...state, isOpen: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor, state]);
     useEffect(() => {
         setBrush(brushes[selectedBrush].toObj());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBrush]);
     useEffect(() => {
         const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
@@ -89,16 +116,17 @@ export const EditBrushes = () => {
         const isValid = Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0;
         if(isValid){
             brushes[selectedBrush].loadObj(currentBrush);
-            if(previews)brushes[selectedBrush].renderPreview(previews.previews[selectedBrush], demoStroke as any, '#ffffff', .5 || 1, 15);
+            if(previews)brushes[selectedBrush].renderPreview(previews.previews[selectedBrush], demoStroke as any, '#ffffff', .5, 15);
         }
         setState({ ...state, errors, isValid });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBrush]);
     useEffect(()=>{
         if(lastBrushes !== brushes){
             lastBrushes = brushes;
             console.log('render previews');
             previews = { previews: brushes.map(() => createPreview()), selectedPreview: createPreview() };
-            previews.previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5 || 1, 15));
+            previews.previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5, 15));
         }
     }, [brushes]);
     return <>
@@ -111,7 +139,10 @@ export const EditBrushes = () => {
         <ReactModal isOpen={isOpen} onRequestClose={close} style={{ content: { width: '20rem' } }}>
             <div className="fields import-brush">
                 <h2>Brushes</h2>
-                <div><button onClick={importBrush}><img src={importIcon} alt="Import Brushes" /></button></div>
+                <div>
+                    <button onClick={importBrush}><img src={importIcon} alt="Import Brushes" /></button>
+                    <button onClick={exportBrush}><img src={exportIcon} alt="Export Brushes" /></button>
+                </div>
                 <div className='errors'>
                     {errors.name.map((error, i) => <div key={'error.name-'+i} className='error'>Name: {error}</div>)}
                 </div>

@@ -1,3 +1,4 @@
+import { SerializedBrush } from '../lib/Serialization';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
@@ -20,11 +21,11 @@ export default abstract class Brush {
     toJSON():string{
         return JSON.stringify(this.toObj());
     }
-    abstract toObj():any
+    abstract toObj():SerializedBrush
     static formJson(json:string):Brush {
         return this.formObj(JSON.parse(json));
     }
-    static formObj(obj:object):Brush {
+    static formObj(_obj:object):Brush {
         throw new Error('not implemented');
     }
 }

@@ -1,15 +1,12 @@
 import JSZip from 'jszip';
-import { SerializedBrush } from './Serialization';
-import { SerializedImage } from '../brushes/SerializedOject';
+import { JSONValue, Serialized } from './Serialization';
 
 type SbrVersionInfo = {
     version:number
     subVersion:number
 };
 
-type Serialized = {[key:string]:JSONValue};
-type JSONValue = number | string | boolean | SerializedImage;
-type Cont = {
+type Context = {
     zip: JSZip
     types:{
         [key:string]: {dir:JSZip; count:number }
@@ -20,37 +17,40 @@ const CANVAS:HTMLCanvasElement = document.createElement('canvas');
 const CTX = CANVAS.getContext('2d');
 
 export const SBR = {
-    async jsonObj(file: File) {
-        return new JSZip()
-            .loadAsync(file)
+    jsonObj(file: File) {
+        const zip = new JSZip();
+        return zip.loadAsync(file)
             .then((zip)=>
                 zip.files['version.json'].async('string')
                     .then(JSON.parse)
                     .then((version:SbrVersionInfo)=>
                         zip.files['content.json'].async('string')
                             .then(JSON.parse)
-                            .then(async (brushes:Serialized[])=>{
-                                const context:Cont = { zip, types: {} };
-                                const unzipData = getUnzipData(version);
-                                for (let i = 0; i < brushes.length; i++) {
+                            .then(async (zipedBrushes:Serialized[])=>{
+                                const context:Context = { zip, types: {} };
+                                const unzipDataFunction = getUnzipDataFunction(version);
+                                const brushes:Serialized[] = [];
+                                for (let i = 0; i < zipedBrushes.length; i++) {
                                     const
-                                        brush:Serialized = brushes[i],
-                                        zipedBrush:Serialized = {};
-                                    for (const key in brush) {
-                                        if (Object.prototype.hasOwnProperty.call(brush, key)) {
-                                            zipedBrush[key] = await unzipData(brush[key], context);
+                                        zipedBrush:Serialized = zipedBrushes[i],
+                                        brush:Serialized = {};
+                                    for (const key in zipedBrush) {
+                                        if (Object.prototype.hasOwnProperty.call(zipedBrush, key)) {
+                                            brush[key] = await unzipDataFunction(zipedBrush[key], context);
                                         }
                                     }
+                                    brushes.push(brush);
                                 }
+                                console.log(brushes);
                                 return brushes;
                             })
                     )
             );
     },
 
-    async binary(brushes: SerializedBrush[]) {
+    async binary(brushes: Serialized[]) {
         const zip = new JSZip();
-        const dir = zip.folder('images');
+        const dir = zip.folder('img');
         if((!dir))throw new Error('JSZip folder could not be created');
         const version:SbrVersionInfo = {
             version: 1,
@@ -58,6 +58,7 @@ export const SBR = {
         };
         zip.file('version.json', JSON.stringify(version));
         const context = { zip, types: { img: { dir, count: 0 } } };
+        const zipedBrushes:Serialized[] = [];
         for (let i = 0; i < brushes.length; i++) {
             const
                 brush:Serialized = brushes[i],
@@ -67,15 +68,19 @@ export const SBR = {
                     zipedBrush[key] = await zipDataV1S1(brush[key], context);
                 }
             }
+            zipedBrushes.push(zipedBrush);
         }
-        zip.file('content.json', JSON.stringify(brushes));
+        console.log(zipedBrushes);
+        zip.file('content.json', JSON.stringify(zipedBrushes));
         return zip.generateAsync({ type: 'blob' });
     }
 };
 
-function zipDataV1S1(value: JSONValue, context: Cont):Promise<JSONValue> {
+function zipDataV1S1(value: JSONValue, context: Context):Promise<JSONValue> {
     return new Promise<JSONValue>((resolve, reject) => {
-        if(typeof value !=  'object')return resolve(value);
+        if(typeof value !==  'object')return resolve(value);
+        if(Array.isArray(value))return resolve(Promise.all(value.map(x=>zipDataV1S1(x, context))));
+        if(value.type === 'json')return resolve(value);
         if(!isDataUrl(value.value))return resolve(value);
         const extension = getExtension(value.value);
         const fileNumber = context.types.img.count++;
@@ -96,7 +101,7 @@ function zipDataV1S1(value: JSONValue, context: Cont):Promise<JSONValue> {
     });
 }
 
-function getUnzipData({ version, subVersion }: SbrVersionInfo): ((value: JSONValue, context: Cont) => Promise<JSONValue>) {
+function getUnzipDataFunction({ version, subVersion }: SbrVersionInfo): ((value: JSONValue, context: Context) => Promise<JSONValue>) {
     switch (version) {
     case 1:
         return getUnzipDataV1(subVersion);
@@ -105,7 +110,7 @@ function getUnzipData({ version, subVersion }: SbrVersionInfo): ((value: JSONVal
     }
 }
 
-function getUnzipDataV1(subVersion : number): ((value: JSONValue, context: Cont) => Promise<JSONValue>) {
+function getUnzipDataV1(subVersion : number): ((value: JSONValue, context: Context) => Promise<JSONValue>) {
     switch (subVersion) {
     case 1:
         return unzipDataV1S1;
@@ -114,16 +119,18 @@ function getUnzipDataV1(subVersion : number): ((value: JSONValue, context: Cont)
     }
 }
 
-function unzipDataV1S1(value : JSONValue, context:Cont): Promise<JSONValue> {
+function unzipDataV1S1(value : JSONValue, context:Context): Promise<JSONValue> {
     return new Promise<JSONValue>((resolve, reject) => {
         if(typeof value !=  'object')return resolve(value);
+        if(Array.isArray(value))return resolve(Promise.all(value.map(x=>unzipDataV1S1(x, context))));
+        if(value.type === 'json')return resolve(value);
         if(!CTX) return;
         const file = value.value.substring(5);
         const contentType = getContentType(file);
-        return context.zip
+        return resolve(context.zip
             .files[file]
             .async('base64')
-            .then(base64=>dataURLFormat(contentType, base64));
+            .then(base64=>({ type: 'img', value: dataURLFormat(contentType, base64) })));
     });
 }
 

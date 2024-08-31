@@ -1,10 +1,11 @@
 import Brush from '../abstracts/Brush';
 import { createDrawable } from '../generators/createDrawable';
+import { BrushList } from '../lib/BrushList';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
-type SerializedMarkerBrush ={
-    scribbleBrushType: 1,
+export type SerializedMarkerBrush ={
+    scribbleBrushType: BrushList.Marker
     name:string;
 }
 
@@ -86,7 +87,7 @@ export default class Marker extends Brush {
 
     toObj(): SerializedMarkerBrush {
         const { name } = this;
-        return { scribbleBrushType: 1, name };
+        return { scribbleBrushType: BrushList.Marker, name };
     }
 
     loadObj({ name }:SerializedMarkerBrush) {

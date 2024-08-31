@@ -1,17 +1,16 @@
 import Brush from '../abstracts/Brush';
 import { createDrawable } from '../generators/createDrawable';
+import { BrushList } from '../lib/BrushList';
 import { scalePoint } from '../lib/DOMMath';
+import { parseSerializedJSON, serializeJSON } from '../lib/Serialization';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
+import { SerializedJSON } from './SerializedOject';
 
-type SerializedSolidBrush ={
-    scribbleBrushType: 3,
+export type SerializedStiffBrush ={
+    scribbleBrushType: BrushList.Stiff,
     name:string
-    fibers: {
-        position: DOMPoint;
-        width: number;
-        alpha: number;
-    }[]
+    fibers: SerializedJSON[]
 }
 
 export default class StiffBrush extends Brush {
@@ -82,18 +81,19 @@ export default class StiffBrush extends Brush {
         canvas.height = 0;
     }
 
-    toObj(): SerializedSolidBrush {
+    toObj(): SerializedStiffBrush {
         const { fibers, name } =this;
-        return { scribbleBrushType: 3, fibers, name };
+        return { scribbleBrushType: BrushList.Stiff, fibers: fibers.map(serializeJSON), name };
     }
 
-    loadObj({ name, fibers }:SerializedSolidBrush) {
+    loadObj({ name, fibers }:SerializedStiffBrush) {
         this.name = name;
-        this.fibers = fibers;
+        this.fibers = fibers.map(parseSerializedJSON);
     }
 
-    static formObj(data:SerializedSolidBrush):StiffBrush {
+    static formObj(data:SerializedStiffBrush):StiffBrush {
         const { name, fibers } = data;
-        return new StiffBrush(fibers, name);
+        return new StiffBrush(fibers.map(parseSerializedJSON), name);
     }
 }
+

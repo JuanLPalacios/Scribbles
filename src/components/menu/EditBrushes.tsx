@@ -54,7 +54,7 @@ export const EditBrushes = () => {
                                 .map(abrToScribblesSerializable)
                                 .map(brushFormObj)] });
                 })
-                .catch();
+                .catch(e=>console.error(e));
 
             break;
         case 'sbr':
@@ -67,14 +67,14 @@ export const EditBrushes = () => {
                                 .map(x=>(x as SerializedBrush))
                                 .map(brushFormObj)] });
                 })
-                .catch();
+                .catch(e=>console.error(e));
 
             break;
         }
-    }, { accept: '.abr' });
+    }, { accept: '.abr, .sbr' });
     const exportBrush = async ()=>{
         const blob = await SBR.binary(brushes.map(brush=>brush.toObj()));
-        saveAs(blob);
+        saveAs(blob, 'brushes.sbr');
     };
     const [state2, onChange] = useState({ selectedBrush: 0 });
     const { selectedBrush } = state2;

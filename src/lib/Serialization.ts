@@ -1,14 +1,19 @@
 import Brush from '../abstracts/Brush';
+import Marker, { SerializedMarkerBrush } from '../brushes/Marker';
+import { SerializedJSON, SerializedOject } from '../brushes/SerializedOject';
 import SolidBrush, { SerializedSolidBrush } from '../brushes/Solid';
+import StiffBrush, { SerializedStiffBrush } from '../brushes/StiffBrush';
 import TextureBrush, { SerializedTextureBrush } from '../brushes/TextureBrush';
 import { BrushList } from './BrushList';
-/*
-type Hash<T> = {[key: string]: T};
-type extractGeneric<Type> = Type extends Hash<infer X> ? X : never
 
-type AbrBrush = extractGeneric<(typeof abrBrushes)['map']>;
-*/
-export type SerializedBrush = SerializedSolidBrush | SerializedTextureBrush;
+export type SerializedBrush =
+| SerializedSolidBrush
+| SerializedTextureBrush
+| SerializedStiffBrush
+| SerializedMarkerBrush;
+export type Serialized = {[key:string]:JSONValue};
+export type JSONValue = number | string | boolean | SerializedOject | JSONValue[];
+
 export const abrToScribblesSerializable = (abrBrush: AbrBrush): SerializedBrush => {
     const { brushType } = abrBrush;
     switch (brushType) {
@@ -36,7 +41,7 @@ function abrSampledBrushToTextured({ antiAliasing, brushTipImage, name, spacing,
     }
     ctx.putImageData(imageData, 0, 0);
     const dataUrl = brushTipImage.toDataURL();
-    return { scribbleBrushType: BrushList.Texture, antiAliasing, brushTipImage: dataUrl, name, spacing };
+    return { scribbleBrushType: BrushList.Texture, antiAliasing, brushTipImage: { type: 'img', value: dataUrl }, name, spacing };
 }
 
 export const brushFormObj = (brushObj:SerializedBrush): Brush => {
@@ -46,7 +51,15 @@ export const brushFormObj = (brushObj:SerializedBrush): Brush => {
         return SolidBrush.formObj(brushObj);
     case BrushList.Texture:
         return TextureBrush.formObj(brushObj);
+    case BrushList.Marker:
+        return Marker.formObj(brushObj);
+    case BrushList.Stiff:
+        return StiffBrush.formObj(brushObj);
     default:
         return new SolidBrush();
     }
 };
+
+export const serializeJSON = (value: unknown):SerializedJSON => ({ type: 'json', value: JSON.stringify(value) });
+export const parseSerializedJSON = (value: SerializedJSON) => JSON.parse(value.value);
+

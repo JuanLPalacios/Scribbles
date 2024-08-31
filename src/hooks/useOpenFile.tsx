@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useSingletonElementReferences } from '../contexts/SingletonElementReferences';
+import { useSingletonElementReferences } from './useSingletonElementReferences';
 type Config = {
     accept?:string
     multiple?:boolean

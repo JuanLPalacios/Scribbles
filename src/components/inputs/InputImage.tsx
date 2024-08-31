@@ -1,18 +1,20 @@
-import { ChangeEvent, ChangeEventHandler, CSSProperties, useRef } from 'react';
+import { ChangeEventHandler, CSSProperties, useRef } from 'react';
 import '../../css/inputs/InputImage.css';
+import { SerializedImage } from '../../brushes/SerializedOject';
+import { useOpenFile } from '../../hooks/useOpenFile';
+import { CustomInput } from '../../types/CustomInput';
 type Params = {
     name?: string | undefined;
-    value?: string;
+    value?: SerializedImage;
     style?: CSSProperties | undefined;
-    onChange?: ChangeEventHandler<HTMLInputElement> | undefined;
+    onChange?: ChangeEventHandler<ImageInput> | undefined;
 };
 
+export type ImageInput = CustomInput<SerializedImage>;
+
 export const InputImage = ({ name, onChange, style, value }:Params)=>{
-    const ref = useRef<HTMLInputElement>(null);
     const ref2 = useRef<HTMLInputElement>(null);
-    const loadImage = (e:ChangeEvent<HTMLInputElement>)=>{
-        const { target } = e;
-        const { files } = target;
+    const openImage = useOpenFile((files)=>{
         if(!files){
             if(ref2.current){
                 ref2.current.value = '';
@@ -24,14 +26,32 @@ export const InputImage = ({ name, onChange, style, value }:Params)=>{
             const image = fr.result;
             if((typeof image == 'string')&&ref2.current&&onChange){
                 ref2.current.value = image;
-                onChange({ ...e, target: ref2.current });
+                const target:EventTarget & ImageInput = { ...ref2.current, value: { type: 'img', value: image }, name: name||'' };
+                const nativeEvent = new Event('change', { bubbles: false, cancelable: false, composed: true });
+                const { bubbles, type, cancelable, defaultPrevented, eventPhase, isTrusted, preventDefault, stopPropagation, timeStamp } = nativeEvent;
+                onChange({
+                    nativeEvent,
+                    currentTarget: target,
+                    target,
+                    bubbles,
+                    cancelable,
+                    defaultPrevented,
+                    eventPhase,
+                    isTrusted,
+                    preventDefault,
+                    isDefaultPrevented: ()=>false,
+                    stopPropagation,
+                    isPropagationStopped: ()=>false,
+                    persist: ()=>{},
+                    timeStamp,
+                    type
+                });
             }
         };
         fr.readAsDataURL(files[0]);
-    };
-    return <div className='InputImage' style={style} onClick={e=>ref.current?.click()}>
-        {value&&<img src={value} alt='tip image'/>}
+    }, { accept: '.png' });
+    return <div className='InputImage' style={style} onClick={openImage} onChange={onChange}>
+        {value&&<img src={value.value} alt='tip image'/>}
         <input type="text" name={name} ref={ref2} style={{ display: 'none' }}/>
-        <input type="file" onChange={loadImage} ref={ref} style={{ display: 'none' }}/>
     </div>;
 };

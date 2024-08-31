@@ -18,9 +18,10 @@ import Brush from '../../abstracts/Brush';
 import { InputImage } from '../inputs/InputImage';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { loadAbrBrushes } from 'abr-js';
-import { abrToScribblesSerializable, brushFormObj, SerializedBrush } from '../../lib/Serialization';
+import { abrToScribblesSerializable, brushFormObj, JSONValue, SerializedBrush } from '../../lib/Serialization';
 import { SBR } from '../../lib/sbr';
 import { saveAs } from 'file-saver';
+import { CustomInput } from '../../types/CustomInput';
 
 let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
 let lastBrushes: Brush[];
@@ -81,7 +82,7 @@ export const EditBrushes = () => {
     const [editor] = useContext(EditorContext);
     const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, isValid, errors } = state;
-    const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
+    const update = useCallback((e:React.ChangeEvent<CustomInput<JSONValue>>) => {
         let value;
         switch (e.target.type){
         case('number'):
@@ -160,7 +161,7 @@ export const EditBrushes = () => {
                                 </div>
                                 <input type="text" name='name' autoComplete="off" value={currentBrush.name} onChange={update} />
                             </label>}
-                        {('brushTipImage' in currentBrush)&&(typeof currentBrush.brushTipImage == 'string') &&
+                        {('brushTipImage' in currentBrush)&&(typeof currentBrush.brushTipImage == 'object') &&
                             <label>
                                 <div>
                                 Tip

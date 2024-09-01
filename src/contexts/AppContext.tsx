@@ -18,6 +18,7 @@ import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
 import transformIcon from '../icons/nametag-svgrepo-com.svg';
 import TextureBrush from '../brushes/TextureBrush';
 import { SingletonElementReferencesContextProvider } from './SingletonElementReferences';
+import { StorageContextProvider } from './StorageContext';
 
 const randomRoundFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
 const randomDiagonalFibers:{ position: DOMPoint, width: number, alpha:number }[] = [];
@@ -51,16 +52,16 @@ for (let i = 0; i < roundFibersNumber/2; i++) {
     });
 }
 
-export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<any, string | JSXElementConstructor<any>> | ReactFragment | ReactPortal | null | undefined; }) => {
+export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<unknown, string | JSXElementConstructor<unknown>> | ReactFragment | ReactPortal | null | undefined; }) => {
     const useDrawing = useReducer(reducer, { prev: [], next: [], });
     const useMenuOptions = useState<MenuOptions>({
         brushes: [
             new SolidBrush(),
             new TextureBrush(),
             new Marker(),
-            new StiffBrush(round as any),
-            new StiffBrush(oldRound as any),
-            new StiffBrush(diagonal as any),
+            new StiffBrush(round as ConstructorParameters<typeof StiffBrush>[0]),
+            new StiffBrush(oldRound as ConstructorParameters<typeof StiffBrush>[0]),
+            new StiffBrush(diagonal as ConstructorParameters<typeof StiffBrush>[0]),
             new StiffBrush(randomRoundFibers),
             new StiffBrush(randomDiagonalFibers),
         ],
@@ -80,7 +81,9 @@ export const AppStateProvider = (props: { children: string | number | boolean | 
     return<EditorContext.Provider value={useDrawing}>
         <MenuContext.Provider value={useMenuOptions}>
             <SingletonElementReferencesContextProvider>
-                {props.children}
+                <StorageContextProvider>
+                    {props.children}
+                </StorageContextProvider>
             </SingletonElementReferencesContextProvider>
         </MenuContext.Provider>
     </EditorContext.Provider>;

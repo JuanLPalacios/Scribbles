@@ -1,4 +1,4 @@
-import { createContext } from 'react';
+import { createContext, JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useReducer } from 'react';
 import { createDrawable } from '../generators/createDrawable';
 import { DrawableState } from '../types/DrawableState';
 import { LayerState } from '../types/LayerState';
@@ -121,6 +121,8 @@ const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction
     case 'drawing/moveLayer':
         return {  type: 'drawing/moveLayer', payload: { at: action.payload.to, to: action.payload.at } };
     case 'drawing/updateLayer':
+        // FIXME: this needs to be typed
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return {  type: 'drawing/updateLayer', payload: { at: action.payload.at, layer: Object.keys(action.payload.layer).reduce((prev, key) => ({ ...prev, [key]: (layers[action.payload.at] as any)[key] }), {}) } };
     case 'drawing/selectLayer':
         return {  type: 'drawing/selectLayer', payload: selectedLayer };
@@ -206,3 +208,10 @@ export const EditorContext = createContext<[EditorState, React.Dispatch<EditorAc
         prev: [],
         next: [],
     }, ()=>undefined]);
+
+export const EditorContextProvider = (props: { children: string | number | boolean | ReactElement<unknown, string | JSXElementConstructor<unknown>> | ReactFragment | ReactPortal | null | undefined; }) => {
+    const useDrawing = useReducer(reducer, { prev: [], next: [], });
+    return<EditorContext.Provider value={useDrawing}>
+        {props.children}
+    </EditorContext.Provider>;
+};

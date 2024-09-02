@@ -1,14 +1,12 @@
-import { createContext, ReactNode, useContext, useRef } from 'react';
+import { createContext, ReactNode, RefObject, useRef } from 'react';
 
-export const SingletonElementReferencesContext = createContext<{fileInput:HTMLInputElement|null}>({
-    fileInput: null
+export const SingletonElementReferencesContext = createContext<{fileInput:RefObject<HTMLInputElement>}>({
+    fileInput: { current: null }
 });
-
-export const useSingletonElementReferences = ()=>useContext(SingletonElementReferencesContext);
 
 export const SingletonElementReferencesContextProvider = ({ children }:{children:ReactNode})=>{
     const ref = useRef<HTMLInputElement>(null);
-    return <SingletonElementReferencesContext.Provider value={{ fileInput: ref.current }}>
+    return <SingletonElementReferencesContext.Provider value={{ fileInput: ref }}>
         {children}
         <div style={{ display: 'none' }}>
             <input type="file" ref={ref} />

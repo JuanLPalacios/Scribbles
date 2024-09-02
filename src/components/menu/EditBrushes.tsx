@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useContext, useState, useEffect } from 'react';
+import { useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import '../../css/Menu.css';
 import '../../css/menu/EditBrushes.css';
 import demoStroke from '../../demo/strokePreview.json';
@@ -22,16 +22,16 @@ import { abrToScribblesSerializable, brushFormObj, JSONValue, SerializedBrush } 
 import { SBR } from '../../lib/sbr';
 import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
+import { useStorage } from '../../hooks/useStorage';
+import SolidBrush from '../../brushes/Solid';
 
 let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
 let lastBrushes: Brush[];
 
 export const EditBrushes = () => {
-    const menuContext = useContext(MenuContext);
-    const [options, setOptions] = menuContext;
-    const {
-        brushes
-    } = options;
+    const [, setBrushes] = useStorage<SerializedBrush[]>('brushes');
+    const [options, setOptions] = useContext(MenuContext);
+    const [tempBrushes, setTempBrushes] = useState<Brush[]>([]);
     const [id] = useState(uid());
     const [currentBrush, setBrush] = useState<any>({
         scribbleBrushType: 2,
@@ -47,13 +47,12 @@ export const EditBrushes = () => {
         case 'abr':
             loadAbrBrushes(file)
                 .then(brushesData=>{
-                    setOptions({ ...options,
-                        brushes: [
-                            ...brushes,
-                            ...brushesData
-                                .map(x=>(x as AbrBrush))
-                                .map(abrToScribblesSerializable)
-                                .map(brushFormObj)] });
+                    setTempBrushes([
+                        ...tempBrushes,
+                        ...brushesData
+                            .map(x=>(x as AbrBrush))
+                            .map(abrToScribblesSerializable)
+                            .map(brushFormObj)]);
                 })
                 .catch(e=>console.error(e));
 
@@ -61,12 +60,11 @@ export const EditBrushes = () => {
         case 'sbr':
             SBR.jsonObj(file)
                 .then(brushesData=>{
-                    setOptions({ ...options,
-                        brushes: [
-                            ...brushes,
-                            ...brushesData
-                                .map(x=>(x as SerializedBrush))
-                                .map(brushFormObj)] });
+                    setTempBrushes([
+                        ...tempBrushes,
+                        ...brushesData
+                            .map(x=>(x as SerializedBrush))
+                            .map(brushFormObj)]);
                 })
                 .catch(e=>console.error(e));
 
@@ -74,14 +72,14 @@ export const EditBrushes = () => {
         }
     }, { accept: '.abr, .sbr' });
     const exportBrush = async ()=>{
-        const blob = await SBR.binary(brushes.map(brush=>brush.toObj()));
+        const blob = await SBR.binary(tempBrushes.map(brush=>brush.toObj()));
         saveAs(blob, 'brushes.sbr');
     };
-    const [state2, onChange] = useState({ selectedBrush: 0 });
-    const { selectedBrush } = state2;
+    const [selectedBrushIndex, setSelectedBrushIndex] = useState(0);
     const [editor] = useContext(EditorContext);
     const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, isValid, errors } = state;
+    const selectedBrush = tempBrushes[selectedBrushIndex] || new SolidBrush();
     const update = useCallback((e:React.ChangeEvent<CustomInput<JSONValue>>) => {
         let value;
         switch (e.target.type){
@@ -98,38 +96,59 @@ export const EditBrushes = () => {
         setBrush({ ...currentBrush, [e.target?.name]: value });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state]);
+    const save = useCallback(() => {
+        setState({ ...state, isOpen: false });
+        setOptions({
+            ...options,
+            brushes: tempBrushes
+                .map(x=>x.toObj())
+                .map(x=>(x as SerializedBrush))
+                .map(brushFormObj)
+
+        });
+        setBrushes(
+            tempBrushes
+                .map(x=>x.toObj())
+                .map(x=>(x as SerializedBrush))
+        );
+    }, [options, setBrushes, setOptions, state, tempBrushes]);
     const close = useCallback(() => {
         setState({ ...state, isOpen: false });
     }, [state]);
     const openModal = useCallback(() => {
         setState({ ...state, isOpen: true });
+        setTempBrushes(
+            options.brushes
+                .map(x=>x.toObj())
+                .map(x=>(x as SerializedBrush))
+                .map(brushFormObj));
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor, state]);
     useEffect(() => {
-        setBrush(brushes[selectedBrush].toObj());
+        setBrush(selectedBrush.toObj());
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [selectedBrush]);
-    useEffect(() => {
+    }, [selectedBrushIndex]);
+    useMemo(() => {
         const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
         if(('name' in currentBrush)&&(typeof currentBrush.name == 'string'))
             if(currentBrush.name.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
                 errors.name.push('Should not contain forbidden characters');
         const isValid = Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0;
-        if(isValid){
-            brushes[selectedBrush].loadObj(currentBrush);
-            if(previews)brushes[selectedBrush].renderPreview(previews.previews[selectedBrush], demoStroke as any, '#ffffff', .5, 15);
+        if((isValid)&&(tempBrushes.length>selectedBrushIndex)){
+            selectedBrush.loadObj(currentBrush);
+            if(previews)selectedBrush.renderPreview(previews.previews[selectedBrushIndex], demoStroke as any, '#ffffff', .5, 15);
         }
         setState({ ...state, errors, isValid });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBrush]);
-    useEffect(()=>{
-        if(lastBrushes !== brushes){
-            lastBrushes = brushes;
+    useMemo(()=>{
+        if(lastBrushes !== tempBrushes){
+            lastBrushes = tempBrushes;
             console.log('render previews');
-            previews = { previews: brushes.map(() => createPreview()), selectedPreview: createPreview() };
-            previews.previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5, 15));
+            previews = { previews: tempBrushes.map(() => createPreview()), selectedPreview: createPreview() };
+            previews.previews.forEach((preview, i) => tempBrushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5, 15));
         }
-    }, [brushes]);
+    }, [tempBrushes]);
     return <>
         <li>
             <button className='round-btn' onClick={openModal}>
@@ -150,7 +169,7 @@ export const EditBrushes = () => {
                 <div style={{ display: 'flex' }}>
                     <div className='brush-list' style={{ width: '10rem', flex: '1 1 auto' }}>
                         <ul className='brushes'>
-                            {previews?.previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrush ? 'selected' : ''} onMouseDown={()=>onChange({ ...state2, selectedBrush: i })} /></li>)}
+                            {previews?.previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrushIndex ? 'selected' : ''} onMouseDown={()=>setSelectedBrushIndex(i)} /></li>)}
                         </ul>
                     </div>
                     <div style={{ width: '8rem' }} className='brush-props'>
@@ -221,7 +240,7 @@ export const EditBrushes = () => {
                     </div>
                 </div>
                 <div className='actions'>
-                    <button disabled={!isValid}>save</button>
+                    <button disabled={!isValid} onClick={save}>save</button>
                     <button onClick={close}>cancel</button>
                 </div>
             </div>

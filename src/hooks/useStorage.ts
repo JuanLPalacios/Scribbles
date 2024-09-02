@@ -1,10 +1,11 @@
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { Serialized } from '../lib/Serialization';
 import { StorageContext, StorageType } from '../contexts/StorageContext';
 
-export function useStorage<T extends Serialized> (key:string, storage:StorageType='local') {
+export function useStorage<T extends Serialized|Serialized[]> (key:string, storage:StorageType='local'):[T|undefined, (value: T) => void] {
     const [{ local, session }, dispatch] = useContext(StorageContext);
     const usedContext = (storage==='local')?local:session;
+    const value = useMemo(()=>usedContext[key]?JSON.parse(usedContext[key]):undefined, [key, usedContext]);
     const setValue = useCallback((value:T) => {
         dispatch({ type: 'setStorage', payload: { key, storage, value: JSON.stringify(value) } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -15,5 +16,5 @@ export function useStorage<T extends Serialized> (key:string, storage:StorageTyp
             dispatch({ type: 'getStorage', payload: { key, storage } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [key, storage, usedContext]);
-    return [JSON.parse(usedContext[key]), setValue];
+    return [value, setValue];
 };

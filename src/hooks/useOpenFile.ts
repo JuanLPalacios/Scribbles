@@ -5,7 +5,7 @@ type Config = {
     multiple?:boolean
 };
 export const useOpenFile = (callback:(files:FileList)=>void, { accept, multiple }:Config) => {
-    const { fileInput } = useSingletonElementReferences();
+    const { fileInput: { current: fileInput } } = useSingletonElementReferences();
     const openFile = useCallback(()=>{
         if(!fileInput)return;
         if(accept)fileInput.accept=accept;

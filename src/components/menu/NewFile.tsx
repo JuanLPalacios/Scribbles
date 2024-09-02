@@ -58,6 +58,7 @@ export const NewFile = () => {
         if(name.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
             errors.name.push('Shuld not contain forbidden characters');
         setState({ ...state, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [height, name, width]);
     return <>
         <li>

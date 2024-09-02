@@ -16,6 +16,7 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         const { color, alpha, tolerance } = config;
         useEffect(()=>{
             if((color === undefined)||(alpha === undefined)||(tolerance === undefined))onChange({ ...config, color: '#000000', alpha: 1, tolerance: .15 });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [alpha, color, config, onChange]);
         return <div>
             <ColorInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
@@ -24,7 +25,7 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         </div>;
     };
 
-    setup({ editorContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: ToolEvent<FillOptions>): void {
+    setup({ editorContext: [drawing] }: ToolEvent<FillOptions>): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
@@ -36,7 +37,6 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         buffer.ctx.globalCompositeOperation = 'source-over';
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     dispose(): void {
     }
 
@@ -47,7 +47,7 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
     }
 
-    click({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
+    click({ point, editorContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const layer = layers[selectedLayer];
@@ -72,7 +72,7 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         canvas.ctx.globalAlpha = 1;
         canvas.ctx.drawImage(buffer.canvas, 0, 0);
         buffer.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
-        this, this.renderThumbnail(layer);
+        this.renderThumbnail(layer);
     }
 
     fill(canvas: DrawableState, buffer: DrawableState, tolerance:number, ox: number, oy: number, color: Uint8ClampedArray | number[], oColor: Uint8ClampedArray | number[]) {

@@ -25,12 +25,12 @@ const SKEW_ICONS = [
     hSkew
 ];
 
-type TransformOptions = any;
+type TransformOptions = unknown;
 
 export const transform = new (class Transform extends Tool<TransformOptions> {
     lastclickTime = 0;
     center = new DOMPoint();
-    handleH: Handle<any>[] = [];
+    handleH: Handle<unknown>[] = [];
     pivot = new DOMPoint();
     rotation = 0;
     initAngle = 0;

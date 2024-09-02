@@ -27,15 +27,17 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
             lastBrushes = brushes;
             console.log('render previews');
             previews = { previews: brushes.map(() => createPreview()), selectedPreview: createPreview() };
-            brushes[selectedBrush]?.renderPreview(previews.selectedPreview, demoStroke as any, '#ffffff', .5 || 1, 15);
-            previews.previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5 || 1, 15));
+            brushes[selectedBrush]?.renderPreview(previews.selectedPreview, demoStroke as never, '#ffffff', .5, 15);
+            previews.previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as never, '#ffffff', .5, 15));
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [brushes]);
     useEffect(()=>{
         if(previews){
             console.log('render selected preview');
-            brushes[selectedBrush]?.renderPreview(previews.selectedPreview, demoStroke as any, '#ffffff', .5 || 1, 15);
+            brushes[selectedBrush]?.renderPreview(previews.selectedPreview, demoStroke as never, '#ffffff', .5, 15);
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBrush]);
     return <>
         <TopMenuPortal>

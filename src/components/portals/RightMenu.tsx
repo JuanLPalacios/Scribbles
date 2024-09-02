@@ -27,7 +27,7 @@ export const RightMenu = ({ children }:MenuProps) => {
 export const RightMenuPortal = ({ children }:{children?: React.ReactNode}) => {
     const [container, setContainer] = useState(() => document.getElementById(id));
     useEffect(() => {
-        container || setContainer(document.getElementById(id));
+        if(!container)setContainer(document.getElementById(id));
     }, [container]);
     return container && ReactDOM.createPortal(children, container);
 };

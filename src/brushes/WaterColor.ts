@@ -4,6 +4,12 @@ import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
 export default class WaterColor extends Brush {
+    loadObj(_obj: object): void {
+        throw new Error('Method not implemented.');
+    }
+    toObj(): object {
+        throw new Error('Method not implemented.');
+    }
     lastPoint: Point = [0, 0];
     spred = 2;
     alpha:DrawableState;
@@ -105,8 +111,7 @@ export default class WaterColor extends Brush {
         this.lastPoint = point;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    endStroke(drawable:DrawableState, point:Point, color:string, width:number) {
+    endStroke(_drawable:DrawableState, _point:Point, _color:string, _width:number) {
         //this.alpha.ctx?.clearRect(0,0,this.alpha.canvas.width, this.alpha.canvas.height);
         //this.path.ctx?.clearRect(0,0,this.path.canvas.width, this.path.canvas.height);
     }

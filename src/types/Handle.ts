@@ -1,6 +1,6 @@
 import { CanvasEvent } from './CanvasEvent';
 
-export interface Handle<O = any> {
+export interface Handle<O = unknown> {
     key: number
     icon: string
     position: DOMPoint

@@ -1,9 +1,9 @@
 import { useCallback, useEffect } from 'react';
 
-export const useShortcut = (callback:()=>void, shorcuts:string[]) => {
+export const useShortcut = (callback:()=>void, shortcuts:string[]) => {
     const handleKeyPress = useCallback((event:KeyboardEvent) => {
-        shorcuts.forEach((shorcut)=>{
-            const keys = shorcut.split('+');
+        shortcuts.forEach((shortcut)=>{
+            const keys = shortcut.split('+');
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 switch(key){
@@ -20,7 +20,8 @@ export const useShortcut = (callback:()=>void, shorcuts:string[]) => {
             }
             callback();
         });
-    }, shorcuts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [shortcuts]);
 
     useEffect(() => {
         document.addEventListener('keydown', handleKeyPress);

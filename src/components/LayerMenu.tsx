@@ -31,6 +31,7 @@ function LayerMenu() {
         if(newLayerPopup.layerName.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
             errors.layerName.push('Shuld not contain forbidden characters');
         setNewLayerPopup({ ...newLayerPopup, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newLayerPopup.layerName]);
     if(!drawing) return <></>;
     const { selectedLayer, layers, height, width } = drawing;

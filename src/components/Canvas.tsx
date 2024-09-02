@@ -1,7 +1,7 @@
 import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
 import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
-import { MenuContext } from '../contexts/MenuOptions';
+import { MenuContext, MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
@@ -59,6 +59,7 @@ function Canvas() {
         setTool(tool);
         onChange(temp);
         editorDispatch({ type: 'editor/forceUpdate', payload: temp2 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tool]);
 
     useEffect(()=>{
@@ -76,13 +77,15 @@ function Canvas() {
                 }
             }, { passive: false });
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [containerRef.current]);
 
-    const getPointer = useCallback((e:React.PointerEvent<HTMLDivElement>):CanvasEvent<any>=>{
+    const getPointer = useCallback((e:React.PointerEvent<HTMLDivElement>):CanvasEvent<MenuOptions>=>{
         if(!containerRef.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext };
         const { clientX, clientY } = e;
         const { top, left } = containerRef.current.getBoundingClientRect();
         return { point: (new DOMPoint(clientX - left, clientY - top)).matrixTransform(transform.inverse()), editorContext: editorContext, menuContext };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editorContext, menuContext, transform, containerRef.current]);
 
     function pointerdownHandler(ev:React.PointerEvent<HTMLDivElement>) {
@@ -108,16 +111,16 @@ function Canvas() {
         if (keys.length === 2) {
             ev.preventDefault();
             ev.stopPropagation();
-            const prev = oldTouches[keys[0] as any as number];
-            const newp = touches[keys[0] as any as number];
+            const prev = oldTouches[keys[0] as unknown as number];
+            const newp = touches[keys[0] as unknown as number];
             const x = newp.clientX - left;
             const y = newp.clientY - top;
             const px = newp.clientX - prev.clientX;
             const py = newp.clientY - prev.clientY;
-            const vx = touches[keys[1] as any as number].screenX -touches[keys[0] as any as number].screenX,
-                vy = touches[keys[1] as any as number].clientY -touches[keys[0] as any as number].clientY,
-                vox = oldTouches[keys[1] as any as number].screenX -oldTouches[keys[0] as any as number].screenX,
-                voy = oldTouches[keys[1] as any as number].clientY -oldTouches[keys[0] as any as number].clientY;
+            const vx = touches[keys[1] as unknown as number].screenX -touches[keys[0] as unknown as number].screenX,
+                vy = touches[keys[1] as unknown as number].clientY -touches[keys[0] as unknown as number].clientY,
+                vox = oldTouches[keys[1] as unknown as number].screenX -oldTouches[keys[0] as unknown as number].screenX,
+                voy = oldTouches[keys[1] as unknown as number].clientY -oldTouches[keys[0] as unknown as number].clientY;
             const scale = Math.sqrt((vx**2+vy**2))/Math.sqrt((vox**2+voy**2));
             const angle = Math.atan2(vy, vx) - Math.atan2(voy, vox);
 

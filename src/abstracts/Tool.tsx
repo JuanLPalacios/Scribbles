@@ -3,7 +3,7 @@ import { CanvasEvent } from '../types/CanvasEvent';
 import { LayerState } from '../types/LayerState';
 import { ToolEvent } from '../types/ToolEvent';
 
-export default abstract class Tool< P = any > {
+export default abstract class Tool< P = unknown > {
     renderThumbnail(layer:LayerState){
         const { canvas, thumbnail } = layer;
         if(thumbnail.ctx){
@@ -14,10 +14,10 @@ export default abstract class Tool< P = any > {
 
     abstract setup(event:ToolEvent<P>):void
     abstract dispose(event:ToolEvent<P>):void
-    mouseDown(event: CanvasEvent<P>){ return; }
-    mouseUp(event: CanvasEvent<P>){ return; }
-    mouseMove(event: CanvasEvent<P>){ return; }
-    click(event: CanvasEvent<P>){ return; }
+    mouseDown(_event: CanvasEvent<P>){ return; }
+    mouseUp(_event: CanvasEvent<P>){ return; }
+    mouseMove(_event: CanvasEvent<P>){ return; }
+    click(_event: CanvasEvent<P>){ return; }
 
     Menu:(props: {config:P, onChange:Dispatch<SetStateAction<P>>}) => JSX.Element = () => <></>;
 }

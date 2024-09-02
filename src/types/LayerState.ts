@@ -2,6 +2,7 @@ import { BlendMode } from './BlendMode';
 import { DrawableState } from './DrawableState';
 import { Rect } from './Rect';
 import { Handle } from './Handle';
+import { MenuOptions } from '../contexts/MenuOptions';
 
 export interface LayerState {
   key: number;
@@ -13,7 +14,7 @@ export interface LayerState {
   visible: boolean
   opacity: number
   mixBlendMode: BlendMode
-  handles: Handle[]
+  handles: Handle<MenuOptions>[]
   imageData: ImageData
 }
 

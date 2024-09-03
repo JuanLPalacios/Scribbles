@@ -1,10 +1,10 @@
-import { JSXElementConstructor, ReactElement, ReactFragment, ReactPortal } from 'react';
+import { ReactNode } from 'react';
 import { EditorContextProvider } from './DrawingState';
 import { MenuContextProvider } from './MenuOptions';
 import { SingletonElementReferencesContextProvider } from './SingletonElementReferences';
 import { StorageContextProvider } from './StorageContext';
 
-export const AppStateProvider = (props: { children: string | number | boolean | ReactElement<unknown, string | JSXElementConstructor<unknown>> | ReactFragment | ReactPortal | null | undefined; }) => {
+export const AppStateProvider = (props: { children: ReactNode }) => {
     return<StorageContextProvider>
         <SingletonElementReferencesContextProvider>
             <EditorContextProvider>

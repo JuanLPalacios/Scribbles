@@ -5,15 +5,11 @@ import { AppStateProvider } from './contexts/AppContext';
 import { content, overlay } from './css/Modal.css';
 import * as serviceWorkerRegistration from './serviceWorkerRegistration';
 import './css/index.css';
-import { loadAbrFromArrayBuffer } from 'abr-js';
-import { base64 } from './base64-2';
 
 ReactModal.defaultStyles = {
     content: { ...ReactModal.defaultStyles.content, ...content },
     overlay: { ...ReactModal.defaultStyles.overlay, ...overlay }
 };
-
-loadAbrFromArrayBuffer((Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer), 'test');
 
 const root = ReactDOM.createRoot(document.getElementById('root') || document.body);
 root.render(

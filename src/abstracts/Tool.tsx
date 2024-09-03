@@ -3,7 +3,8 @@ import { CanvasEvent } from '../types/CanvasEvent';
 import { LayerState } from '../types/LayerState';
 import { ToolEvent } from '../types/ToolEvent';
 
-export default abstract class Tool< P = unknown > {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default abstract class Tool<P = any> {
     renderThumbnail(layer:LayerState){
         const { canvas, thumbnail } = layer;
         if(thumbnail.ctx){

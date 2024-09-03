@@ -1,9 +1,8 @@
-import { useContext } from 'react';
-import { MenuContext } from '../contexts/MenuOptions';
 import '../css/Toolbar.css';
+import { useMenu } from '../hooks/useMenu';
 
 function Toolbar() {
-    const menuContext = useContext(MenuContext);
+    const menuContext = useMenu();
     const [options, onChange] = menuContext;
     const {
         tools, selectedTool

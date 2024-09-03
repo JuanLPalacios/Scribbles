@@ -1,25 +1,19 @@
-import { createContext, JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useEffect, useState } from 'react';
-import Marker from '../brushes/Marker';
-import SolidBrush from '../brushes/Solid';
-import StiffBrush from '../brushes/StiffBrush';
+import { createContext, ReactNode, useMemo, useState } from 'react';
 import { uid } from '../lib/uid';
 import { draw } from '../tools/Draw';
 import { erase } from '../tools/Erase';
 import { fill } from '../tools/Fill';
 import { transform } from '../tools/Transform';
-import round from '../brushes/stiff/round.json';
-import oldRound from '../brushes/stiff/oldRound.json';
-import diagonal from '../brushes/stiff/flat.json';
 import drawIcon from '../icons/brush-f-svgrepo-com.svg';
 import eraseIcon from '../icons/erase-svgrepo-com.svg';
 import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
 import transformIcon from '../icons/nametag-svgrepo-com.svg';
-import TextureBrush from '../brushes/TextureBrush';
-import Brush from '../abstracts/Brush';
 import { ToolButton } from '../types/ToolButton';
 import { StatePair } from '../types/StatePair';
-import { useStorage } from '../hooks/useStorage';
-import { brushFormObj, SerializedBrush } from '../lib/Serialization';
+import { useBrushes } from '../hooks/useBrushes';
+import { BrushesContextProvider, BrushOptions } from './BrushOptions';
+
+export type MenuOptions2 = ToolOptions & ColorOptions & AlphaOptions & ToleranceOptions
 
 export type MenuOptions = ToolOptions & BrushOptions & ColorOptions & AlphaOptions & ToleranceOptions
 
@@ -34,12 +28,6 @@ export type ColorOptions = {
 
 export type AlphaOptions = {
     alpha:number,
-};
-
-export type BrushOptions = {
-    brushes:Brush[],
-    selectedBrush:number,
-    brushWidth:number,
 };
 
 export type ToleranceOptions = {
@@ -60,20 +48,10 @@ export const MenuContext = createContext<StatePair<MenuOptions>>([
     ()=>undefined]
 );
 
-export const MenuContextProvider = (props: { children: string | number | boolean | ReactElement<unknown, string | JSXElementConstructor<unknown>> | ReactFragment | ReactPortal | null | undefined; }) => {
-    const [brushes] = useStorage<SerializedBrush[]>('brushes');
-    const useMenuOptions = useState<MenuOptions>(()=>{
-        const r:MenuOptions = {
-            brushes: [
-                new SolidBrush(),
-                new TextureBrush(),
-                new Marker(),
-                new StiffBrush(round as ConstructorParameters<typeof StiffBrush>[0]),
-                new StiffBrush(oldRound as ConstructorParameters<typeof StiffBrush>[0]),
-                new StiffBrush(diagonal as ConstructorParameters<typeof StiffBrush>[0]),
-            ],
-            selectedBrush: 0,
-            brushWidth: 20,
+export const MenuContextProvider2 = (props: { children: ReactNode }) => {
+    const [brushesOptions, setBrushesOptions] = useBrushes();
+    const [options2, setOptions2] = useState<MenuOptions2>(()=>{
+        const r:MenuOptions2 = {
             tools: [
                 { key: uid(), Tool: draw, name: 'draw', icon: drawIcon },
                 { key: uid(), Tool: erase, name: 'erase', icon: eraseIcon },
@@ -87,13 +65,29 @@ export const MenuContextProvider = (props: { children: string | number | boolean
         };
         return r;
     });
-    const [options, setOptions] = useMenuOptions;
-    useEffect(()=>{
-        if(brushes)
-            setOptions({ ...options, brushes: brushes.map(brushFormObj) });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [brushes]);
+    const useMenuOptions = useMemo<StatePair<MenuOptions>>(()=>([
+        {
+            ...options2,
+            ...brushesOptions
+        },
+        (options)=>{
+            if(typeof options === 'function') options = options(useMenuOptions[0]);
+            const { brushes, brushWidth, selectedBrush, ...options2 } =  options;
+            setBrushesOptions({ brushes, brushWidth, selectedBrush });
+            setOptions2(options2);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    ]), [brushesOptions, options2]);
     return<MenuContext.Provider value={useMenuOptions}>
         {props.children}
     </MenuContext.Provider>;
 };
+
+export const MenuContextProvider = (props: { children: ReactNode }) => {
+    const providers = [
+        BrushesContextProvider,
+        MenuContextProvider2
+    ];
+    return providers.reverse().reduce((children, Provider)=><Provider>{children}</Provider>, props.children);
+};
+

@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import Tool from '../abstracts/Tool';
-import { AlphaOptions, BrushOptions } from '../contexts/MenuOptions';
+import { AlphaOptions } from '../contexts/MenuOptions';
+import { BrushOptions } from '../contexts/BrushOptions';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { createDrawable } from '../generators/createDrawable';
 import { CanvasEvent } from '../types/CanvasEvent';

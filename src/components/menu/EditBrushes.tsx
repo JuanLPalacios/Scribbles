@@ -9,7 +9,6 @@ import exportIcon from '../../icons/external-svgrepo-com.svg';
 import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 import { DrawableState } from '../../types/DrawableState';
-import { MenuContext } from '../../contexts/MenuOptions';
 import { createDrawable } from '../../generators/createDrawable';
 import { Drawable } from '../Drawable';
 import { uid } from '../../lib/uid';
@@ -24,13 +23,14 @@ import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
 import { useStorage } from '../../hooks/useStorage';
 import SolidBrush from '../../brushes/Solid';
+import { useMenu } from '../../hooks/useMenu';
 
 let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
 let lastBrushes: Brush[];
 
 export const EditBrushes = () => {
     const [, setBrushes] = useStorage<SerializedBrush[]>('brushes');
-    const [options, setOptions] = useContext(MenuContext);
+    const [options, setOptions] = useMenu();
     const [tempBrushes, setTempBrushes] = useState<Brush[]>([]);
     const [id] = useState(uid());
     const [currentBrush, setBrush] = useState<any>({

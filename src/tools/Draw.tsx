@@ -3,7 +3,8 @@ import Tool from '../abstracts/Tool';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { ColorInput } from '../components/inputs/ColorInput';
-import { AlphaOptions, BrushOptions, ColorOptions } from '../contexts/MenuOptions';
+import { AlphaOptions, ColorOptions } from '../contexts/MenuOptions';
+import { BrushOptions } from '../contexts/BrushOptions';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
 

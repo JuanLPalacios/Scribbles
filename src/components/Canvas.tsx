@@ -1,17 +1,18 @@
 import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
 import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
-import { MenuContext, MenuOptions } from '../contexts/MenuOptions';
+import { MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { QuickStart } from './QuickStart';
+import { useMenu } from '../hooks/useMenu';
 
 export const CanvasContext = createContext({});
 
 function Canvas() {
     const editorContext = useContext(EditorContext);
-    const menuContext = useContext(MenuContext);
+    const menuContext = useMenu();
     const [editor, editorDispatch] = editorContext;
     const [options, onChange] = menuContext;
     const [prevTool, setTool] = useState<Tool>();

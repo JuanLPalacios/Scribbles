@@ -1,4 +1,4 @@
-import { createContext, JSXElementConstructor, ReactElement, ReactFragment, ReactPortal, useReducer } from 'react';
+import { createContext, ReactNode, useReducer } from 'react';
 import { createDrawable } from '../generators/createDrawable';
 import { DrawableState } from '../types/DrawableState';
 import { LayerState } from '../types/LayerState';
@@ -138,6 +138,7 @@ const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction
     }
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const reducer = (state:EditorState, action: EditorAction):EditorState => {
     const { next, prev, drawing } = state;
     switch (action.type) {
@@ -209,7 +210,7 @@ export const EditorContext = createContext<[EditorState, React.Dispatch<EditorAc
         next: [],
     }, ()=>undefined]);
 
-export const EditorContextProvider = (props: { children: string | number | boolean | ReactElement<unknown, string | JSXElementConstructor<unknown>> | ReactFragment | ReactPortal | null | undefined; }) => {
+export const EditorContextProvider = (props: { children: ReactNode; }) => {
     const useDrawing = useReducer(reducer, { prev: [], next: [], });
     return<EditorContext.Provider value={useDrawing}>
         {props.children}

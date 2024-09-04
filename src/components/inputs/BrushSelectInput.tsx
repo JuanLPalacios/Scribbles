@@ -1,14 +1,13 @@
 import '../../css/inputs/BrushSelectInput.css';
-import demoStroke from '../../demo/strokePreview.json';
-import { Dispatch, SetStateAction, useEffect, useState, CSSProperties, useMemo } from 'react';
+import { Dispatch, SetStateAction, useState, CSSProperties, useMemo } from 'react';
 import { AlphaOptions } from '../../contexts/MenuOptions';
 import { BrushOptions } from '../../contexts/BrushOptions';
-import { createDrawable } from '../../generators/createDrawable';
 import { uid } from '../../lib/uid';
-import { Drawable } from '../Drawable';
 import { LeftMenuPortal } from '../portals/LeftMenu';
 import { TopMenuPortal } from '../portals/TopMenu';
+import { BrushPreview } from './BrushPreview';
 import Brush from '../../abstracts/Brush';
+import { DrawableState } from '../../types/DrawableState';
 
 const style:CSSProperties = {
     display: 'flex',
@@ -16,13 +15,21 @@ const style:CSSProperties = {
 };
 
 export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:Dispatch<SetStateAction<BrushOptions & AlphaOptions>>}) => {
-    const { brushes, selectedBrush, brushWidth, onChange } = props;
+    const { brushesPacks: brushes, selectedBrush, brushWidth, onChange } = props;
+    const [currentSelectedBrush, setCurrentSelectedBrush] = useState<{
+        brush: Brush;
+        preview?: DrawableState;
+    }>({ brush: brushes[selectedBrush].brush });
+    const { preview } = currentSelectedBrush;
+    useMemo(()=>{
+        setCurrentSelectedBrush({ brush: brushes[selectedBrush].brush, preview });
+    }, [brushes, preview, selectedBrush]);
     const [id] = useState(uid());
     return <>
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
                 <button>
-                    <BrushPreview brush={brushes[selectedBrush]} />Brush
+                    <BrushPreview brush={currentSelectedBrush} />Brush
                 </button>
                 <ul>
                     {brushes.map((brush, i) => <li key={id+'-'+i}><BrushPreview brush={brush} selected={i===selectedBrush} onMouseDown={() => onChange({ ...props, selectedBrush: i })}/></li>)}
@@ -39,14 +46,3 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
         </LeftMenuPortal>
     </>;
 };
-
-const createPreview = () => createDrawable({ size: [150, 30] });
-
-function BrushPreview({ brush, selected, onMouseDown }:{ brush:Brush, selected?: boolean, onMouseDown?: React.MouseEventHandler<HTMLDivElement> }) {
-    const preview = useMemo(createPreview, []);
-    useEffect(()=>{
-        brush.renderPreview(preview, demoStroke as never, '#ffffff', .5, 15);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [brush]);
-    return <Drawable canvas={preview.canvas} className={ selected ? 'selected' : ''} onMouseDown={onMouseDown} />;
-}

@@ -36,7 +36,7 @@ export type ToleranceOptions = {
 
 export const MenuContext = createContext<StatePair<MenuOptions>>([
     {
-        brushes: [],
+        brushesPacks: [],
         brushWidth: 0,
         selectedBrush: 0,
         selectedTool: 0,
@@ -72,8 +72,8 @@ export const MenuContextProvider2 = (props: { children: ReactNode }) => {
         },
         (options)=>{
             if(typeof options === 'function') options = options(useMenuOptions[0]);
-            const { brushes, brushWidth, selectedBrush, ...options2 } =  options;
-            setBrushesOptions({ brushes, brushWidth, selectedBrush });
+            const { brushesPacks: brushes, brushWidth, selectedBrush, ...options2 } =  options;
+            setBrushesOptions({ brushesPacks: brushes, brushWidth, selectedBrush });
             setOptions2(options2);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps

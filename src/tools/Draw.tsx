@@ -39,7 +39,7 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         buffer.ctx?.restore();
     }
 
-    mouseDown({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
+    mouseDown({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
@@ -48,10 +48,10 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         this.down = true;
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
-        brush.startStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
+        brush.brush.startStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
     }
 
-    mouseUp({ point, editorContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
+    mouseUp({ point, editorContext: [drawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
@@ -60,14 +60,14 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
         const { canvas, buffer } = layer;
-        brush.endStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
+        brush.brush.endStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
         canvas.ctx?.drawImage(buffer.canvas, 0, 0);
         buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
         this.down = false;
         this.renderThumbnail(layer);
     }
 
-    mouseMove({ point, editorContext: [drawing], menuContext: [{ color, alpha, brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
+    mouseMove({ point, editorContext: [drawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>): void {
         if(!drawing.drawing) return;
         const { layers, selectedLayer } = drawing.drawing;
         const brush = brushes[selectedBrush];
@@ -75,6 +75,6 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         const { x, y } = point;
         const { rect: { position: [dx, dy] } } = layer;
         if (!this.down) return;
-        brush.drawStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
+        brush.brush.drawStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
     }
 })();

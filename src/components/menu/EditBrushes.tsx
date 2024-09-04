@@ -1,43 +1,34 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import '../../css/Menu.css';
 import '../../css/menu/EditBrushes.css';
-import demoStroke from '../../demo/strokePreview.json';
 import brushIcon from '../../icons/brush-f-svgrepo-com.svg';
 import importIcon from '../../icons/internal-svgrepo-com.svg';
 import exportIcon from '../../icons/external-svgrepo-com.svg';
 import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
 import { DrawableState } from '../../types/DrawableState';
-import { createDrawable } from '../../generators/createDrawable';
-import { Drawable } from '../Drawable';
 import { uid } from '../../lib/uid';
 //import { abrBrushes } from 'abr-js';
 import Brush from '../../abstracts/Brush';
 import { InputImage } from '../inputs/InputImage';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { loadAbrBrushes } from 'abr-js';
-import { abrToScribblesSerializable, brushFormObj, JSONValue, SerializedBrush } from '../../lib/Serialization';
+import { abrToScribblesSerializable, brushFormObj, JSONValue, Serialized, SerializedBrush } from '../../lib/Serialization';
 import { SBR } from '../../lib/sbr';
 import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
 import { useStorage } from '../../hooks/useStorage';
 import SolidBrush from '../../brushes/Solid';
 import { useMenu } from '../../hooks/useMenu';
-
-let previews:{previews:DrawableState[], selectedPreview:DrawableState}|undefined;
-let lastBrushes: Brush[];
+import { BrushPreview } from '../inputs/BrushPreview';
 
 export const EditBrushes = () => {
     const [, setBrushes] = useStorage<SerializedBrush[]>('brushes');
     const [options, setOptions] = useMenu();
-    const [tempBrushes, setTempBrushes] = useState<Brush[]>([]);
+    const [tempBrushes, setTempBrushes] = useState<{ brush: Brush; preview?: DrawableState; }[]>([]);
     const [id] = useState(uid());
-    const [currentBrush, setBrush] = useState<any>({
-        scribbleBrushType: 2,
-        spacing: 15,
-        antiAliasing: false,
-        brushTipImage: {},
+    const [currentBrush, setBrush] = useState<Serialized>({
     });
     const importBrush = useOpenFile((files)=>{
         if(files.length==0)return;
@@ -52,7 +43,9 @@ export const EditBrushes = () => {
                         ...brushesData
                             .map(x=>(x as AbrBrush))
                             .map(abrToScribblesSerializable)
-                            .map(brushFormObj)]);
+                            .map(brushFormObj)
+                            .map(brush=>({ brush }))
+                    ]);
                 })
                 .catch(e=>console.error(e));
 
@@ -64,7 +57,9 @@ export const EditBrushes = () => {
                         ...tempBrushes,
                         ...brushesData
                             .map(x=>(x as SerializedBrush))
-                            .map(brushFormObj)]);
+                            .map(brushFormObj)
+                            .map(brush=>({ brush }))
+                    ]);
                 })
                 .catch(e=>console.error(e));
 
@@ -72,14 +67,14 @@ export const EditBrushes = () => {
         }
     }, { accept: '.abr, .sbr' });
     const exportBrush = async ()=>{
-        const blob = await SBR.binary(tempBrushes.map(brush=>brush.toObj()));
+        const blob = await SBR.binary(tempBrushes.map(pack=>pack.brush.toObj()));
         saveAs(blob, 'brushes.sbr');
     };
     const [selectedBrushIndex, setSelectedBrushIndex] = useState(0);
     const [editor] = useContext(EditorContext);
     const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, isValid, errors } = state;
-    const selectedBrush = tempBrushes[selectedBrushIndex] || new SolidBrush();
+    const selectedBrush = tempBrushes[selectedBrushIndex] || { brush: new SolidBrush() };
     const update = useCallback((e:React.ChangeEvent<CustomInput<JSONValue>>) => {
         let value;
         switch (e.target.type){
@@ -100,15 +95,15 @@ export const EditBrushes = () => {
         setState({ ...state, isOpen: false });
         setOptions({
             ...options,
-            brushes: tempBrushes
-                .map(x=>x.toObj())
+            brushesPacks: tempBrushes
+                .map(x=>x.brush.toObj())
                 .map(x=>(x as SerializedBrush))
                 .map(brushFormObj)
-
+                .map(brush=>({ brush }))
         });
         setBrushes(
             tempBrushes
-                .map(x=>x.toObj())
+                .map(x=>x.brush.toObj())
                 .map(x=>(x as SerializedBrush))
         );
     }, [options, setBrushes, setOptions, state, tempBrushes]);
@@ -118,14 +113,16 @@ export const EditBrushes = () => {
     const openModal = useCallback(() => {
         setState({ ...state, isOpen: true });
         setTempBrushes(
-            options.brushes
-                .map(x=>x.toObj())
+            options.brushesPacks
+                .map(x=>x.brush.toObj())
                 .map(x=>(x as SerializedBrush))
-                .map(brushFormObj));
+                .map(brushFormObj)
+                .map(brush=>({ brush }))
+        );
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor, state]);
     useEffect(() => {
-        setBrush(selectedBrush.toObj());
+        setBrush(selectedBrush.brush.toObj());
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBrushIndex]);
     useMemo(() => {
@@ -135,20 +132,12 @@ export const EditBrushes = () => {
                 errors.name.push('Should not contain forbidden characters');
         const isValid = Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0;
         if((isValid)&&(tempBrushes.length>selectedBrushIndex)){
-            selectedBrush.loadObj(currentBrush);
-            if(previews)selectedBrush.renderPreview(previews.previews[selectedBrushIndex], demoStroke as any, '#ffffff', .5, 15);
+            selectedBrush.brush.loadObj(currentBrush);
         }
+        if(isValid)setTempBrushes(tempBrushes.map((x, i)=>(selectedBrushIndex===i)?{ ...x, brush: brushFormObj(currentBrush as SerializedBrush) }:x));
         setState({ ...state, errors, isValid });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBrush]);
-    useMemo(()=>{
-        if(lastBrushes !== tempBrushes){
-            lastBrushes = tempBrushes;
-            console.log('render previews');
-            previews = { previews: tempBrushes.map(() => createPreview()), selectedPreview: createPreview() };
-            previews.previews.forEach((preview, i) => tempBrushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5, 15));
-        }
-    }, [tempBrushes]);
     return <>
         <li>
             <button className='round-btn' onClick={openModal}>
@@ -169,7 +158,7 @@ export const EditBrushes = () => {
                 <div style={{ display: 'flex' }}>
                     <div className='brush-list' style={{ width: '10rem', flex: '1 1 auto' }}>
                         <ul className='brushes'>
-                            {previews?.previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrushIndex ? 'selected' : ''} onMouseDown={()=>setSelectedBrushIndex(i)} /></li>)}
+                            {tempBrushes.map((brush, i) => <li key={id+'-'+i}><BrushPreview brush={brush} selected={i==selectedBrushIndex} onMouseDown={()=>setSelectedBrushIndex(i)} /></li>)}
                         </ul>
                     </div>
                     <div style={{ width: '8rem' }} className='brush-props'>
@@ -180,7 +169,10 @@ export const EditBrushes = () => {
                                 </div>
                                 <input type="text" name='name' autoComplete="off" value={currentBrush.name} onChange={update} />
                             </label>}
-                        {('brushTipImage' in currentBrush)&&(typeof currentBrush.brushTipImage == 'object') &&
+                        {('brushTipImage' in currentBrush)
+                        &&(typeof currentBrush.brushTipImage == 'object')
+                        &&('type' in currentBrush.brushTipImage)
+                        &&(currentBrush.brushTipImage.type == 'img')&&
                             <label>
                                 <div>
                                 Tip
@@ -247,6 +239,3 @@ export const EditBrushes = () => {
         </ReactModal>
     </>;
 };
-
-const createPreview = () => createDrawable({ size: [150, 30] });
-

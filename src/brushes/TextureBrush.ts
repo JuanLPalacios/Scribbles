@@ -14,6 +14,7 @@ export type SerializedTextureBrush = {
 }
 
 export default class TextureBrush extends Brush {
+    img?:HTMLImageElement;
     lastPoint:Point = [0, 0];
     segments:[Point, Point][] = [];
     lastSegments:Point[] = [];
@@ -33,14 +34,16 @@ export default class TextureBrush extends Brush {
         const { ctx, canvas } = this._brushTipImage;
         if(!ctx) return;
         const img = new Image;
-        img.onload = ()=>{
+        this.img = img;
+        img.addEventListener('load', ()=>{
             canvas.width = 0; //forces the canvas to clear
             canvas.width = img.width;
             canvas.height = img.height;
             this.textureWith = Math.max(img.width, img.height);
             ctx.globalCompositeOperation = 'source-over';
             ctx.drawImage(img, 0, 0);
-        };
+            this.img = undefined;
+        });
         img.src = value.value;
     }
 
@@ -139,5 +142,12 @@ export default class TextureBrush extends Brush {
         const brush = new TextureBrush();
         brush.loadObj(data);
         return brush;
+    }
+
+    renderPreview(...params:[DrawableState, Point[], string, number, number]): void {
+        super.renderPreview(...params);
+        this.img?.addEventListener('load', ()=>{
+            super.renderPreview(...params);
+        });
     }
 }

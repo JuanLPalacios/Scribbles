@@ -3,14 +3,15 @@ import '../../css/inputs/InputImage.css';
 import { SerializedImage } from '../../brushes/SerializedOject';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { CustomInput } from '../../types/CustomInput';
+
+export type ImageInput = CustomInput<SerializedImage>;
+
 type Params = {
     name?: string | undefined;
     value?: SerializedImage;
     style?: CSSProperties | undefined;
     onChange?: ChangeEventHandler<ImageInput> | undefined;
 };
-
-export type ImageInput = CustomInput<SerializedImage>;
 
 export const InputImage = ({ name, onChange, style, value }:Params)=>{
     const ref2 = useRef<HTMLInputElement>(null);

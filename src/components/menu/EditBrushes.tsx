@@ -14,7 +14,7 @@ import Brush from '../../abstracts/Brush';
 import { InputImage } from '../inputs/InputImage';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { loadAbrBrushes } from 'abr-js';
-import { abrToScribblesSerializable, brushFormObj, JSONValue, Serialized, SerializedBrush } from '../../lib/Serialization';
+import { abrToScribblesSerializable, brushFormObj, JSONValue, SerializedBrush } from '../../lib/Serialization';
 import { SBR } from '../../lib/sbr';
 import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
@@ -22,14 +22,15 @@ import { useStorage } from '../../hooks/useStorage';
 import SolidBrush from '../../brushes/Solid';
 import { useMenu } from '../../hooks/useMenu';
 import { BrushPreview } from '../inputs/BrushPreview';
+import { BrushList } from '../../lib/BrushList';
 
 export const EditBrushes = () => {
     const [, setBrushes] = useStorage<SerializedBrush[]>('brushes');
     const [options, setOptions] = useMenu();
     const [tempBrushes, setTempBrushes] = useState<{ brush: Brush; preview?: DrawableState; }[]>([]);
     const [id] = useState(uid());
-    const [currentBrush, setBrush] = useState<Serialized>({
-    });
+    const [currentBrush, setBrush] = useState<SerializedBrush>({
+    } as SerializedBrush);
     const importBrush = useOpenFile((files)=>{
         if(files.length==0)return;
         const file = files[0];
@@ -75,19 +76,22 @@ export const EditBrushes = () => {
     const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, isValid, errors } = state;
     const selectedBrush = tempBrushes[selectedBrushIndex] || { brush: new SolidBrush() };
-    const update = useCallback((e:React.ChangeEvent<CustomInput<JSONValue>>) => {
+    const update = useCallback((e:React.ChangeEvent<CustomInput<JSONValue>|HTMLSelectElement>) => {
         let value;
-        switch (e.target.type){
-        case('number'):
+        if(e.target.name!='scribbleBrushType')
+            switch (e.target.type){
+            case('number'):
+                value = +e.target.value;
+                break;
+            case('checkbox'):
+                value = e.target.checked;
+                break;
+            default:
+                value = e.target.value;
+                break;
+            }
+        else
             value = +e.target.value;
-            break;
-        case('checkbox'):
-            value = e.target.checked;
-            break;
-        default:
-            value = e.target.value;
-            break;
-        }
         setBrush({ ...currentBrush, [e.target?.name]: value });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state]);
@@ -122,7 +126,7 @@ export const EditBrushes = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editor, state]);
     useEffect(() => {
-        setBrush(selectedBrush.brush.toObj());
+        setBrush(selectedBrush.brush.toObj() as SerializedBrush);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBrushIndex]);
     useMemo(() => {
@@ -162,6 +166,17 @@ export const EditBrushes = () => {
                         </ul>
                     </div>
                     <div style={{ width: '8rem' }} className='brush-props'>
+                        {('scribbleBrushType' in currentBrush)&&(typeof currentBrush.scribbleBrushType == 'number') &&
+                            <label>
+                                <div>
+                                Type
+                                </div>
+                                <select name="scribbleBrushType" value={currentBrush.scribbleBrushType} onChange={update}>
+                                    {Object.values(BrushList)
+                                        .filter(x=>(typeof x == 'number'))
+                                        .map((key)=><option value={key} >{BrushList[key]}</option>)}
+                                </select>
+                            </label>}
                         {('name' in currentBrush)&&(typeof currentBrush.name == 'string') &&
                             <label>
                                 <div>

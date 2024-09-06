@@ -158,7 +158,7 @@ export default class SolidBrush extends Brush {
         };
     }
 
-    loadObj({ name, angle, diameter, hardness, roundness, spacing }:SerializedSolidBrush) {
+    loadObj({ name='', angle=0, diameter=1, hardness=1, roundness=1, spacing=0 }:SerializedSolidBrush) {
         this.name = name;
         this.angle = angle;
         this.strokeAngle = [Math.sin(angle*Math.PI/180), -Math.cos(angle*Math.PI/180)];

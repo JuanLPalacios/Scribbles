@@ -18,13 +18,14 @@ export default class StiffBrush extends Brush {
     fibers: { position: DOMPoint, width: number, alpha:number }[];
     scaledFibers: { position: DOMPoint, width: number, alpha:number }[];
 
+    constructor()
     constructor(fibers: { position: DOMPoint, width: number, alpha:number }[])
     constructor(fibers: { position: DOMPoint, width: number, alpha:number }[], name:string)
-    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[], name?:string){
+    constructor(fibers?: { position: DOMPoint, width: number, alpha:number }[], name?:string){
         super();
         this.name = name || '';
-        this.fibers = fibers;
-        this.scaledFibers = fibers;
+        this.fibers = fibers||[];
+        this.scaledFibers = fibers||[];
     }
 
     startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
@@ -86,14 +87,15 @@ export default class StiffBrush extends Brush {
         return { scribbleBrushType: BrushList.Stiff, fibers: fibers.map(serializeJSON), name };
     }
 
-    loadObj({ name, fibers }:SerializedStiffBrush) {
+    loadObj({ name='', fibers=[] }:SerializedStiffBrush) {
         this.name = name;
         this.fibers = fibers.map(parseSerializedJSON);
     }
 
     static formObj(data:SerializedStiffBrush):StiffBrush {
-        const { name, fibers } = data;
-        return new StiffBrush(fibers.map(parseSerializedJSON), name);
+        const brush = new StiffBrush();
+        brush.loadObj(data);
+        return brush;
     }
 }
 

@@ -90,11 +90,13 @@ export default class Marker extends Brush {
         return { scribbleBrushType: BrushList.Marker, name };
     }
 
-    loadObj({ name }:SerializedMarkerBrush) {
+    loadObj({ name='' }:SerializedMarkerBrush) {
         this.name = name;
     }
 
     static formObj(data:SerializedMarkerBrush):Marker {
-        return new Marker();
+        const brush = new Marker();
+        brush.loadObj(data);
+        return brush;
     }
 }

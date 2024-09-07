@@ -1,11 +1,13 @@
 
-import { useCallback, useContext, useState, useEffect, useMemo } from 'react';
+import { useCallback, useState, useEffect, useMemo } from 'react';
 import '../../css/Menu.css';
 import '../../css/menu/EditBrushes.css';
 import brushIcon from '../../icons/brush-f-svgrepo-com.svg';
 import importIcon from '../../icons/internal-svgrepo-com.svg';
 import exportIcon from '../../icons/external-svgrepo-com.svg';
-import { EditorContext } from '../../contexts/DrawingState';
+import plusIcon from '../../icons/math-plus-svgrepo-com.svg';
+import trashIcon from '../../icons/trash-svgrepo-com.svg';
+import clipboardIcon from '../../icons/duplicate-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { DrawableState } from '../../types/DrawableState';
 import { uid } from '../../lib/uid';
@@ -25,12 +27,28 @@ import { BrushPreview } from '../inputs/BrushPreview';
 import { BrushList } from '../../lib/BrushList';
 
 export const EditBrushes = () => {
-    const [, setBrushes] = useStorage<SerializedBrush[]>('brushes');
+    const [brushes, setBrushes] = useStorage<SerializedBrush[]>('brushes');
     const [options, setOptions] = useMenu();
     const [tempBrushes, setTempBrushes] = useState<{ brush: Brush; preview?: DrawableState; }[]>([]);
     const [id] = useState(uid());
     const [currentBrush, setBrush] = useState<SerializedBrush>({
     } as SerializedBrush);
+    const [selectedBrushIndex, setSelectedBrushIndex] = useState(0);
+    const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
+    const { isOpen, isValid, errors } = state;
+    const selectedBrush = tempBrushes[selectedBrushIndex] || { brush: new SolidBrush() };
+    const addBrush = useCallback(() => {
+        setTempBrushes([
+            ...tempBrushes,
+            { brush: new SolidBrush() }
+        ]);
+    }, [tempBrushes]);
+    const deleteBrush = useCallback(() => {
+        setTempBrushes(tempBrushes.filter((_x, i)=>i!=selectedBrushIndex));
+    }, [selectedBrushIndex, tempBrushes]);
+    const duplicateBrush = useCallback(() => {
+        setTempBrushes([...tempBrushes, { brush: brushFormObj(selectedBrush.brush.toObj() as SerializedBrush) }]);
+    }, [selectedBrush.brush,  tempBrushes]);
     const importBrush = useOpenFile((files)=>{
         if(files.length==0)return;
         const file = files[0];
@@ -66,16 +84,13 @@ export const EditBrushes = () => {
 
             break;
         }
-    }, { accept: '.abr, .sbr' });
+    }, [tempBrushes],
+    { accept: '.abr, .sbr' }
+    );
     const exportBrush = async ()=>{
         const blob = await SBR.binary(tempBrushes.map(pack=>pack.brush.toObj()));
         saveAs(blob, 'brushes.sbr');
     };
-    const [selectedBrushIndex, setSelectedBrushIndex] = useState(0);
-    const [editor] = useContext(EditorContext);
-    const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
-    const { isOpen, isValid, errors } = state;
-    const selectedBrush = tempBrushes[selectedBrushIndex] || { brush: new SolidBrush() };
     const update = useCallback((e:React.ChangeEvent<CustomInput<JSONValue>|HTMLSelectElement>) => {
         let value;
         if(e.target.name!='scribbleBrushType')
@@ -117,14 +132,10 @@ export const EditBrushes = () => {
     const openModal = useCallback(() => {
         setState({ ...state, isOpen: true });
         setTempBrushes(
-            options.brushesPacks
-                .map(x=>x.brush.toObj())
-                .map(x=>(x as SerializedBrush))
-                .map(brushFormObj)
+            (brushes||[]).map(brushFormObj)
                 .map(brush=>({ brush }))
         );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [editor, state]);
+    }, [brushes, state]);
     useEffect(() => {
         setBrush(selectedBrush.brush.toObj() as SerializedBrush);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -153,6 +164,9 @@ export const EditBrushes = () => {
             <div className="fields import-brush">
                 <h2>Brushes</h2>
                 <div>
+                    <button onClick={addBrush}><img src={plusIcon} alt="Add Brush" /></button>
+                    <button onClick={duplicateBrush}><img src={clipboardIcon} alt="Duplicate Brush" /></button>
+                    <button onClick={deleteBrush}><img src={trashIcon} alt="Delete Brush" /></button>
                     <button onClick={importBrush}><img src={importIcon} alt="Import Brushes" /></button>
                     <button onClick={exportBrush}><img src={exportIcon} alt="Export Brushes" /></button>
                 </div>

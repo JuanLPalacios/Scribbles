@@ -25,6 +25,9 @@ export default tseslint.config(
         "warn",
         { "allowConstantExport": true }
       ],
+      "react-hooks/exhaustive-deps": ["warn", {
+        "additionalHooks": "(useOpenFile)"
+      }],
       "react/jsx-filename-extension": ["warn", { "extensions": [".js", ".jsx", ".tsx"] }],
       "react/react-in-jsx-scope": "off",
       "react/display-name": "off",

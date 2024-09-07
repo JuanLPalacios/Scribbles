@@ -50,7 +50,7 @@ export const InputImage = ({ name, onChange, style, value }:Params)=>{
             }
         };
         fr.readAsDataURL(files[0]);
-    }, { accept: '.png' });
+    }, [name, onChange], { accept: '.png' });
     return <div className='InputImage' style={style} onClick={openImage} onChange={onChange}>
         {value&&<img src={value.value} alt='tip image'/>}
         <input type="text" name={name} ref={ref2} style={{ display: 'none' }}/>

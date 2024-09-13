@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { createDrawable } from '../generators/createDrawable';
-import { createBezier, createPerpendicularVector } from '../lib/DOMMath';
+import { createBezier, createPerpendicularVector, scalePoint } from '../lib/DOMMath';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
-import { Serialized } from '../lib/Serialization';
+import { parseSerializedJSON, Serialized } from '../lib/Serialization';
 import { SerializedSolidBrush } from './Solid';
 import { SerializedTextureBrush } from './TextureBrush';
 import { BrushList } from '../lib/BrushList';
 import { SerializedMarkerBrush } from './Marker';
+import { SerializedStiffBrush } from './StiffBrush';
 
 type IsSerialized<S extends Serialized> = S;
 
@@ -77,12 +78,12 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
         ...DEFAULT_SOLID_BRUSH,
         ...that as Partial<SerializedSolidBrush>,
     };
-    const [lastPoint, setLastPoint] = useState<Point >([0, 0]);
-    const [lastSegments, setLastSegments] = useState<Point[] >([]);
-    const [finished, setFinished] = useState(false);
-    const buffer = useMemo(()=>createDrawable({ size: [1, 1] }), []);
-    const previewBuffer = useMemo<DrawableState >(()=>createDrawable({ size: [1, 1] }), []);
-    const [currentLength, setCurrentLength] = useState(0);
+    let lastPoint:Point =  [0, 0];
+    let lastSegments:Point[] =  [];
+    let finished = false;
+    const buffer = createDrawable({ size: [1, 1] });
+    const previewBuffer:DrawableState = createDrawable({ size: [1, 1] });
+    let currentLength = 0;
     const strokeAngle = useMemo<Point >(()=>[Math.sin(that.angle*Math.PI/180), -Math.cos(that.angle*Math.PI/180)], [that.angle]);
     const drawSegment = (bufferCtx: CanvasRenderingContext2D, width: number, v1: number[], v2: number[], point: Point)=>{
         bufferCtx.beginPath();
@@ -123,8 +124,8 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
         const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
-        setFinished(true);
-        setCurrentLength(0);
+        finished = true;
+        currentLength = 0;
         bufferCanvas.width = canvas.width;
         bufferCanvas.height = canvas.height;
         previewCanvas.width = canvas.width;
@@ -144,8 +145,8 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
         bufferCtx.globalCompositeOperation = 'source-over';
         previewCtx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = alpha;
-        setLastPoint(point);
-        setLastSegments([point]);
+        lastPoint = point;
+        lastSegments = [point];
         bufferCtx.filter = `blur(${~~(width*(1-that.hardness)/2)}px)`;
         bufferCtx.beginPath();
         bufferCtx.moveTo(...point);
@@ -166,10 +167,10 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
         const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
         const v2 = [point[0]-lastPoint[0],  point[1]-lastPoint[1]];
         const v1 = strokeAngle;
-        setFinished(false);
+        finished = false;
         lastSegments.push(point);
         if (!ctx || !bufferCtx || !previewCtx) return;
-        setCurrentLength(currentLength + Math.abs(Math.sqrt((point[0]-lastPoint[0])**2+(point[1]-lastPoint[1])**2)));
+        currentLength = currentLength + Math.abs(Math.sqrt((point[0]-lastPoint[0])**2+(point[1]-lastPoint[1])**2));
         if (currentLength<that.spacing) {
             previewCtx.clearRect(0, 0, canvas.width, canvas.height);
             previewCtx.drawImage(bufferCanvas, 0, 0);
@@ -178,11 +179,11 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
             ctx.drawImage(previewCanvas, 0, 0);
             return;
         }
-        setCurrentLength(0);
+        currentLength = 0;
         drawSegment(bufferCtx, width, v1, v2, point);
-        setFinished(true);
-        setLastPoint(point);
-        setLastSegments([point]);
+        finished = true;
+        lastPoint = point;
+        lastSegments = [point];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(bufferCanvas, 0, 0);
     });
@@ -398,3 +399,65 @@ export const  MarkerC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, 
     });
     return<></>;
 });
+
+export const  StiffC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRenderPreview, setStartStroke }, uber }:BrushFunctions<SerializedStiffBrush>)=>{
+    const thatbuffer:DrawableState = createDrawable({ size: [1, 1] });
+    const thatfibers: { position: DOMPoint, width: number, alpha:number }[] = that.fibers.map(parseSerializedJSON);
+    let thatscaledFibers: { position: DOMPoint, width: number, alpha:number }[];
+
+    setStartStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+        thatscaledFibers = thatfibers.map(fiber => ({ ...fiber, position: scalePoint(fiber.position, width/2), width: fiber.width*width }));
+        const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
+        const { ctx, canvas } = drawable;
+        buffer.width = canvas.width+width;
+        buffer.height = canvas.height+width;
+        if (!bufferCtx || !ctx) return;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.setTransform(1, 0, 0, 1, -width/2, -width/2);
+        bufferCtx.globalCompositeOperation = 'copy';
+        bufferCtx.setTransform(1, 0, 0, 1, width/2, width/2);
+        bufferCtx.lineCap = 'round';
+        bufferCtx.lineJoin = 'round';
+        bufferCtx.lineWidth = width;
+        bufferCtx.strokeStyle = color;
+        bufferCtx.beginPath();
+        bufferCtx.moveTo(...point);
+    });
+
+    setDrawStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+        const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
+        const { ctx, canvas } = drawable;
+        if (!bufferCtx || !ctx) return;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.setTransform(1, 0, 0, 1, -width/2, -width/2);
+        bufferCtx.setTransform(1, 0, 0, 1, width/2, width/2);
+        bufferCtx.lineTo(...point);
+        ctx.globalAlpha = 1;
+        thatscaledFibers.forEach(fiber => {
+            const { width, position, alpha } = fiber;
+            bufferCtx.clearRect(0, 0, buffer.width, buffer.height);
+            bufferCtx.lineWidth = width;
+            bufferCtx.globalAlpha = alpha;
+            bufferCtx.stroke();
+            ctx.drawImage(buffer, position.x, position.y);
+        });
+        ctx.resetTransform();
+        bufferCtx.resetTransform();
+        bufferCtx.globalAlpha = 1;
+        bufferCtx.drawImage(canvas, 0, 0);
+        ctx.globalCompositeOperation = 'copy';
+        ctx.globalAlpha = alpha;
+        ctx.drawImage(buffer, 0, 0);
+    });
+
+    setEndStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+        const { ctx, } = drawable;
+        const { canvas } = thatbuffer;
+        ctx?.restore();
+        canvas.width = 0;
+        canvas.height = 0;
+    });
+    return<></>;
+});
+

@@ -1,18 +1,27 @@
 import Brush from '../abstracts/Brush';
 import Marker, { SerializedMarkerBrush } from '../brushes/Marker';
-import { SerializedJSON, SerializedOject } from '../brushes/SerializedOject';
 import SolidBrush, { SerializedSolidBrush } from '../brushes/Solid';
 import StiffBrush, { SerializedStiffBrush } from '../brushes/StiffBrush';
 import TextureBrush, { SerializedTextureBrush } from '../brushes/TextureBrush';
 import { BrushList } from './BrushList';
+import { SerializedImageData } from '../brushes/SerializedImageData';
+import { CompressedOject } from '../brushes/CompressedOject';
+import { serializeImageData } from './serializeJSON';
 
 export type SerializedBrush =
 | SerializedSolidBrush
 | SerializedTextureBrush
 | SerializedStiffBrush
 | SerializedMarkerBrush;
-export type Serialized = {[key:string]:JSONValue};
-export type JSONValue = number | string | boolean | SerializedOject | JSONValue[];
+export type Compressed = {[key:string]:CompressedValue};
+export type CompressedValue = number | string | boolean | CompressedOject  | CompressedValue[];
+
+export type Serialized = {[key:string]:SerializedValue};
+export type SerializedValue = number | string | boolean | Serialized | SerializedImageData | SerializedValue[];
+
+export function isSerializedImageData(value: SerializedImageData | Serialized): value is SerializedImageData {
+    return (value as SerializedImageData).colorSpace !== undefined;
+}
 
 export const abrToScribblesSerializable = (abrBrush: AbrBrush): SerializedBrush => {
     const { brushType } = abrBrush;
@@ -39,9 +48,7 @@ function abrSampledBrushToTextured({ antiAliasing, brushTipImage, name, spacing,
         imageData.data[i+1] = 0;
         imageData.data[i+2] = 0;
     }
-    ctx.putImageData(imageData, 0, 0);
-    const dataUrl = brushTipImage.toDataURL();
-    return { scribbleBrushType: BrushList.Texture, antiAliasing, brushTipImage: { type: 'img', value: dataUrl }, name, spacing };
+    return { scribbleBrushType: BrushList.Texture, antiAliasing, brushTipImage: serializeImageData(imageData), name, spacing };
 }
 
 export const brushFormObj = (brushObj:SerializedBrush): Brush => {
@@ -59,7 +66,4 @@ export const brushFormObj = (brushObj:SerializedBrush): Brush => {
         return new SolidBrush();
     }
 };
-
-export const serializeJSON = (value: unknown):SerializedJSON => ({ type: 'json', value: JSON.stringify(value) });
-export const parseSerializedJSON = (value: SerializedJSON) => JSON.parse(value.value);
 

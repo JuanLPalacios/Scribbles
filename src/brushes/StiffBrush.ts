@@ -2,15 +2,15 @@ import Brush from '../abstracts/Brush';
 import { createDrawable } from '../generators/createDrawable';
 import { BrushList } from '../lib/BrushList';
 import { scalePoint } from '../lib/DOMMath';
-import { parseSerializedJSON, serializeJSON } from '../lib/Serialization';
+import { parseSerializedJSON, serializeJSON } from '../lib/serializeJSON';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
-import { SerializedJSON } from './SerializedOject';
+import { CompressedJSON } from "./CompressedOject";
 
 export type SerializedStiffBrush ={
     scribbleBrushType: BrushList.Stiff,
     name:string
-    fibers: SerializedJSON[]
+    fibers: CompressedJSON[]
 }
 
 export default class StiffBrush extends Brush {

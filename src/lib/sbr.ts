@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
-import { JSONValue, Serialized } from './Serialization';
+import { Serialized, SerializedValue, CompressedValue, Compressed, isSerializedImageData } from './Serialization';
+import { serializeImageData, deserializeImageData } from './serializeJSON';
 
 type SbrVersionInfo = {
     version:number
@@ -26,17 +27,17 @@ export const SBR = {
                     .then((version:SbrVersionInfo)=>
                         zip.files['content.json'].async('string')
                             .then(JSON.parse)
-                            .then(async (zipedBrushes:Serialized[])=>{
+                            .then(async (zippedBrushes:Compressed[])=>{
                                 const context:Context = { zip, types: {} };
                                 const unzipDataFunction = getUnzipDataFunction(version);
                                 const brushes:Serialized[] = [];
-                                for (let i = 0; i < zipedBrushes.length; i++) {
+                                for (let i = 0; i < zippedBrushes.length; i++) {
                                     const
-                                        zipedBrush:Serialized = zipedBrushes[i],
+                                        zippedBrush:Compressed = zippedBrushes[i],
                                         brush:Serialized = {};
-                                    for (const key in zipedBrush) {
-                                        if (Object.prototype.hasOwnProperty.call(zipedBrush, key)) {
-                                            brush[key] = await unzipDataFunction(zipedBrush[key], context);
+                                    for (const key in zippedBrush) {
+                                        if (Object.prototype.hasOwnProperty.call(zippedBrush, key)) {
+                                            brush[key] = await unzipDataFunction(zippedBrush[key], context);
                                         }
                                     }
                                     brushes.push(brush);
@@ -58,50 +59,42 @@ export const SBR = {
         };
         zip.file('version.json', JSON.stringify(version));
         const context = { zip, types: { img: { dir, count: 0 } } };
-        const zipedBrushes:Serialized[] = [];
+        const zippedBrushes:Compressed[] = [];
         for (let i = 0; i < brushes.length; i++) {
             const
                 brush:Serialized = brushes[i],
-                zipedBrush:Serialized = {};
+                zippedBrush:Compressed = {};
             for (const key in brush) {
                 if (Object.prototype.hasOwnProperty.call(brush, key)) {
-                    zipedBrush[key] = await zipDataV1S1(brush[key], context);
+                    zippedBrush[key] = await zipDataV1S1(brush[key], context);
                 }
             }
-            zipedBrushes.push(zipedBrush);
+            zippedBrushes.push(zippedBrush);
         }
-        console.log(zipedBrushes);
-        zip.file('content.json', JSON.stringify(zipedBrushes));
+        console.log(zippedBrushes);
+        zip.file('content.json', JSON.stringify(zippedBrushes));
         return zip.generateAsync({ type: 'blob' });
     }
 };
 
-function zipDataV1S1(value: JSONValue, context: Context):Promise<JSONValue> {
-    return new Promise<JSONValue>((resolve, reject) => {
-        if(typeof value !==  'object')return resolve(value);
-        if(Array.isArray(value))return resolve(Promise.all(value.map(x=>zipDataV1S1(x, context))));
-        if(value.type === 'json')return resolve(value);
-        if(!isDataUrl(value.value))return resolve(value);
-        const extension = getExtension(value.value);
+function zipDataV1S1(value: SerializedValue, context: Context):Promise<CompressedValue> {
+    return (async ():Promise<CompressedValue> => {
+        if(typeof value !==  'object')return value;
+        if(Array.isArray(value))return Promise.all(value.map(x=>zipDataV1S1(x, context)));
+        if(!isSerializedImageData(value)) return { type: 'json', value: JSON.stringify(value) };
+        if(!CTX) return '';
+        const imageData = deserializeImageData(value, CANVAS, CTX);
+        CANVAS.width = value.width;
+        CANVAS.height = value.height;
+        CTX.putImageData(imageData, 0, 0);
         const fileNumber = context.types.img.count++;
-        const filename = `${fileNumber}.${extension}`;
-        if(!CTX) return;
-        const img = new Image;
-        img.onload = async ()=>{
-            CANVAS.width = 0; //forces the canvas to clear
-            CANVAS.width = img.width;
-            CANVAS.height = img.height;
-            CTX.globalCompositeOperation = 'source-over';
-            CTX.drawImage(img, 0, 0);
-            context.types.img.dir.file(filename, await new Promise<Blob>(res => CANVAS.toBlob(t=>{ if(t)res(t); })));
-            resolve({ type: 'img', value: `data:img/${filename}` });
-        };
-        img.onerror = reject;
-        img.src = value.value;
-    });
+        const filename = `${fileNumber}.png`;
+        context.types.img.dir.file(filename, await new Promise<Blob>(res => CANVAS.toBlob(t=>{ if(t)res(t); }, 'image/png')));
+        return ({ type: 'img', value: `data:img/${filename}` });
+    })();
 }
 
-function getUnzipDataFunction({ version, subVersion }: SbrVersionInfo): ((value: JSONValue, context: Context) => Promise<JSONValue>) {
+function getUnzipDataFunction({ version, subVersion }: SbrVersionInfo): ((value: CompressedValue, context: Context) => Promise<SerializedValue>) {
     switch (version) {
     case 1:
         return getUnzipDataV1(subVersion);
@@ -110,7 +103,7 @@ function getUnzipDataFunction({ version, subVersion }: SbrVersionInfo): ((value:
     }
 }
 
-function getUnzipDataV1(subVersion : number): ((value: JSONValue, context: Context) => Promise<JSONValue>) {
+function getUnzipDataV1(subVersion : number): ((value: CompressedValue, context: Context) => Promise<SerializedValue>) {
     switch (subVersion) {
     case 1:
         return unzipDataV1S1;
@@ -119,8 +112,8 @@ function getUnzipDataV1(subVersion : number): ((value: JSONValue, context: Conte
     }
 }
 
-function unzipDataV1S1(value : JSONValue, context:Context): Promise<JSONValue> {
-    return new Promise<JSONValue>((resolve, reject) => {
+function unzipDataV1S1(value : CompressedValue, context:Context): Promise<SerializedValue> {
+    return new Promise<SerializedValue>((resolve, reject) => {
         if(typeof value !=  'object')return resolve(value);
         if(Array.isArray(value))return resolve(Promise.all(value.map(x=>unzipDataV1S1(x, context))));
         if(value.type === 'json')return resolve(value);
@@ -130,7 +123,23 @@ function unzipDataV1S1(value : JSONValue, context:Context): Promise<JSONValue> {
         return resolve(context.zip
             .files[file]
             .async('base64')
-            .then(base64=>({ type: 'img', value: dataURLFormat(contentType, base64) })));
+            .then(base64=>(dataURLFormat(contentType, base64)))
+            .then(url=>(new Promise<SerializedValue>((resolve, reject) => {
+                if(!CTX) return;
+                const img = new Image;
+                img.onload = async ()=>{
+                    CANVAS.width = 0; //forces the canvas to clear
+                    CANVAS.width = img.width;
+                    CANVAS.height = img.height;
+                    CTX.globalCompositeOperation = 'source-over';
+                    CTX.drawImage(img, 0, 0);
+                    resolve(serializeImageData(CTX.getImageData(0, 0, CANVAS.width, CANVAS.height)));
+                };
+                img.onerror = reject;
+                img.src = url;
+            }))
+            )
+        );
     });
 }
 
@@ -300,7 +309,7 @@ function dataURLFormat(contentType: string, base64: string): string {
     return `data:${contentType};base64,${base64}`;
 }
 
-function getExtension(value:string) {
+export function getExtension(value:string) {
     const contentType = (value.split(';base64,')[0]||'')?.substring(5);
     switch (contentType) {
     case 'audio/aac':
@@ -456,7 +465,7 @@ function getExtension(value:string) {
     }
 }
 
-function isDataUrl(value:string):boolean {
+export function isDataUrl(value:string):boolean {
     return value.startsWith('data:');
 }
 

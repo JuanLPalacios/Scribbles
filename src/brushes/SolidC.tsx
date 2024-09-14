@@ -1,83 +1,50 @@
-import { useMemo, useState } from 'react';
+import { createContext, ReactNode, useContext, useMemo } from 'react';
 import { createDrawable } from '../generators/createDrawable';
 import { createBezier, createPerpendicularVector, scalePoint } from '../lib/DOMMath';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
-import { parseSerializedJSON, Serialized } from '../lib/Serialization';
+import { Serialized, SerializedBrush } from '../lib/Serialization';
+import { parseSerializedJSON, deserializeImageData } from '../lib/serializeJSON';
 import { SerializedSolidBrush } from './Solid';
 import { SerializedTextureBrush } from './TextureBrush';
 import { BrushList } from '../lib/BrushList';
 import { SerializedMarkerBrush } from './Marker';
 import { SerializedStiffBrush } from './StiffBrush';
 
-type IsSerialized<S extends Serialized> = S;
+type IsSerialized<S extends Serialized&{name:string, scribbleBrushType:number}> = S;
+
+type BrushRenderer = {
+        startStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
+        drawStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
+        endStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
+    };
+
+export const BrushRendererContext = createContext<BrushRenderer>({ drawStroke: ()=>{}, endStroke: ()=>{}, startStroke: ()=>{} });
 
 type BrushFunctions<S extends {name:string}> = {
-    that:S&{
-        renderPreview: (drawable: DrawableState, points: Point[], color: string, alpha: number, width: number) => void;
-        startStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
-        drawStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
-        endStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
-    },
-    uber:{
-        renderPreview: (drawable: DrawableState, points: Point[], color: string, alpha: number, width: number) => void;
-        startStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
-        drawStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
-        endStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
-    },
-    hooks:{
-        setDrawStroke: React.Dispatch<React.SetStateAction<(drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void>>;
-        setEndStroke: React.Dispatch<React.SetStateAction<(drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void>>;
-        setRenderPreview: React.Dispatch<React.SetStateAction<(drawable: DrawableState, points: Point[], color: string, alpha: number, width: number) => void>>;
-        setStartStroke: React.Dispatch<React.SetStateAction<(drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void>>;
-    }
+    that:S
+    children: ReactNode
 }
+type BrushPair<S extends Serialized&{name:string, scribbleBrushType:number}> = [(props: BrushFunctions<any>)=> ReactNode, S];
 
-function preview({ startStroke, drawStroke, endStroke }: { startStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void; drawStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void; endStroke: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void; }) {
-    return (drawable: DrawableState, points: Point[], color: string, alpha: number, width: number) => {
-        const { canvas, ctx } = drawable;
-        if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        points.forEach((point, i) => {
-            if (i === 0) startStroke(drawable, point, color, alpha, width);
-            else drawStroke(drawable, point, color, alpha, width);
-        });
-        endStroke(drawable, points[points.length - 1], color, alpha, width);
-    };
-}
+export const useBrush = ()=>useContext(BrushRendererContext);
 
-function BrushHOC<S extends Serialized&{name:string}>(WrappedComponent:React.ComponentType<BrushFunctions<IsSerialized<S>>>){
-    const Brush = (props: Serialized&{name:string}) => {
-        const [startStroke, setStartStroke] = useState<(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>void>(()=>{});
-        const [drawStroke, setDrawStroke] = useState<(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>void>(()=>{});
-        const [endStroke, setEndStroke] = useState<(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>void>(()=>{});
-        const s = { startStroke, drawStroke, endStroke };
-        const [renderPreview, setRenderPreview] = useState(()=>preview({ startStroke, drawStroke, endStroke }));
-        const hooks = { setDrawStroke, setEndStroke, setRenderPreview, setStartStroke };
-        const t:BrushFunctions<S> = { 'that': { ...props, ...s, renderPreview } as BrushFunctions<S>['that'], uber: { ...s, renderPreview }, hooks };
-        return <WrappedComponent {...t} />;
+function BrushMaper<S extends Serialized&{name:string, scribbleBrushType:number}>(list:BrushPair<IsSerialized<S>>[]){
+    const Brush = ({ that, children }: BrushFunctions<Serialized&{name:string, scribbleBrushType:number}>) => {
+        const [WrappedComponent, defaultThat] = useMemo(()=>{
+            const i = list.findIndex(x=>x[1].scribbleBrushType==that.scribbleBrushType);
+            return list[i];
+        }, [that.scribbleBrushType]);
+        const memo = useMemo(()=>({ ...defaultThat, ...that }), [defaultThat, that]);
+        return <WrappedComponent that={memo} >{children}</WrappedComponent>;
     };
 
-    Brush.displayName = `Brush(${WrappedComponent.displayName || WrappedComponent.name})`;
+    Brush.displayName = `Brush(${list.map(([WrappedComponent])=>`Brush(${WrappedComponent.name})`).join('|')})`;
     return Brush;
 }
 
-const DEFAULT_SOLID_BRUSH:SerializedSolidBrush = {
-    scribbleBrushType: BrushList.Solid,
-    name: 'SolidBrush',
-    angle: 0,
-    diameter: 1,
-    hardness: 1,
-    roundness: 1,
-    spacing: 300
-};
-
-const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRenderPreview, setStartStroke }, uber }:BrushFunctions<SerializedSolidBrush>)=>{
-    that = {
-        ...that,
-        ...DEFAULT_SOLID_BRUSH,
-        ...that as Partial<SerializedSolidBrush>,
-    };
+export const SolidC = (({ that, children }:BrushFunctions<SerializedSolidBrush>)=>{
+    console.log('SolidC');
     let lastPoint:Point =  [0, 0];
     let lastSegments:Point[] =  [];
     let finished = false;
@@ -120,7 +87,7 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
         bufferCtx.arc(x, y, bufferCtx.lineWidth / 2, 0, 2 * Math.PI);
         bufferCtx.fill();
     };
-    setStartStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const startStroke = useMemo(()=>(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
         const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
@@ -159,9 +126,9 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
         bufferCtx.stroke();
         previewCtx.stroke();
         ctx.drawImage(bufferCanvas, 0, 0);
-    });
+    }, []);
 
-    setDrawStroke((drawable:DrawableState, point:Point, _color:string, _alpha:number, width:number)=>{
+    const drawStroke = useMemo(()=>(drawable:DrawableState, point:Point, _color:string, _alpha:number, width:number)=>{
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
         const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
@@ -186,74 +153,48 @@ const SolidC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRender
         lastSegments = [point];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(bufferCanvas, 0, 0);
-    });
+    }, []);
 
-    setEndStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const endStroke = useMemo(()=>(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
         const { ctx, } = drawable;
         if(!finished) {
             const temp = that.spacing;
             that.spacing = 0;
-            that.drawStroke(drawable, point, color, alpha, width);
+            drawStroke(drawable, point, color, alpha, width);
             that.spacing = temp;
         }
         // FIXME: draw tip shape to create the illusion of the more complex brush
         ctx?.restore();
-    });
-    return <></>;
+    }, [finished, that]);
+    const v = useMemo(()=>({ drawStroke, endStroke, startStroke }), [drawStroke, endStroke, startStroke]);
+    return <BrushRendererContext.Provider value={v}>
+        {children}
+    </BrushRendererContext.Provider>;
 });
 
-export default SolidC;
-
-const DEFAULT_TEXTURE_BRUSH:SerializedTextureBrush = {
-    scribbleBrushType: BrushList.Texture,
-    name: 'TextureBrush',
-    brushTipImage: {
-        type: 'img',
-        value: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABQAAAAUAQMAAAC3R49OAAAC4npUWHRSYXcgcHJvZmlsZSB0eXBlIGV4aWYAAHja7ZdRkusoDEX/WcUsAUkIieVgA1VvB7P8uWDi7qT7TdV0vY/5iCkbW5GvhA6QJPS/f43wFw4qwiGpeS45RxyppMIVNx6v4+oppnW9HtL+jJ7t4f6AYRL0cj3mvv0r7Prxgm1/Op7twc6t41uIbuF1yIw879tOcgsJX/ZHIqHsF2r+NJx98rllt/jrczIUoyn0UCPuQhLXla9IMs8kFb3jSuJwjMuStsW+1i/cpfumgPfdS/3iIzP5KMcl9BhWfqnTtpO+2OUOw08ZEd+R+XNGJneIL/Ubo/kY/RpdTTmgXHkP6jGUdQfHA+WU9VpGM5yKe1utoHms8QS1hqEeIR54KMSo+KBEjSoN6qs/6USKiTsbeuaTZdlcjAufAEAoPxoNtiBFGliwnCAnMPOdC624ZcZDMEfkRvBkghgYP7fwavhpexIaY05zouh3rZAXz/mFNCa5eYUXgNDYNdVVXwpXF1+PCVZAUFeZHQOs8bgkDqWPuSWLs0QNcE3xWi9kbQugRIitSIYEBGImUcoUjdmIUEcHn4rMsQT4AAHSoNyQJSeRDDhYDYiNd4yWLytfZmwvAKGSxYCmSAWslDRlrDfHFKpBRZOqZjV1LVqz5JQ152x57lPVxJKpZTNzK1ZdPLl6dnP34rVwEWxjGkouVryUUiuC1lShVeFfYTj4kCMdeuTDDj/KUU9MnzOdeubTTj/LWRs3adgCQsvNmrfSaqeOqdRT1567de+l14G5NmSkoSMPGz7KqDe1TfWZ2iu5f6dGmxovUNPPPqjBbPaQoLmd6GQGYpwIxG0SwITmySw6pcST3GQWC0sQUUaWOuE0msRAMHViHXSz+yD3W24B1f2v3Pg7cmGi+xPkwkT3idxXbt9Qa3Vtt7IAzVWImmKHFCw/OHSv7HV+L/2oDz998S30FnoLvYXeQm+ht9D/U2jgx0PB36l/APhNkfqI954AAAABhGlDQ1BJQ0MgcHJvZmlsZQAAeJx9kT1Iw0AcxV9TxSoVQTuIOGSoTi2IijhKFYtgobQVWnUwufQLmjQkKS6OgmvBwY/FqoOLs64OroIg+AHi7OCk6CIl/i8ptIjx4Lgf7+497t4BQqPCVLNrAlA1y0jFY2I2tyr2vCKAQfQigoDETD2RXszAc3zdw8fXuyjP8j735+hX8iYDfCLxHNMNi3iDeGbT0jnvE4dYSVKIz4kjBl2Q+JHrsstvnIsOCzwzZGRS88QhYrHYwXIHs5KhEk8ThxVVo3wh67LCeYuzWqmx1j35C4N5bSXNdZqjiGMJCSQhQkYNZVRgIUqrRoqJFO3HPPwjjj9JLplcZTByLKAKFZLjB/+D392ahalJNykYA7pfbPtjDOjZBZp12/4+tu3mCeB/Bq60tr/aAGY/Sa+3tfARMLANXFy3NXkPuNwBhp90yZAcyU9TKBSA9zP6phwwdAv0rbm9tfZx+gBkqKvlG+DgEBgvUva6x7sDnb39e6bV3w9t73Kl1q8legAAAAZQTFRFaW5kAAAAGNpOJQAAAAF0Uk5TAEDm2GYAAAABYktHRACIBR1IAAAACXBIWXMAAC4jAAAuIwF4pT92AAAAB3RJTUUH6AgSCTARRoTKFAAAAC5JREFUCNdjYPzBwMD+j4FB/n8Dg/3/A2Bc//8BGP///wErhsnD1IP0gswAmgUAlioqPY22sLYAAAAASUVORK5CYII='
-    },
-    spacing: 0,
-    antiAliasing: true,
-};
-
-export const  TextureC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRenderPreview, setStartStroke }, uber }:BrushFunctions<SerializedTextureBrush>)=>{
-    that = {
-        ...that,
-        ...DEFAULT_TEXTURE_BRUSH,
-        ...that as Partial<SerializedTextureBrush>,
-    };
-    let thatimg:HTMLImageElement|undefined;
+export const  TextureC = (({ that, children }:BrushFunctions<SerializedTextureBrush>)=>{
+    console.log('TextureC');
+    const that_brushTipImage:DrawableState = useMemo(()=>createDrawable({ size: [1, 1] }), []);
+    const brushTipImageData = useMemo(()=>{
+        const { ctx, canvas } = that_brushTipImage;
+        if(!ctx) return;
+        ctx.putImageData(deserializeImageData(that.brushTipImage, canvas, ctx), 0, 0);
+        return ctx.getImageData(0, 0, canvas.width, canvas.height);
+    }, [that.brushTipImage, that_brushTipImage]);
     let thatlastPoint:Point = [0, 0];
     let thatlastSegments:Point[] = [];
     let thatfinished = false;
-    const thatbuffer:DrawableState = createDrawable({ size: [1, 1] });
-    const thatpreviewBuffer:DrawableState = createDrawable({ size: [1, 1] });
+    const thatbuffer:DrawableState = useMemo(()=>createDrawable({ size: [1, 1] }), []);
+    const thatpreviewBuffer:DrawableState = useMemo(()=>createDrawable({ size: [1, 1] }), []);
     let thatcurrentLength = 0;
-    let thattextureWith = 20;
-    const that_brushTipImage:DrawableState = createDrawable({ size: [1, 1] });
-    const setBrushTipImage = ()=>{
-        const { ctx, canvas } = that_brushTipImage;
-        if(!ctx) return;
-        const img = new Image;
-        thatimg = img;
-        img.addEventListener('load', ()=>{
-            canvas.width = 0; //forces the canvas to clear
-            canvas.width = img.width;
-            canvas.height = img.height;
-            thattextureWith = Math.max(img.width, img.height);
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.drawImage(img, 0, 0);
-            thatimg = undefined;
-        });
-        img.src = that.brushTipImage.value;
-    };
-    setBrushTipImage();
+    const thattextureWith = Math.max(brushTipImageData?.width||1, brushTipImageData?.height||1);
     function drawSegment(bufferCtx: CanvasRenderingContext2D, width: number, [x, y]: Point) {
         const texture = that_brushTipImage.canvas;
         const { width: sWidth, height: sHeight } = texture;
         const dWidth=sWidth*width/thattextureWith, dHeight = sHeight*width/thattextureWith;
         bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x-dWidth/2, y-dHeight/2, dWidth, dHeight);
     }
-    setStartStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const startStroke = (drawable:DrawableState, point:Point, color:string, alpha:number)=>{
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
         const { ctx: previewCtx, canvas: preview } = thatpreviewBuffer;
@@ -275,9 +216,9 @@ export const  TextureC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke,
         thatlastPoint = point;
         thatlastSegments = [point];
         ctx.drawImage(buffer, 0, 0);
-    });
+    };
 
-    setDrawStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const drawStroke = (drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
         const { ctx: previewCtx, canvas: preview } = thatpreviewBuffer;
@@ -300,35 +241,31 @@ export const  TextureC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke,
         thatlastSegments = [point];
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(buffer, 0, 0);
-    });
+    };
 
-    setEndStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const endStroke = (drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
         const { ctx, } = drawable;
         if(!thatfinished) {
             const temp = that.spacing;
             that.spacing = 0;
-            that.drawStroke(drawable, point, color, alpha, width);
+            drawStroke(drawable, point, color, alpha, width);
             that.spacing = temp;
         }
         // FIXME: draw tip shape to create the illusion of the more complex brush
         ctx?.restore();
-    });
-
-    setRenderPreview((...params:[DrawableState, Point[], string, number, number])=>{
-        uber.renderPreview(...params);
-        thatimg?.addEventListener('load', ()=>{
-            uber.renderPreview(...params);
-        });
-    });
-    return <></>;
+    };
+    return <BrushRendererContext.Provider value={{ drawStroke, endStroke, startStroke }}>
+        {children}
+    </BrushRendererContext.Provider>;
 });
 
-export const  MarkerC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRenderPreview, setStartStroke }, uber }:BrushFunctions<SerializedMarkerBrush>)=>{
+export const  MarkerC = (({ that, children }:BrushFunctions<SerializedMarkerBrush>)=>{
+    console.log('MarkerC');
     let thatprevToLastPoint: Point = [0, 0];
     let thatlastPoint: Point = [0, 0];
     const thatbuffer:DrawableState = createDrawable({ size: [1, 1] });
 
-    setStartStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const startStroke = useMemo(()=>(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
         thatlastPoint = point;
         thatprevToLastPoint = point;
         const { ctx, canvas } = drawable;
@@ -356,9 +293,9 @@ export const  MarkerC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, 
         bufferCtx.lineTo(...point);
         bufferCtx.stroke();
         ctx.drawImage(buffer, 0, 0);
-    });
+    }, []);
 
-    setDrawStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const drawStroke = useMemo(()=>(drawable:DrawableState, point:Point)=>{
         const ctx = drawable.ctx;
         const { ctx: bufferCtx, canvas } = thatbuffer;
         if (!ctx || !bufferCtx) return;
@@ -375,9 +312,9 @@ export const  MarkerC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, 
         ctx.drawImage(canvas, 0, 0);
         thatprevToLastPoint = thatlastPoint;
         thatlastPoint = point;
-    });
+    }, []);
 
-    setEndStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const endStroke = useMemo(()=>(drawable:DrawableState)=>{
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: canvas2 } = thatbuffer;
         if (!ctx || !bufferCtx) return;
@@ -396,16 +333,20 @@ export const  MarkerC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, 
         canvas2.width = 0;
         canvas2.height = 0;
         canvas.style.filter = 'none';
-    });
-    return<></>;
+    }, [thatbuffer]);
+    const v = useMemo(()=>({ drawStroke, endStroke, startStroke }), [drawStroke, endStroke, startStroke]);
+    return <BrushRendererContext.Provider value={v}>
+        {children}
+    </BrushRendererContext.Provider>;
 });
 
-export const  StiffC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, setRenderPreview, setStartStroke }, uber }:BrushFunctions<SerializedStiffBrush>)=>{
+export const  StiffC = (({ that, children }:BrushFunctions<SerializedStiffBrush>)=>{
+    console.log('StiffC');
     const thatbuffer:DrawableState = createDrawable({ size: [1, 1] });
     const thatfibers: { position: DOMPoint, width: number, alpha:number }[] = that.fibers.map(parseSerializedJSON);
-    let thatscaledFibers: { position: DOMPoint, width: number, alpha:number }[];
+    let thatscaledFibers: { position: DOMPoint, width: number, alpha:number }[]=[];
 
-    setStartStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const startStroke = useMemo(()=>(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
         thatscaledFibers = thatfibers.map(fiber => ({ ...fiber, position: scalePoint(fiber.position, width/2), width: fiber.width*width }));
         const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
         const { ctx, canvas } = drawable;
@@ -422,9 +363,9 @@ export const  StiffC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, s
         bufferCtx.strokeStyle = color;
         bufferCtx.beginPath();
         bufferCtx.moveTo(...point);
-    });
+    }, []);
 
-    setDrawStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const drawStroke = useMemo(()=>(drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
         const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
         const { ctx, canvas } = drawable;
         if (!bufferCtx || !ctx) return;
@@ -449,15 +390,50 @@ export const  StiffC = BrushHOC(({ that, hooks: { setDrawStroke, setEndStroke, s
         ctx.globalCompositeOperation = 'copy';
         ctx.globalAlpha = alpha;
         ctx.drawImage(buffer, 0, 0);
-    });
+    }, [thatbuffer, thatscaledFibers]);
 
-    setEndStroke((drawable:DrawableState, point:Point, color:string, alpha:number, width:number)=>{
+    const endStroke = useMemo(()=>(drawable:DrawableState)=>{
         const { ctx, } = drawable;
         const { canvas } = thatbuffer;
         ctx?.restore();
         canvas.width = 0;
         canvas.height = 0;
-    });
-    return<></>;
+    }, [thatbuffer]);
+    const v = useMemo(()=>({ drawStroke, endStroke, startStroke }), [drawStroke, endStroke, startStroke]);
+    return <BrushRendererContext.Provider value={v}>
+        {children}
+    </BrushRendererContext.Provider>;
 });
 
+export const BrushC = BrushMaper<SerializedBrush>([
+    [SolidC, {
+        scribbleBrushType: BrushList.Solid,
+        name: 'SolidBrush',
+        angle: 0,
+        diameter: 1,
+        hardness: 1,
+        roundness: 1,
+        spacing: 300
+    },],
+    [TextureC, {
+        scribbleBrushType: BrushList.Texture,
+        name: 'TextureBrush',
+        brushTipImage: {
+            colorSpace: 'srgb',
+            height: 1,
+            width: 1,
+            data: [0, 0, 0, 0]
+        },
+        spacing: 0,
+        antiAliasing: true,
+    }],
+    [MarkerC, {
+        scribbleBrushType: BrushList.Marker,
+        name: 'Marker'
+    }],
+    [StiffC, {
+        scribbleBrushType: BrushList.Stiff,
+        name: 'Stiff',
+        fibers: []
+    }]
+]);

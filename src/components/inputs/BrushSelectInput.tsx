@@ -8,6 +8,7 @@ import { TopMenuPortal } from '../portals/TopMenu';
 import { BrushPreview } from './BrushPreview';
 import Brush from '../../abstracts/Brush';
 import { DrawableState } from '../../types/DrawableState';
+import { BrushC } from '../../brushes/SolidC';
 
 const style:CSSProperties = {
     display: 'flex',
@@ -29,10 +30,16 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
                 <button>
-                    <BrushPreview brush={currentSelectedBrush} />Brush
+                    <BrushC that={currentSelectedBrush.brush.toObj()as any}>
+                        <BrushPreview brush={currentSelectedBrush} />Brush
+                    </BrushC>
                 </button>
                 <ul>
-                    {brushes.map((brush, i) => <li key={id+'-'+i}><BrushPreview brush={brush} selected={i===selectedBrush} onMouseDown={() => onChange({ ...props, selectedBrush: i })}/></li>)}
+                    {brushes.map((brush, i) => <li key={id+'-'+i}>
+                        <BrushC that={brush.brush.toObj()as any}>
+                            <BrushPreview brush={brush} selected={i===selectedBrush} onMouseDown={() => onChange({ ...props, selectedBrush: i })} />
+                        </BrushC>
+                    </li>)}
                 </ul>
             </div>
         </TopMenuPortal>

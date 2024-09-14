@@ -16,15 +16,17 @@ import Brush from '../../abstracts/Brush';
 import { InputImage } from '../inputs/InputImage';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { loadAbrBrushes } from 'abr-js';
-import { abrToScribblesSerializable, brushFormObj, JSONValue, SerializedBrush } from '../../lib/Serialization';
+import { abrToScribblesSerializable, brushFormObj, isSerializedImageData, SerializedBrush, SerializedValue } from '../../lib/Serialization';
 import { SBR } from '../../lib/sbr';
 import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
 import { useStorage } from '../../hooks/useStorage';
 import SolidBrush from '../../brushes/Solid';
 import { useMenu } from '../../hooks/useMenu';
-import { BrushPreview } from '../inputs/BrushPreview';
 import { BrushList } from '../../lib/BrushList';
+import { BrushC } from '../../brushes/SolidC';
+import { Thumb } from '../inputs/BrushSelectInput';
+import { BrushPreview } from '../inputs/BrushPreview';
 
 export const EditBrushes = () => {
     const [brushes, setBrushes] = useStorage<SerializedBrush[]>('brushes');
@@ -91,7 +93,7 @@ export const EditBrushes = () => {
         const blob = await SBR.binary(tempBrushes.map(pack=>pack.brush.toObj()));
         saveAs(blob, 'brushes.sbr');
     };
-    const update = useCallback((e:React.ChangeEvent<CustomInput<JSONValue>|HTMLSelectElement>) => {
+    const update = useCallback((e:React.ChangeEvent<CustomInput<SerializedValue>|HTMLSelectElement>) => {
         let value;
         if(e.target.name!='scribbleBrushType')
             switch (e.target.type){
@@ -132,7 +134,8 @@ export const EditBrushes = () => {
     const openModal = useCallback(() => {
         setState({ ...state, isOpen: true });
         setTempBrushes(
-            (brushes||[]).map(brushFormObj)
+            (brushes||[])
+                .map(brushFormObj)
                 .map(brush=>({ brush }))
         );
     }, [brushes, state]);
@@ -175,8 +178,13 @@ export const EditBrushes = () => {
                 </div>
                 <div style={{ display: 'flex' }}>
                     <div className='brush-list' style={{ width: '10rem', flex: '1 1 auto' }}>
+                        {tempBrushes.length}
                         <ul className='brushes'>
-                            {tempBrushes.map((brush, i) => <li key={id+'-'+i}><BrushPreview brush={brush} selected={i==selectedBrushIndex} onMouseDown={()=>setSelectedBrushIndex(i)} /></li>)}
+                            {tempBrushes.map((brush, i) => <li key={id+'-'+i}>
+                                <BrushC that={brush.brush.toObj()as any}>
+                                    <BrushPreview brush={brush} selected={i==selectedBrushIndex} onMouseDown={()=>setSelectedBrushIndex(i)} />
+                                </BrushC>
+                            </li>)}
                         </ul>
                     </div>
                     <div style={{ width: '8rem' }} className='brush-props'>
@@ -188,7 +196,7 @@ export const EditBrushes = () => {
                                 <select name="scribbleBrushType" value={currentBrush.scribbleBrushType} onChange={update}>
                                     {Object.values(BrushList)
                                         .filter(x=>(typeof x == 'number'))
-                                        .map((key)=><option value={key} >{BrushList[key]}</option>)}
+                                        .map((value, i)=><option  key={id+'-options-'+i} value={value} >{BrushList[value]}</option>)}
                                 </select>
                             </label>}
                         {('name' in currentBrush)&&(typeof currentBrush.name == 'string') &&
@@ -200,8 +208,7 @@ export const EditBrushes = () => {
                             </label>}
                         {('brushTipImage' in currentBrush)
                         &&(typeof currentBrush.brushTipImage == 'object')
-                        &&('type' in currentBrush.brushTipImage)
-                        &&(currentBrush.brushTipImage.type == 'img')&&
+                        &&(isSerializedImageData(currentBrush.brushTipImage))&&
                             <label>
                                 <div>
                                 Tip

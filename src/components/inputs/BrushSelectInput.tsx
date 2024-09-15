@@ -1,5 +1,5 @@
 import '../../css/inputs/BrushSelectInput.css';
-import { Dispatch, SetStateAction, useState, CSSProperties, useMemo } from 'react';
+import { Dispatch, SetStateAction, useState, CSSProperties, useMemo, useEffect } from 'react';
 import { AlphaOptions } from '../../contexts/MenuOptions';
 import { BrushOptions } from '../../contexts/BrushOptions';
 import { uid } from '../../lib/uid';
@@ -8,7 +8,7 @@ import { TopMenuPortal } from '../portals/TopMenu';
 import { BrushPreview } from './BrushPreview';
 import Brush from '../../abstracts/Brush';
 import { DrawableState } from '../../types/DrawableState';
-import { BrushC } from '../../brushes/SolidC';
+import { BrushC } from '../../brushes/BrushC';
 
 const style:CSSProperties = {
     display: 'flex',
@@ -26,17 +26,24 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
         setCurrentSelectedBrush({ brush: brushes[selectedBrush].brush, preview });
     }, [brushes, preview, selectedBrush]);
     const [id] = useState(uid());
+    useEffect(()=>{
+        const c = 'BrushSelectInput';
+        console.log(c+'.mount');
+        return ()=>{
+            console.log(c+'.unmount');
+        };
+    }, []);
     return <>
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
                 <button>
-                    <BrushC that={currentSelectedBrush.brush.toObj()as any}>
+                    <BrushC brush={currentSelectedBrush.brush.toObj()as any}>
                         <BrushPreview brush={currentSelectedBrush} />Brush
                     </BrushC>
                 </button>
                 <ul>
                     {brushes.map((brush, i) => <li key={id+'-'+i}>
-                        <BrushC that={brush.brush.toObj()as any}>
+                        <BrushC brush={brush.brush.toObj()as any}>
                             <BrushPreview brush={brush} selected={i===selectedBrush} onMouseDown={() => onChange({ ...props, selectedBrush: i })} />
                         </BrushC>
                     </li>)}

@@ -10,6 +10,7 @@ import { TopMenu } from './components/portals/TopMenu';
 import { LeftMenu } from './components/portals/LeftMenu';
 import { RightMenu } from './components/portals/RightMenu';
 import { BottomMenu } from './components/portals/BottomMenu';
+import { ToolContextProvider } from './contexts/ToolContextProvider';
 
 function App() {
     const [drawing] = useContext(EditorContext);
@@ -21,7 +22,9 @@ function App() {
                     <h1 className='filename'>{drawing?.name}</h1>
                 </TopMenu>
                 <LeftMenu></LeftMenu>
-                <Canvas/>
+                <ToolContextProvider>
+                    <Canvas/>
+                </ToolContextProvider>
                 <RightMenu>
                     <Toolbar />
                     <LayerMenu />

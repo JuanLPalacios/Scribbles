@@ -7,8 +7,9 @@ import { AlphaOptions, ColorOptions } from '../contexts/MenuOptions';
 import { BrushOptions } from '../contexts/BrushOptions';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
+import { LayerState } from '../types/LayerState';
 
-type DrawOptions = BrushOptions & ColorOptions & AlphaOptions;
+export type DrawOptions = BrushOptions & ColorOptions & AlphaOptions;
 
 export const draw = new (class Draw extends Tool<DrawOptions> {
     down = false;
@@ -78,3 +79,11 @@ export const draw = new (class Draw extends Tool<DrawOptions> {
         brush.brush.drawStroke(layer.buffer, [x-dx, y-dy], color, alpha, brushWidth);
     }
 })();
+
+export function renderThumbnail(layer:LayerState){
+    const { canvas, thumbnail } = layer;
+    if(thumbnail.ctx){
+        thumbnail.ctx.globalCompositeOperation = 'copy';
+        thumbnail.ctx.drawImage(canvas.canvas, 0, 0, thumbnail.canvas.width, thumbnail.canvas.height);
+    }
+}

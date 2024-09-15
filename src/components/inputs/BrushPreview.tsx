@@ -4,7 +4,7 @@ import { Drawable } from '../Drawable';
 import { createDrawable } from '../../generators/createDrawable';
 import Brush from '../../abstracts/Brush';
 import { DrawableState } from '../../types/DrawableState';
-import { useBrush } from '../../brushes/SolidC';
+import { useBrush } from '../../hooks/useBrush';
 import { Point } from '../../types/Point';
 
 export function BrushPreview({ brush, selected, onMouseDown }:{ brush:{ brush: Brush; preview?: DrawableState | undefined; }, selected?: boolean, onMouseDown?: React.MouseEventHandler<HTMLDivElement> }) {
@@ -13,7 +13,6 @@ export function BrushPreview({ brush, selected, onMouseDown }:{ brush:{ brush: B
     useMemo(()=>{
         console.log('re-rendered');
         const preview = brush.preview || createPreview();
-        //brush.brush.renderPreview(preview, demoStroke as never, '#ffffff', .5, 15);
         const
             color = '#ffffff',
             alpha=.5,

@@ -24,8 +24,7 @@ import { useStorage } from '../../hooks/useStorage';
 import SolidBrush from '../../brushes/Solid';
 import { useMenu } from '../../hooks/useMenu';
 import { BrushList } from '../../lib/BrushList';
-import { BrushC } from '../../brushes/SolidC';
-import { Thumb } from '../inputs/BrushSelectInput';
+import { BrushC } from '../../brushes/BrushC';
 import { BrushPreview } from '../inputs/BrushPreview';
 
 export const EditBrushes = () => {
@@ -181,7 +180,7 @@ export const EditBrushes = () => {
                         {tempBrushes.length}
                         <ul className='brushes'>
                             {tempBrushes.map((brush, i) => <li key={id+'-'+i}>
-                                <BrushC that={brush.brush.toObj()as any}>
+                                <BrushC brush={brush.brush.toObj()as any}>
                                     <BrushPreview brush={brush} selected={i==selectedBrushIndex} onMouseDown={()=>setSelectedBrushIndex(i)} />
                                 </BrushC>
                             </li>)}

@@ -1,5 +1,4 @@
 import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
-import Tool from '../abstracts/Tool';
 import '../css/Canvas.css';
 import { MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
@@ -7,6 +6,8 @@ import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { QuickStart } from './QuickStart';
 import { useMenu } from '../hooks/useMenu';
+import { useTool } from '../hooks/useTool';
+import { Tool } from '../contexts/ToolContext';
 
 export const CanvasContext = createContext({});
 
@@ -15,16 +16,13 @@ function Canvas() {
     const menuContext = useMenu();
     const [editor, editorDispatch] = editorContext;
     const [options, onChange] = menuContext;
-    const [prevTool, setTool] = useState<Tool>();
+    const [prevTool, setTool] = useState<Tool<any>>();
     const [keys, setKeys] = useState<{[key:string]:boolean}>({});
     const [touches, setTouches] = useState<{[key:number]:React.PointerEvent<HTMLDivElement>}>({});
     const [oldTouches, setOldTouches] = useState<{[key:number]:React.PointerEvent<HTMLDivElement>}>({});
     const [oldTransform, setOldTransform] = useState<DOMMatrix>(new DOMMatrix());
     const [transform, setTransform] = useState<DOMMatrix>(new DOMMatrix());
-    const {
-        tools, selectedTool
-    } = options;
-    const tool = tools[selectedTool].Tool;
+    const tool = useTool();
 
     const ref = useRef<HTMLDivElement>(null);
 

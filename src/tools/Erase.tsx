@@ -9,7 +9,7 @@ import { DrawableState } from '../types/DrawableState';
 import { ToolEvent } from '../types/ToolEvent';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 
-type EraseOptions = BrushOptions & AlphaOptions;
+export type EraseOptions = BrushOptions & AlphaOptions;
 
 export const erase = new (class Erase extends Tool<EraseOptions> {
     mask: DrawableState;
@@ -109,3 +109,4 @@ export const erase = new (class Erase extends Tool<EraseOptions> {
         this.renderMask(canvas, buffer);
     }
 })();
+

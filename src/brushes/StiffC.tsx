@@ -8,7 +8,6 @@ import { BrushRendererContext } from '../contexts/BrushRendererContext';
 import { SerializedStiffBrush } from './StiffBrush';
 
 export const StiffC = (({ brush: that, children }: BrushFunctions<SerializedStiffBrush>) => {
-    console.log('StiffC');
     const thatbuffer: DrawableState = createDrawable({ size: [1, 1] });
     const thatfibers: { position: DOMPoint; width: number; alpha: number; }[] = that.fibers.map(parseSerializedJSON);
     let thatscaledFibers: { position: DOMPoint; width: number; alpha: number; }[] = [];

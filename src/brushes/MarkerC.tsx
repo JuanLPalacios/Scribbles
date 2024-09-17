@@ -6,7 +6,6 @@ import { BrushRendererContext } from '../contexts/BrushRendererContext';
 import { SerializedMarkerBrush } from './Marker';
 
 export const MarkerC = (({ children }: BrushFunctions<SerializedMarkerBrush>) => {
-    console.log('MarkerC');
     let thatprevToLastPoint: Point = [0, 0];
     let thatlastPoint: Point = [0, 0];
     const thatbuffer: DrawableState = createDrawable({ size: [1, 1] });

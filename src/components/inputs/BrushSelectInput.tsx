@@ -1,5 +1,5 @@
 import '../../css/inputs/BrushSelectInput.css';
-import { Dispatch, SetStateAction, useState, CSSProperties, useMemo, useEffect } from 'react';
+import { Dispatch, SetStateAction, useState, CSSProperties, useMemo } from 'react';
 import { AlphaOptions } from '../../contexts/MenuOptions';
 import { BrushOptions } from '../../contexts/BrushOptions';
 import { uid } from '../../lib/uid';
@@ -26,13 +26,6 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
         setCurrentSelectedBrush({ brush: brushes[selectedBrush].brush, preview });
     }, [brushes, preview, selectedBrush]);
     const [id] = useState(uid());
-    useEffect(()=>{
-        const c = 'BrushSelectInput';
-        console.log(c+'.mount');
-        return ()=>{
-            console.log(c+'.unmount');
-        };
-    }, []);
     return <>
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>

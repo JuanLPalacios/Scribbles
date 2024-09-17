@@ -8,7 +8,6 @@ export const ToolContextProvider = (props: { children: ReactNode; }) => {
     const { brushesPacks, selectedBrush } = options2;
     const { tools, selectedTool } = options2;
     const { ToolC } = tools[selectedTool];
-    console.log('ToolContextProvider=>'+ToolC.name);
     const { brush } = useMemo(() => brushesPacks[selectedBrush], [brushesPacks, selectedBrush]);
     return <BrushC brush={brush.toObj() as any}>
         <ToolC>

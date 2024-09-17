@@ -113,6 +113,7 @@ type UpdateLayer = {
 
 const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction => {
     const { width, height, layers, selectedLayer } = drawing;
+    console.log(action.type, action.payload);
     switch (action.type) {
     case 'drawing/addLayer':
         return { type: 'drawing/removeLayer', payload: { at: action.payload.at } };
@@ -141,6 +142,8 @@ const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction
 // eslint-disable-next-line react-refresh/only-export-components
 export const reducer = (state:EditorState, action: EditorAction):EditorState => {
     const { next, prev, drawing } = state;
+    const { payload } = { payload: undefined, ...action };
+    console.log(action.type, payload);
     switch (action.type) {
     case 'editor/do':
         return drawing? { ...state, drawing: dreducer(drawing, action.payload), prev: [...prev, antidreducer(drawing, action.payload)], next: [] } : state ;
@@ -159,6 +162,7 @@ export const reducer = (state:EditorState, action: EditorAction):EditorState => 
 
 const dreducer = (drawing:DrawingState, action: DrawingAction):DrawingState => {
     const { layers, selectedLayer } = drawing;
+    console.log(action.type, action.payload);
     switch (action.type) {
     case 'drawing/addLayer':
         return drawing && { ...drawing, layers: [...layers.slice(0, action.payload.at),

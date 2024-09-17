@@ -9,9 +9,7 @@ import { Point } from '../../types/Point';
 
 export function BrushPreview({ brush, selected, onMouseDown }:{ brush:{ brush: Brush; preview?: DrawableState | undefined; }, selected?: boolean, onMouseDown?: React.MouseEventHandler<HTMLDivElement> }) {
     const { startStroke, drawStroke, endStroke } = useBrush();
-    console.log(brush.brush.name);
     useMemo(()=>{
-        console.log('re-rendered');
         const preview = brush.preview || createPreview();
         const
             color = '#ffffff',

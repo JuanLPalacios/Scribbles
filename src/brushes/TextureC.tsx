@@ -8,7 +8,6 @@ import { BrushRendererContext } from '../contexts/BrushRendererContext';
 import { SerializedTextureBrush } from './TextureBrush';
 
 export const TextureC = (({ brush: that, children }: BrushFunctions<SerializedTextureBrush>) => {
-    console.log('TextureC');
     const that_brushTipImage: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
     const brushTipImageData = useMemo(() => {
         const { ctx, canvas } = that_brushTipImage;

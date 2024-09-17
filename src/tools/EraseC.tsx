@@ -11,7 +11,7 @@ import { renderThumbnail } from './Draw';
 import { DrawableState } from '../types/DrawableState';
 import { ToolContext, ToolFunctions } from '../contexts/ToolContext';
 
-type EraseOptions = BrushOptions & AlphaOptions;
+export type EraseOptions = BrushOptions & AlphaOptions;
 
 export const EraseC = ({ children }: ToolFunctions) => {
     const menuContext = useMenu();
@@ -117,3 +117,4 @@ export const EraseC = ({ children }: ToolFunctions) => {
         <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
     </ToolContext.Provider>;
 };
+

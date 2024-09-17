@@ -8,7 +8,6 @@ import { BrushRendererContext } from '../contexts/BrushRendererContext';
 import { BrushFunctions } from '../contexts/BrushRendererContext';
 
 export const SolidC = (({ brush: that, children }:BrushFunctions<SerializedSolidBrush>)=>{
-    console.log('SolidC');
     let lastPoint:Point =  [0, 0];
     let lastSegments:Point[] =  [];
     let finished = false;

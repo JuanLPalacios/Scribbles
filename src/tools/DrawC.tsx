@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useMemo } from 'react';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { ColorInput } from '../components/inputs/ColorInput';
@@ -78,13 +78,6 @@ export const DrawC = ({ children }: ToolFunctions) => {
             mouseMove,
             mouseUp,
             setup
-        };
-    }, []);
-    useEffect(()=>{
-        const c = 'Draw';
-        console.log(c+'.mount');
-        return ()=>{
-            console.log(c+'.unmount');
         };
     }, []);
     return <ToolContext.Provider value={r}>

@@ -14,6 +14,7 @@ import { useBrushes } from '../hooks/useBrushes';
 import { BrushesContextProvider, BrushOptions } from './BrushOptions';
 import { DrawC } from '../tools/DrawC';
 import { EraseC } from '../tools/EraseC';
+import { FillC } from '../tools/FillC';
 
 export type MenuOptions2 = ToolOptions & ColorOptions & AlphaOptions & ToleranceOptions
 
@@ -57,7 +58,7 @@ export const MenuContextProvider2 = (props: { children: ReactNode }) => {
             tools: [
                 { key: uid(), Tool: draw, ToolC: DrawC, name: 'draw', icon: drawIcon },
                 { key: uid(), Tool: erase, ToolC: EraseC, name: 'erase', icon: eraseIcon },
-                { key: uid(), Tool: fill, ToolC: DrawC, name: 'fill', icon: fillIcon },
+                { key: uid(), Tool: fill, ToolC: FillC, name: 'fill', icon: fillIcon },
                 { key: uid(), Tool: transform, ToolC: DrawC, name: 'transform', icon: transformIcon }
             ],
             selectedTool: 0,

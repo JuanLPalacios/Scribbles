@@ -11,7 +11,7 @@ import { ToleranceInput } from '../components/inputs/ToleranceInput';
 import { Point } from '../types/Point';
 import { AlphaOptions, ColorOptions, ToleranceOptions } from '../contexts/MenuOptions';
 
-type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
+export type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
 export const FillC = ({ children }: ToolFunctions) => {
     const menuContext = useMenu();
@@ -179,7 +179,7 @@ export const FillC = ({ children }: ToolFunctions) => {
     </ToolContext.Provider>;
 };
 
-function parseColor(color:string): [number, number, number, number] {
+export function parseColor(color:string): [number, number, number, number] {
     //this needs to be moved to a lib or repaced by one
 
     return [
@@ -189,3 +189,4 @@ function parseColor(color:string): [number, number, number, number] {
         parseInt(color.substring(7), 16)
     ];
 }
+

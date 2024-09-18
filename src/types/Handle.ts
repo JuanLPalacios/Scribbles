@@ -1,6 +1,7 @@
 import { CanvasEvent } from './CanvasEvent';
 
-export interface Handle<O = unknown> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Handle<O = any> {
     key: number
     icon: string
     position: DOMPoint

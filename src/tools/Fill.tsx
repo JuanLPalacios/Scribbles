@@ -19,9 +19,9 @@ export const fill = new (class Fill extends Tool<FillOptions> {
         // eslint-disable-next-line react-hooks/exhaustive-deps
         }, [alpha, color, config, onChange]);
         return <div>
-            <ColorInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
-            <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
-            <ToleranceInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
+            <ColorInput   />
+            <AlphaInput   />
+            <ToleranceInput   />
         </div>;
     };
 

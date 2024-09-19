@@ -1,20 +1,37 @@
 import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
 import '../css/Canvas.css';
-import { MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { QuickStart } from './QuickStart';
-import { useMenu } from '../hooks/useMenu';
 import { useTool } from '../hooks/useTool';
 import { Tool } from '../contexts/ToolContext';
+import { useAlphaOptions } from '../hooks/useAlphaOptions';
+import { useBrushesOptions } from '../hooks/useBrushesOptions';
+import { useColorOptions } from '../hooks/useColorOptions';
+import { useToolOptions } from '../hooks/useToolOptions';
+import { useToleranceOptions } from '../hooks/useToleranceOptions';
+import { MenuOptions } from '../contexts/MenuOptions';
 
 export const CanvasContext = createContext({});
 
 function Canvas() {
     const editorContext = useContext(EditorContext);
-    const menuContext = useMenu();
     const [editor, editorDispatch] = editorContext;
+    const [{ alpha }, setAlphaOptions] = useAlphaOptions();
+    const [{ brushWidth, brushesPacks, selectedBrush }, setBrushesOptions] = useBrushesOptions();
+    const [{ color }, setColorOptions] = useColorOptions();
+    const [{ selectedTool, tools }, setToolOptions] = useToolOptions();
+    const [{ tolerance }, setToleranceOptions] = useToleranceOptions();
+    const menuContext = [{ alpha, brushWidth, brushesPacks, selectedBrush, color, selectedTool, tools, tolerance },
+        (p: { alpha: any; brushWidth: any; brushesPacks: any; selectedBrush: any; color: any; selectedTool: any; tools: any; tolerance: any; })=>{
+            const { alpha, brushWidth, brushesPacks, selectedBrush, color, selectedTool, tools, tolerance } = p;
+            setAlphaOptions({ alpha });
+            setBrushesOptions({ brushesPacks, brushWidth, selectedBrush });
+            setColorOptions({ color });
+            setToolOptions({ selectedTool, tools });
+            setToleranceOptions({ tolerance });
+        }] as const;
     const [options, onChange] = menuContext;
     const [prevTool, setTool] = useState<Tool<any>>();
     const [keys, setKeys] = useState<{[key:string]:boolean}>({});
@@ -80,10 +97,10 @@ function Canvas() {
     }, [containerRef.current]);
 
     const getPointer = useCallback((e:React.PointerEvent<HTMLDivElement>):CanvasEvent<MenuOptions>=>{
-        if(!containerRef.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext };
+        if(!containerRef.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext: menuContext as any };
         const { clientX, clientY } = e;
         const { top, left } = containerRef.current.getBoundingClientRect();
-        return { point: (new DOMPoint(clientX - left, clientY - top)).matrixTransform(transform.inverse()), editorContext: editorContext, menuContext };
+        return { point: (new DOMPoint(clientX - left, clientY - top)).matrixTransform(transform.inverse()), editorContext: editorContext, menuContext: menuContext as any };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editorContext, menuContext, transform, containerRef.current]);
 

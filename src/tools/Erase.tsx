@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import Tool from '../abstracts/Tool';
 import { AlphaOptions } from '../contexts/MenuOptions';
-import { BrushOptions } from '../contexts/BrushOptions';
+import { BrushOptions } from '../contexts/BrushesOptionsContext';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { createDrawable } from '../generators/createDrawable';
 import { CanvasEvent } from '../types/CanvasEvent';
@@ -14,10 +14,10 @@ export type EraseOptions = BrushOptions & AlphaOptions;
 export const erase = new (class Erase extends Tool<EraseOptions> {
     mask: DrawableState;
     down = false;
-    Menu:(props: {config:EraseOptions, onChange:Dispatch<SetStateAction<EraseOptions>>}) => JSX.Element = ({ config, onChange }) => {
+    Menu:(props: {config:EraseOptions, onChange:Dispatch<SetStateAction<EraseOptions>>}) => JSX.Element = () => {
         return <>
-            <BrushSelectInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
-            <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
+            <BrushSelectInput  />
+            <AlphaInput   />
         </>;
     };
 

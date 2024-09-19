@@ -1,7 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { ToolFunctions, ToolContext } from '../contexts/ToolContext';
-import { useMenu } from '../hooks/useMenu';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { DrawableState } from '../types/DrawableState';
 import { ToolEvent } from '../types/ToolEvent';
@@ -10,12 +9,16 @@ import { ColorInput } from '../components/inputs/ColorInput';
 import { ToleranceInput } from '../components/inputs/ToleranceInput';
 import { Point } from '../types/Point';
 import { AlphaOptions, ColorOptions, ToleranceOptions } from '../contexts/MenuOptions';
+import { useColorOptions } from '../hooks/useColorOptions';
+import { useToleranceOptions } from '../hooks/useToleranceOptions';
+import { useAlphaOptions } from '../hooks/useAlphaOptions';
 
 export type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
 export const FillC = ({ children }: ToolFunctions) => {
-    const menuContext = useMenu();
-    const [config, onChange] = menuContext;
+    const [{ color }, setColor] = useColorOptions();
+    const [{ tolerance }, setTolerance] = useToleranceOptions();
+    const [{ alpha }, setAlpha] = useAlphaOptions();
     const r = useMemo(() => {
         const setup = function({ editorContext: [drawing] }: ToolEvent<FillOptions>): void {
             if(!drawing.drawing) return;
@@ -166,16 +169,16 @@ export const FillC = ({ children }: ToolFunctions) => {
             setup
         };
     }, []);
-    const { color, alpha, tolerance } = config;
     useEffect(()=>{
-        if((color === undefined)||(alpha === undefined)||(tolerance === undefined))onChange({ ...config, color: '#000000', alpha: 1, tolerance: .15 });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [alpha, color, config, onChange]);
+        if(color === undefined)setColor({ color: '#000000' });
+        if(alpha === undefined)setAlpha({ alpha: 1 });
+        if(tolerance === undefined)setTolerance({ tolerance: .15 });
+    }, [alpha, color, setAlpha, setColor, setTolerance, tolerance]);
     return <ToolContext.Provider value={r}>
         {children}
-        <ColorInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
-        <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
-        <ToleranceInput {...config} onChange={(values) => onChange({ ...config, ...values })}  />
+        <ColorInput   />
+        <AlphaInput   />
+        <ToleranceInput   />
     </ToolContext.Provider>;
 };
 

@@ -22,14 +22,14 @@ import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
 import { useStorage } from '../../hooks/useStorage';
 import SolidBrush from '../../brushes/Solid';
-import { useMenu } from '../../hooks/useMenu';
 import { BrushList } from '../../lib/BrushList';
 import { BrushC } from '../../brushes/BrushC';
 import { BrushPreview } from '../inputs/BrushPreview';
+import { useBrushesOptions } from '../../hooks/useBrushesOptions';
 
 export const EditBrushes = () => {
     const [brushes, setBrushes] = useStorage<SerializedBrush[]>('brushes');
-    const [options, setOptions] = useMenu();
+    const [{ brushWidth, selectedBrush }, setBrushesOptions] = useBrushesOptions();
     const [tempBrushes, setTempBrushes] = useState<{ brush: Brush; preview?: DrawableState; }[]>([]);
     const [id] = useState(uid());
     const [currentBrush, setBrush] = useState<SerializedBrush>({
@@ -37,7 +37,7 @@ export const EditBrushes = () => {
     const [selectedBrushIndex, setSelectedBrushIndex] = useState(0);
     const [state, setState] = useState({ isOpen: false, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, isValid, errors } = state;
-    const selectedBrush = tempBrushes[selectedBrushIndex] || { brush: new SolidBrush() };
+    const editorSelectedBrush = tempBrushes[selectedBrushIndex] || { brush: new SolidBrush() };
     const addBrush = useCallback(() => {
         setTempBrushes([
             ...tempBrushes,
@@ -48,8 +48,8 @@ export const EditBrushes = () => {
         setTempBrushes(tempBrushes.filter((_x, i)=>i!=selectedBrushIndex));
     }, [selectedBrushIndex, tempBrushes]);
     const duplicateBrush = useCallback(() => {
-        setTempBrushes([...tempBrushes, { brush: brushFormObj(selectedBrush.brush.toObj() as SerializedBrush) }]);
-    }, [selectedBrush.brush,  tempBrushes]);
+        setTempBrushes([...tempBrushes, { brush: brushFormObj(editorSelectedBrush.brush.toObj() as SerializedBrush) }]);
+    }, [editorSelectedBrush.brush,  tempBrushes]);
     const importBrush = useOpenFile((files)=>{
         if(files.length==0)return;
         const file = files[0];
@@ -113,8 +113,9 @@ export const EditBrushes = () => {
     }, [state]);
     const save = useCallback(() => {
         setState({ ...state, isOpen: false });
-        setOptions({
-            ...options,
+        setBrushesOptions({
+            brushWidth,
+            selectedBrush,
             brushesPacks: tempBrushes
                 .map(x=>x.brush.toObj())
                 .map(x=>(x as SerializedBrush))
@@ -126,7 +127,7 @@ export const EditBrushes = () => {
                 .map(x=>x.brush.toObj())
                 .map(x=>(x as SerializedBrush))
         );
-    }, [options, setBrushes, setOptions, state, tempBrushes]);
+    }, [brushWidth, selectedBrush, setBrushes, setBrushesOptions, state, tempBrushes]);
     const close = useCallback(() => {
         setState({ ...state, isOpen: false });
     }, [state]);
@@ -139,7 +140,7 @@ export const EditBrushes = () => {
         );
     }, [brushes, state]);
     useEffect(() => {
-        setBrush(selectedBrush.brush.toObj() as SerializedBrush);
+        setBrush(editorSelectedBrush.brush.toObj() as SerializedBrush);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBrushIndex]);
     useMemo(() => {
@@ -149,7 +150,7 @@ export const EditBrushes = () => {
                 errors.name.push('Should not contain forbidden characters');
         const isValid = Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0;
         if((isValid)&&(tempBrushes.length>selectedBrushIndex)){
-            selectedBrush.brush.loadObj(currentBrush);
+            editorSelectedBrush.brush.loadObj(currentBrush);
         }
         if(isValid)setTempBrushes(tempBrushes.map((x, i)=>(selectedBrushIndex===i)?{ ...x, brush: brushFormObj(currentBrush as SerializedBrush) }:x));
         setState({ ...state, errors, isValid });

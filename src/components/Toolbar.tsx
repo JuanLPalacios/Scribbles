@@ -1,13 +1,9 @@
 import '../css/Toolbar.css';
-import { useMenu } from '../hooks/useMenu';
+import { useToolOptions } from '../hooks/useToolOptions';
 
 function Toolbar() {
-    const menuContext = useMenu();
-    const [options, onChange] = menuContext;
-    const {
-        tools, selectedTool
-    } = options;
-    const  onSelect= (selectedTool: number)=>onChange({ ...options, selectedTool });
+    const [{ selectedTool, tools }, setToolOptions] = useToolOptions();
+    const  onSelect= (selectedTool: number)=>setToolOptions({ selectedTool, tools });
     //const { Tool } = tools[selectedTool];
     //<Tool.Menu config={options} onChange={onChange}/>
     return (

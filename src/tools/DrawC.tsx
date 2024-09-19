@@ -3,14 +3,11 @@ import { AlphaInput } from '../components/inputs/AlphaInput';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { ColorInput } from '../components/inputs/ColorInput';
 import { ToolFunctions, ToolContext } from '../contexts/ToolContext';
-import { useMenu } from '../hooks/useMenu';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
 import { DrawOptions, renderThumbnail } from './Draw';
 
 export const DrawC = ({ children }: ToolFunctions) => {
-    const menuContext = useMenu();
-    const [config, onChange] = menuContext;
     const r = useMemo(()=>{
         let down = false;
 
@@ -82,8 +79,8 @@ export const DrawC = ({ children }: ToolFunctions) => {
     }, []);
     return <ToolContext.Provider value={r}>
         {children}
-        <BrushSelectInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
-        <ColorInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
-        <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
+        <BrushSelectInput  />
+        <ColorInput  />
+        <AlphaInput  />
     </ToolContext.Provider>;
 };

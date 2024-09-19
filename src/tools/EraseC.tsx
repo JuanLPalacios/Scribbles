@@ -1,12 +1,11 @@
 import { useMemo } from 'react';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
-import { BrushOptions } from '../contexts/BrushOptions';
+import { BrushOptions } from '../contexts/BrushesOptionsContext';
 import { AlphaOptions } from '../contexts/MenuOptions';
 import { createDrawable } from '../generators/createDrawable';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
-import { useMenu } from '../hooks/useMenu';
 import { renderThumbnail } from './Draw';
 import { DrawableState } from '../types/DrawableState';
 import { ToolContext, ToolFunctions } from '../contexts/ToolContext';
@@ -14,8 +13,6 @@ import { ToolContext, ToolFunctions } from '../contexts/ToolContext';
 export type EraseOptions = BrushOptions & AlphaOptions;
 
 export const EraseC = ({ children }: ToolFunctions) => {
-    const menuContext = useMenu();
-    const [config, onChange] = menuContext;
     const mask = useMemo(()=>createDrawable({ size: [1, 1] }), []);
     const r = useMemo(()=>{
         let down = false;
@@ -113,8 +110,8 @@ export const EraseC = ({ children }: ToolFunctions) => {
     }, [mask]);
     return <ToolContext.Provider value={r}>
         {children}
-        <BrushSelectInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
-        <AlphaInput {...config} onChange={(values) => onChange({ ...config, ...values })} />
+        <BrushSelectInput  />
+        <AlphaInput  />
     </ToolContext.Provider>;
 };
 

@@ -1,7 +1,5 @@
 import '../../css/inputs/BrushSelectInput.css';
-import { Dispatch, SetStateAction, useState, CSSProperties, useMemo } from 'react';
-import { AlphaOptions } from '../../contexts/MenuOptions';
-import { BrushOptions } from '../../contexts/BrushOptions';
+import { useState, CSSProperties, useMemo } from 'react';
 import { uid } from '../../lib/uid';
 import { LeftMenuPortal } from '../portals/LeftMenu';
 import { TopMenuPortal } from '../portals/TopMenu';
@@ -9,22 +7,23 @@ import { BrushPreview } from './BrushPreview';
 import Brush from '../../abstracts/Brush';
 import { DrawableState } from '../../types/DrawableState';
 import { BrushC } from '../../brushes/BrushC';
+import { useBrushesOptions } from '../../hooks/useBrushesOptions';
 
 const style:CSSProperties = {
     display: 'flex',
     flexDirection: 'column'
 };
 
-export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:Dispatch<SetStateAction<BrushOptions & AlphaOptions>>}) => {
-    const { brushesPacks: brushes, selectedBrush, brushWidth, onChange } = props;
+export const BrushSelectInput = () => {
+    const [{ brushesPacks, selectedBrush, brushWidth }, onChange] = useBrushesOptions();
     const [currentSelectedBrush, setCurrentSelectedBrush] = useState<{
         brush: Brush;
         preview?: DrawableState;
-    }>({ brush: brushes[selectedBrush].brush });
+    }>({ brush: brushesPacks[selectedBrush].brush });
     const { preview } = currentSelectedBrush;
     useMemo(()=>{
-        setCurrentSelectedBrush({ brush: brushes[selectedBrush].brush, preview });
-    }, [brushes, preview, selectedBrush]);
+        setCurrentSelectedBrush({ brush: brushesPacks[selectedBrush].brush, preview });
+    }, [brushesPacks, preview, selectedBrush]);
     const [id] = useState(uid());
     return <>
         <TopMenuPortal>
@@ -35,9 +34,9 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
                     </BrushC>
                 </button>
                 <ul>
-                    {brushes.map((brush, i) => <li key={id+'-'+i}>
+                    {brushesPacks.map((brush, i) => <li key={id+'-'+i}>
                         <BrushC brush={brush.brush.toObj()as any}>
-                            <BrushPreview brush={brush} selected={i===selectedBrush} onMouseDown={() => onChange({ ...props, selectedBrush: i })} />
+                            <BrushPreview brush={brush} selected={i===selectedBrush} onMouseDown={() => onChange({ brushesPacks, brushWidth, selectedBrush: i })} />
                         </BrushC>
                     </li>)}
                 </ul>
@@ -48,7 +47,7 @@ export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:D
                 <div>
                     brush width
                 </div>
-                <input {...{ orient: 'vertical' }} type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="16" onChange={(e) => onChange({ ...props, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} />
+                <input {...{ orient: 'vertical' }} type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="16" onChange={(e) => onChange({ brushesPacks, selectedBrush, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} />
             </label>
         </LeftMenuPortal>
     </>;

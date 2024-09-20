@@ -1,7 +1,7 @@
 import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
 import '../css/Canvas.css';
 import Layer from './Layer';
-import { EditorContext } from '../contexts/DrawingState';
+import { DrawingState, EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { QuickStart } from './QuickStart';
 import { useTool } from '../hooks/useTool';
@@ -12,6 +12,7 @@ import { useColorOptions } from '../hooks/useColorOptions';
 import { useToolOptions } from '../hooks/useToolOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';
 import { MenuOptions } from '../contexts/MenuOptions';
+import { Drawing } from './Drawing';
 
 export const CanvasContext = createContext({});
 
@@ -40,9 +41,6 @@ function Canvas() {
     const [oldTransform, setOldTransform] = useState<DOMMatrix>(new DOMMatrix());
     const [transform, setTransform] = useState<DOMMatrix>(new DOMMatrix());
     const tool = useTool();
-
-    const ref = useRef<HTMLDivElement>(null);
-
     const containerRef = useRef<HTMLDivElement>(null);
 
     const { top, left } = containerRef.current?.getBoundingClientRect() || { top: 0, left: 0 };
@@ -217,39 +215,6 @@ function Canvas() {
         };
     }, [keys]);
 
-    let viewPort = undefined;
-    if(editor.drawing){
-        const { width, height, layers, selectedLayer } = editor.drawing;
-        viewPort = <>
-            <div
-                style={{
-                    transform: `${transform}`,
-                    transformOrigin: 'top left'
-                }}
-            >
-                <div
-                    ref={ref}
-                    style={{ width: `${width}px`, height: `${height}px` }}
-                >
-                    {layers.map((layer) => <Layer values={layer} key={layer.key} />)}
-                    {layers[selectedLayer].handles.map(({ key, icon, position, rotation, onMouseDown }) => <img
-                        key={key}
-                        src={icon}
-                        style={{
-                            left: `${position.x}px`,
-                            top: `${position.y}px`,
-                            width: '24px',
-                            height: '24px',
-                            transform: `translate(${-12}px, ${-12}px) ${rotation}`
-                        }}
-                        alt=""
-                        draggable="false"
-                        onPointerDown={e => onMouseDown(getPointer(e))}
-                    />)}
-                </div>
-            </div>
-        </>;
-    }
     return (
         <CanvasContext.Provider value={{ brush: tool }}>
             <div className="Canvas"
@@ -262,7 +227,14 @@ function Canvas() {
                 onWheel={wheelHandler}
             >
                 {editor.drawing?
-                    viewPort
+                    <div
+                        style={{
+                            transform: `${transform}`,
+                            transformOrigin: 'top left'
+                        }}
+                    >
+                        <Drawing drawing={editor.drawing} getPointer={getPointer} />
+                    </div>
                     :<QuickStart/>}
             </div>
         </CanvasContext.Provider>
@@ -270,4 +242,3 @@ function Canvas() {
 }
 
 export default Canvas;
-

@@ -23,5 +23,3 @@ export type Tool<P = any> = {
 export type ToolFunctions = {
     children: ReactNode;
 };
-export type ToolPair<T extends string> = [(props: ToolFunctions) => ReactNode, T];
-

@@ -42,7 +42,7 @@ export const FillC = ({ children }: ToolFunctions) => {
             setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
         };
 
-        const click = function({ point, editorContext: [drawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
+        const click = function({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
             if(!drawing.drawing) return;
             const { layers, selectedLayer } = drawing.drawing;
             const layer = layers[selectedLayer];
@@ -67,6 +67,9 @@ export const FillC = ({ children }: ToolFunctions) => {
             canvas.ctx.globalAlpha = 1;
             canvas.ctx.drawImage(buffer.canvas, 0, 0);
             buffer.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
+            const { rect, canvas: { ctx } } = layer;
+            if(!ctx)return;
+            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
             renderThumbnail(layer);
         };
 

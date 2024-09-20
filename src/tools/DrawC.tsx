@@ -35,14 +35,13 @@ export const DrawC = ({ children }: ToolFunctions) => {
             const { layers, selectedLayer } = drawing.drawing;
             const brush = brushes[selectedBrush];
             const layer = layers[selectedLayer];
-            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
             down = true;
             const { x, y } = point;
             const { rect: { position: [dx, dy] } } = layer;
             brush.brush.startStroke(layer.buffer, [x - dx, y - dy], color, alpha, brushWidth);
         };
 
-        const mouseUp = ({ point, editorContext: [drawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>) => {
+        const mouseUp = ({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }: CanvasEvent<DrawOptions>) => {
             if (!drawing.drawing) return;
             const { layers, selectedLayer } = drawing.drawing;
             const brush = brushes[selectedBrush];
@@ -55,6 +54,9 @@ export const DrawC = ({ children }: ToolFunctions) => {
             canvas.ctx?.drawImage(buffer.canvas, 0, 0);
             buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
             down = false;
+            const { rect, canvas: { ctx } } = layer;
+            if(!ctx)return;
+            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
             renderThumbnail(layer);
         };
 

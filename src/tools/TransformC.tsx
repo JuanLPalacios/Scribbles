@@ -56,7 +56,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             if(!drawing.drawing) return;
             const { layers, selectedLayer } = drawing.drawing;
             const layer = layers[selectedLayer];
-            endTranform(e, layer);
+            endTransform(e, layer);
             setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
         };
 
@@ -86,14 +86,14 @@ export const TransformC = ({ children }: ToolFunctions) => {
                 endRectCut(e, layer);
                 break;
             case 'none':
-                endTranform(e, layer);
+                endTransform(e, layer);
                 break;
             default:
                 action = 'transform';
                 break;
             }
 
-            setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            //setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
         };
 
         const mouseMove = function(e: CanvasEvent<TransformOptions>,): void {
@@ -409,7 +409,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
         };
 
-        const endTranform = function({ editorContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState) {
+        const endTransform = function({ editorContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState) {
             if(!drawing.drawing) return;
             const { layers, selectedLayer } = drawing.drawing;
             const { canvas, buffer } = layers[selectedLayer];
@@ -428,8 +428,10 @@ export const TransformC = ({ children }: ToolFunctions) => {
             }
             layer.handles = [];
             action = 'none';
+            const { rect, canvas: { ctx } } = layer;
+            if(!ctx)return;
+            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
             renderThumbnail(layer);
-            setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
         };
 
         const render = function(layer: LayerState) {

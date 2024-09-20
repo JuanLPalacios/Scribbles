@@ -54,7 +54,6 @@ export const EraseC = ({ children }: ToolFunctions) => {
             const { layers, selectedLayer } = drawing.drawing;
             const brush = brushes[selectedBrush];
             const layer = layers[selectedLayer];
-            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
             const { x, y } = point;
             const { rect: { position: [dx, dy] } } = layer;
             const { canvas, buffer } = layer;
@@ -65,7 +64,7 @@ export const EraseC = ({ children }: ToolFunctions) => {
             down = true;
         };
 
-        const mouseUp = function({ point, editorContext: [drawing], menuContext: [{ brushesPacks: brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
+        const mouseUp = function({ point, editorContext: [drawing, setDrawing], menuContext: [{ brushesPacks: brushes, brushWidth, selectedBrush, alpha }] }: CanvasEvent<EraseOptions>,): void {
             if(!drawing.drawing) return;
             const { layers, selectedLayer } = drawing.drawing;
             const brush = brushes[selectedBrush];
@@ -83,6 +82,9 @@ export const EraseC = ({ children }: ToolFunctions) => {
             }
             buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
             canvas.canvas.style.display = 'inline';
+            const { rect, canvas: { ctx } } = layer;
+            if(!ctx)return;
+            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
             renderThumbnail(layer);
             down = false;
         };

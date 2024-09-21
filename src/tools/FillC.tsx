@@ -36,10 +36,10 @@ export const FillC = ({ children }: ToolFunctions) => {
         };
 
         const mouseDown = function({ editorContext: [drawing, setDrawing] }: CanvasEvent<FillOptions>): void {
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
+            //if(!drawing.drawing) return;
+            //const { layers, selectedLayer } = drawing.drawing;
+            //const layer = layers[selectedLayer];
+            //setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
         };
 
         const click = function({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {

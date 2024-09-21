@@ -77,7 +77,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
         };
 
         const mouseUp = function(e: CanvasEvent<TransformOptions>,): void {
-            const { editorContext: [drawing, setDrawing] } = e;
+            const { editorContext: [drawing] } = e;
             if(!drawing.drawing) return;
             const { layers, selectedLayer } = drawing.drawing;
             const layer = layers[selectedLayer];

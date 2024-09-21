@@ -1,6 +1,4 @@
 import { createContext, ReactNode, useReducer } from 'react';
-import { createDrawable } from '../generators/createDrawable';
-import { DrawableState } from '../types/DrawableState';
 import { LayerState } from '../types/LayerState';
 
 export type DrawingState = {
@@ -52,7 +50,7 @@ type Load = {
 
 type DrawingAction =
     WorkLayer |
-    Loadlayer |
+    LoadLayer |
     SelectLayer |
     AddLayer |
     RemoveLayer |
@@ -67,11 +65,11 @@ type WorkLayer = {
     }
 }
 
-type Loadlayer = {
-    type: 'drawing/loadlayer',
+type LoadLayer = {
+    type: 'drawing/loadLayer',
     payload:{
         at:number,
-        canvas:DrawableState
+        imageData:ImageData
     }
 }
 
@@ -111,7 +109,7 @@ type UpdateLayer = {
     }
 }
 
-const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction => {
+const antiDeduce = (drawing:DrawingState, action: DrawingAction):DrawingAction => {
     const { width, height, layers, selectedLayer } = drawing;
     console.log(action.type, action.payload);
     switch (action.type) {
@@ -128,12 +126,13 @@ const antidreducer = (drawing:DrawingState, action: DrawingAction):DrawingAction
     case 'drawing/selectLayer':
         return {  type: 'drawing/selectLayer', payload: selectedLayer };
     case 'drawing/workLayer':
-    case 'drawing/loadlayer':
+    case 'drawing/loadLayer':
         // eslint-disable-next-line no-case-declarations
-        const canvas = createDrawable({ size: [width, height] });
-        if(canvas.ctx) canvas.ctx.globalCompositeOperation = 'copy';
-        canvas.ctx?.drawImage(layers[action.payload.at].canvas.canvas, 0, 0);
-        return {  type: 'drawing/loadlayer', payload: { at: action.payload.at, canvas } };
+        const layer = layers[action.payload.at];
+        if(!layer.canvas.ctx)throw new Error();
+        // eslint-disable-next-line no-case-declarations
+        const imageData = layer.canvas.ctx.getImageData(0, 0, width, height);
+        return {  type: 'drawing/loadLayer', payload: { at: action.payload.at, imageData } };
     default:
         throw action;
     }
@@ -146,11 +145,11 @@ export const reducer = (state:EditorState, action: EditorAction):EditorState => 
     console.log(action.type, payload);
     switch (action.type) {
     case 'editor/do':
-        return drawing? { ...state, drawing: dreducer(drawing, action.payload), prev: [...prev, antidreducer(drawing, action.payload)], next: [] } : state ;
+        return drawing? { ...state, drawing: deduce(drawing, action.payload), prev: [...prev, antiDeduce(drawing, action.payload)], next: [] } : state ;
     case 'editor/undo':
-        return (drawing && (prev.length > 0)) ? { ...state, prev: prev.slice(0, prev.length -1), next: [...next, antidreducer(drawing, prev[prev.length-1])], drawing: dreducer(drawing, prev[prev.length-1]) } : state;
+        return (drawing && (prev.length > 0)) ? { ...state, prev: prev.slice(0, prev.length -1), next: [...next, antiDeduce(drawing, prev[prev.length-1])], drawing: deduce(drawing, prev[prev.length-1]) } : state;
     case 'editor/redo':
-        return (drawing && (next.length > 0)) ? { ...state, next: next.slice(0, next.length -1), prev: [...prev, antidreducer(drawing, next[next.length-1])], drawing: dreducer(drawing, next[next.length-1]) } : state;
+        return (drawing && (next.length > 0)) ? { ...state, next: next.slice(0, next.length -1), prev: [...prev, antiDeduce(drawing, next[next.length-1])], drawing: deduce(drawing, next[next.length-1]) } : state;
     case 'editor/forceUpdate':
         return { ...state, ...action.payload };
     case 'editor/load':
@@ -160,7 +159,7 @@ export const reducer = (state:EditorState, action: EditorAction):EditorState => 
     }
 };
 
-const dreducer = (drawing:DrawingState, action: DrawingAction):DrawingState => {
+const deduce = (drawing:DrawingState, action: DrawingAction):DrawingState => {
     const { layers, selectedLayer } = drawing;
     console.log(action.type, action.payload);
     switch (action.type) {
@@ -196,11 +195,10 @@ const dreducer = (drawing:DrawingState, action: DrawingAction):DrawingState => {
                 ...layers.slice(action.payload.at+1)
             ]
         };
-    case 'drawing/loadlayer':
+    case 'drawing/loadLayer':
         // eslint-disable-next-line no-case-declarations
         const ctx = layers[action.payload.at].canvas.ctx;
-        if(ctx) ctx.globalCompositeOperation = 'copy';
-        ctx?.drawImage(action.payload.canvas.canvas, 0, 0);
+        ctx?.putImageData(action.payload.imageData, 0, 0);
         if(ctx) ctx.globalCompositeOperation = 'source-over';
         return { ...drawing };
     default:

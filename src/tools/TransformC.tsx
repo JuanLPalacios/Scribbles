@@ -13,7 +13,7 @@ import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
 import { createDrawable } from '../generators/createDrawable';
 import { useMemo } from 'react';
-import { ToolContext, ToolFunctions } from '../contexts/ToolContext';
+import { Tool, ToolContext, ToolFunctions } from '../contexts/ToolContext';
 import { renderThumbnail } from './Draw';
 
 const SKEW_ICONS = [
@@ -30,7 +30,7 @@ const SKEW_ICONS = [
 type TransformOptions = unknown;
 
 export const TransformC = ({ children }: ToolFunctions) => {
-    const r = useMemo(() => {
+    const r = useMemo<Tool<any>>(() => {
         let lastclickTime = 0;
         let center = new DOMPoint();
         let handleH: Handle<unknown>[] = [];
@@ -43,106 +43,6 @@ export const TransformC = ({ children }: ToolFunctions) => {
         let axis: [boolean, boolean] = [false, false];
         let skewMode = false;
         let action: 'none' | 'scale' | 'rotate' | 'skew' | 'translate' | 'rect-cut' | 'transform' = 'none';
-
-        const setup = function({ editorContext: [drawing, setDrawing] }:ToolEvent<TransformOptions>): void {
-            if(!drawing.drawing) return;
-            action = 'none';
-            setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
-        };
-
-        const dispose = function(e:ToolEvent<TransformOptions>): void {
-            action = 'none';
-            const { editorContext: [drawing, setDrawing] } = e;
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-            endTransform(e, layer);
-            setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
-        };
-
-        const mouseDown = function(e: CanvasEvent<TransformOptions>,): void {
-            const { editorContext: [drawing] } = e;
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-
-            switch(action){
-            case 'none':
-                startRectCut(e, layer);
-                break;
-            case 'transform':
-                startTranslation(e, layer);
-                break;
-            }
-        };
-
-        const mouseUp = function(e: CanvasEvent<TransformOptions>,): void {
-            const { editorContext: [drawing] } = e;
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-            switch(action){
-            case 'rect-cut':
-                endRectCut(e, layer);
-                break;
-            case 'none':
-                endTransform(e, layer);
-                break;
-            default:
-                action = 'transform';
-                break;
-            }
-
-            //setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
-        };
-
-        const mouseMove = function(e: CanvasEvent<TransformOptions>,): void {
-            const { editorContext: [drawing, setDrawing] } = e;
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-
-            switch(action){
-            case 'scale':
-                scale(e, layer);
-                break;
-            case 'skew':
-                skew(e, layer);
-                break;
-            case 'rotate':
-                rotate(e, layer);
-                break;
-            case 'translate':
-                translate(e, layer);
-                break;
-            case 'rect-cut':
-                rectCut(e, layer);
-                break;
-            }
-
-            setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
-        };
-
-        const click = function({ point, editorContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>,): void {
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-            inverseMatrix = DOMMatrix.fromFloat32Array(matrix.inverse().toFloat32Array());
-            const { x: projectionX, y: projectionY } = point.matrixTransform(inverseMatrix);
-            const { x: width, y: height }  = handles[4];
-            if(
-                (projectionX<0)
-            ||(projectionY<0)
-            ||(projectionX>width)
-            ||(projectionY>height)
-            ) return;
-            const dt = Date.now() - lastclickTime;
-            lastclickTime += dt;
-            if(dt > 500) return;
-            skewMode = !skewMode;
-            render(layer);
-            setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
-        };
 
         const startTranslation = function(e: CanvasEvent<TransformOptions>, layer: LayerState){
             inverseMatrix = DOMMatrix.fromFloat32Array(matrix.inverse().toFloat32Array());
@@ -450,12 +350,104 @@ export const TransformC = ({ children }: ToolFunctions) => {
             layer.buffer.canvas.style.transform = matrix.toString();
         };
         return {
-            click,
-            dispose,
-            mouseDown,
-            mouseMove,
-            mouseUp,
-            setup
+            setup({ editorContext: [drawing, setDrawing] }){
+                if(!drawing.drawing) return;
+                action = 'none';
+                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            },
+            dispose(e){
+                action = 'none';
+                const { editorContext: [drawing, setDrawing] } = e;
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
+                const layer = layers[selectedLayer];
+                endTransform(e, layer);
+                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            },
+            click({ point, editorContext: [drawing, setDrawing] }){
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
+                const layer = layers[selectedLayer];
+                inverseMatrix = DOMMatrix.fromFloat32Array(matrix.inverse().toFloat32Array());
+                const { x: projectionX, y: projectionY } = point.matrixTransform(inverseMatrix);
+                const { x: width, y: height }  = handles[4];
+                if(
+                    (projectionX<0)
+                ||(projectionY<0)
+                ||(projectionX>width)
+                ||(projectionY>height)
+                ) return;
+                const dt = Date.now() - lastclickTime;
+                lastclickTime += dt;
+                if(dt > 500) return;
+                skewMode = !skewMode;
+                render(layer);
+                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            },
+            mouseDown(e){
+                const { editorContext: [drawing] } = e;
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
+                const layer = layers[selectedLayer];
+
+                switch(action){
+                case 'none':
+                    startRectCut(e, layer);
+                    break;
+                case 'transform':
+                    startTranslation(e, layer);
+                    break;
+                }
+            },
+            mouseMove(e){
+                const { editorContext: [drawing, setDrawing] } = e;
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
+                const layer = layers[selectedLayer];
+
+                switch(action){
+                case 'scale':
+                    scale(e, layer);
+                    break;
+                case 'skew':
+                    skew(e, layer);
+                    break;
+                case 'rotate':
+                    rotate(e, layer);
+                    break;
+                case 'translate':
+                    translate(e, layer);
+                    break;
+                case 'rect-cut':
+                    rectCut(e, layer);
+                    break;
+                }
+
+                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            },
+            mouseUp(e){
+                const { editorContext: [drawing, setDrawing] } = e;
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
+                const layer = layers[selectedLayer];
+                const { rect, canvas: { ctx } } = layer;
+                switch(action){
+                case 'rect-cut':
+                    if(!ctx)return;
+                    setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
+                    endRectCut(e, layer);
+                    break;
+                case 'none':
+                    endTransform(e, layer);
+                    setDrawing({ type: 'editor/forceUpdate', payload: { drawing: { ...drawing.drawing, layers: layers.map((x, i)=>(i==selectedLayer)?{ ...x, imageData: ctx.getImageData(0, 0, ...rect.size) }:x), } } });
+                    break;
+                default:
+                    action = 'transform';
+                    break;
+                }
+
+                //setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            }
         };
     }, []);
     return <ToolContext.Provider value={r}>

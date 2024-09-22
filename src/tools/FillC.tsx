@@ -1,9 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { AlphaInput } from '../components/inputs/AlphaInput';
-import { ToolFunctions, ToolContext } from '../contexts/ToolContext';
+import { ToolFunctions, ToolContext, Tool } from '../contexts/ToolContext';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { DrawableState } from '../types/DrawableState';
-import { ToolEvent } from '../types/ToolEvent';
 import { renderThumbnail } from './Draw';
 import { ColorInput } from '../components/inputs/ColorInput';
 import { ToleranceInput } from '../components/inputs/ToleranceInput';
@@ -19,60 +18,7 @@ export const FillC = ({ children }: ToolFunctions) => {
     const [{ color }, setColor] = useColorOptions();
     const [{ tolerance }, setTolerance] = useToleranceOptions();
     const [{ alpha }, setAlpha] = useAlphaOptions();
-    const r = useMemo(() => {
-        const setup = function({ editorContext: [drawing] }: ToolEvent<FillOptions>): void {
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-            const { canvas, buffer } = layer;
-            if(!canvas.ctx || !buffer.ctx) return;
-            canvas.ctx.restore();
-            canvas.ctx.globalCompositeOperation = 'source-over';
-            buffer.ctx.restore();
-            buffer.ctx.globalCompositeOperation = 'source-over';
-        };
-
-        const dispose = function(): void {
-        };
-
-        const mouseDown = function({ editorContext: [drawing, setDrawing] }: CanvasEvent<FillOptions>): void {
-            //if(!drawing.drawing) return;
-            //const { layers, selectedLayer } = drawing.drawing;
-            //const layer = layers[selectedLayer];
-            //setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
-        };
-
-        const click = function({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
-            if(!drawing.drawing) return;
-            const { layers, selectedLayer } = drawing.drawing;
-            const layer = layers[selectedLayer];
-            const { x, y } = point;
-            const { rect: { position: [dx, dy] } } = layer;
-            const px = x - dx, py = y - dy;
-            const { canvas, buffer } = layer;
-            if(!buffer.ctx) return;
-            buffer.ctx.fillStyle = color;
-            buffer.ctx.globalAlpha = alpha;
-            fill(
-                canvas,
-                buffer,
-                tolerance,
-                Math.floor(px),
-                Math.floor(py),
-                parseColor(color+Math.round(alpha*255).toString(16)),
-                canvas.ctx?.getImageData(px, py, 1, 1).data || [0, 0, 0, 0]
-            );
-            if(!canvas.ctx) return;
-            canvas.ctx.globalCompositeOperation = 'source-over';
-            canvas.ctx.globalAlpha = 1;
-            canvas.ctx.drawImage(buffer.canvas, 0, 0);
-            buffer.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
-            const { rect, canvas: { ctx } } = layer;
-            if(!ctx)return;
-            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
-            renderThumbnail(layer);
-        };
-
+    const r = useMemo<Tool<any>>(() => {
         const fill = function(canvas: DrawableState, buffer: DrawableState, tolerance:number, ox: number, oy: number, color: Uint8ClampedArray | number[], oColor: Uint8ClampedArray | number[]) {
             const canvasWidth = canvas.canvas.width;
             const canvasHeight = canvas.canvas.height;
@@ -163,13 +109,54 @@ export const FillC = ({ children }: ToolFunctions) => {
             const black = (a-b)/255, white = black+dA;
             return Math.max(black*black, white*white);
         };
+
         return {
-            click,
-            dispose,
-            mouseDown,
-            mouseMove: ()=>{},
-            mouseUp: ()=>{},
-            setup
+            setup({ editorContext: [drawing] }) {
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
+                const layer = layers[selectedLayer];
+                const { canvas, buffer } = layer;
+                if(!canvas.ctx || !buffer.ctx) return;
+                canvas.ctx.restore();
+                canvas.ctx.globalCompositeOperation = 'source-over';
+                buffer.ctx.restore();
+                buffer.ctx.globalCompositeOperation = 'source-over';
+            },
+            dispose(){},
+            click({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
+                if(!drawing.drawing) return;
+                const { layers, selectedLayer } = drawing.drawing;
+                const layer = layers[selectedLayer];
+                const { rect, canvas: { ctx } } = layer;
+                if(!ctx)return;
+                setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
+                const { x, y } = point;
+                const { rect: { position: [dx, dy] } } = layer;
+                const px = x - dx, py = y - dy;
+                const { canvas, buffer } = layer;
+                if(!buffer.ctx) return;
+                buffer.ctx.fillStyle = color;
+                buffer.ctx.globalAlpha = alpha;
+                fill(
+                    canvas,
+                    buffer,
+                    tolerance,
+                    Math.floor(px),
+                    Math.floor(py),
+                    parseColor(color+Math.round(alpha*255).toString(16)),
+                    canvas.ctx?.getImageData(px, py, 1, 1).data || [0, 0, 0, 0]
+                );
+                if(!canvas.ctx) return;
+                canvas.ctx.globalCompositeOperation = 'source-over';
+                canvas.ctx.globalAlpha = 1;
+                canvas.ctx.drawImage(buffer.canvas, 0, 0);
+                buffer.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
+                setDrawing({ type: 'editor/forceUpdate', payload: { drawing: { ...drawing.drawing, layers: layers.map((x, i)=>(i==selectedLayer)?{ ...x, imageData: ctx.getImageData(0, 0, ...rect.size) }:x), } } });
+                renderThumbnail(layer);
+            },
+            mouseDown(){},
+            mouseMove(){},
+            mouseUp(){},
         };
     }, []);
     useEffect(()=>{

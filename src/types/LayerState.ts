@@ -4,6 +4,21 @@ import { Rect } from './Rect';
 import { Handle } from './Handle';
 import { MenuOptions } from '../contexts/MenuOptions';
 
+export interface EditorLayerState {
+  key: number;
+  canvas?: DrawableState
+  thumbnail?: DrawableState
+  handles: Handle<MenuOptions>[]
+}
+
+export interface LayerState2 {
+  name: string;
+  visible: boolean
+  opacity: number
+  mixBlendMode: BlendMode
+  imageData: ImageData
+}
+
 export interface LayerState {
   key: number;
   rect: Rect;

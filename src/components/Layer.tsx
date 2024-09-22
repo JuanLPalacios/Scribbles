@@ -4,8 +4,7 @@ import { LayerState } from '../types/LayerState';
 import { createDrawable } from '../generators/createDrawable';
 
 const Layer = ({ values }:{values:LayerState}) => {
-    const { rect, canvas, buffer, thumbnail, visible, opacity, mixBlendMode } = values;
-    const { imageData } = values;
+    const { rect, canvas, buffer, thumbnail, visible, opacity, mixBlendMode, imageData } = values;
     const {
         position: [x, y],
         size: [width, height]
@@ -20,10 +19,10 @@ const Layer = ({ values }:{values:LayerState}) => {
         if(buffer&&canvas){
             buffer.ctx?.restore();
             buffer.canvas.width = width;
-            buffer.canvas.height =height;
+            buffer.canvas.height = height;
             buffer.ctx?.drawImage(canvas.canvas, 0, 0);
             canvas.canvas.width = width;
-            canvas.canvas.height =height;
+            canvas.canvas.height = height;
             canvas.ctx?.restore();
             canvas.ctx?.drawImage(buffer.canvas, 0, 0);
         }

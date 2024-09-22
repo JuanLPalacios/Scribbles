@@ -1,18 +1,26 @@
 import { createContext, ReactNode, useReducer } from 'react';
-import { LayerState } from '../types/LayerState';
+import { LayerState2, EditorLayerState } from '../types/LayerState';
+import { createEditorLayer } from '../generators/createEditorLayer';
 
 export type DrawingState = {
+    name:string,
     width:number,
     height:number,
-    layers:LayerState[]
-    selectedLayer:number
+    layers:LayerState2[]
 };
 
 export type EditorState = {
-    name?:string,
-    drawing?: DrawingState,
+    drawing?: {
+        editor:EditorDrawingState,
+        data:DrawingState,
+    }
+}
+
+export type EditorDrawingState = {
+    layers: EditorLayerState[],
     prev:DrawingAction[],
-    next:DrawingAction[]
+    next:DrawingAction[],
+    selectedLayer:number
 }
 
 export type EditorAction =
@@ -37,15 +45,12 @@ type Redo = {
 
 type ForceUpdate = {
     type: 'editor/forceUpdate',
-    payload: Partial<Omit<EditorState, 'prev' | 'next' >>
+    payload: Partial<Omit<EditorDrawingState, 'prev' | 'next' >>
 }
 
 type Load = {
     type: 'editor/load',
-    payload?:{
-        name:string
-        drawing:DrawingState
-    }
+    payload?:DrawingState
 }
 
 type DrawingAction =
@@ -61,7 +66,7 @@ type WorkLayer = {
     type: 'drawing/workLayer',
     payload:{
         at:number,
-        layer:LayerState
+        layer:LayerState2
     }
 }
 
@@ -82,7 +87,7 @@ type AddLayer = {
     type: 'drawing/addLayer',
     payload:{
         at:number,
-        layer:LayerState
+        layer:LayerState2
     }
 }
 
@@ -105,7 +110,7 @@ type UpdateLayer = {
     type: 'drawing/updateLayer',
     payload:{
         at:number,
-        layer: Partial<Omit<LayerState, 'canvas' >>
+        layer: Partial<Omit<LayerState2, 'canvas' >>
     }
 }
 
@@ -141,16 +146,31 @@ const antiDeduce = (drawing:DrawingState, action: DrawingAction):DrawingAction =
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const reducer = (state:EditorState, action: EditorAction):EditorState => {
-    const { next, prev, drawing } = state;
+    const { drawing } = state;
+    if(!drawing){
+        switch (action.type) {
+            case 'editor/load':
+                return action.payload? { ...state, drawing:{ data:action.payload, editor:{layers:action.payload.layers.map(createEditorLayer), next:[], prev:[], selectedLayer:0 } } } : { ...state, drawing: undefined };
+            case 'editor/undo':
+            case 'editor/redo':
+            case 'editor/forceUpdate':
+            case 'editor/do':
+                return state;
+            default:
+                throw new Error();
+        }
+    }
+    const { editor, data } = drawing||{};
+    const { next, prev } = editor||{};
     const { payload } = { payload: undefined, ...action };
     console.log(action.type, payload);
     switch (action.type) {
     case 'editor/do':
-        return drawing? { ...state, drawing: deduce(drawing, action.payload), prev: [...prev, antiDeduce(drawing, action.payload)], next: [] } : state ;
+        return drawing? { ...state, drawing: { data: deduce(data, action.payload), editor:{prev: [...prev, antiDeduce(data, action.payload)], next: []} } : state ;
     case 'editor/undo':
-        return (drawing && (prev.length > 0)) ? { ...state, prev: prev.slice(0, prev.length -1), next: [...next, antiDeduce(drawing, prev[prev.length-1])], drawing: deduce(drawing, prev[prev.length-1]) } : state;
+        return (data && (prev.length > 0)) ? { ...state, prev: prev.slice(0, prev.length -1), next: [...next, antiDeduce(data, prev[prev.length-1])], drawing: deduce(data, prev[prev.length-1]) } : state;
     case 'editor/redo':
-        return (drawing && (next.length > 0)) ? { ...state, next: next.slice(0, next.length -1), prev: [...prev, antiDeduce(drawing, next[next.length-1])], drawing: deduce(drawing, next[next.length-1]) } : state;
+        return (data && (next.length > 0)) ? { ...state, next: next.slice(0, next.length -1), prev: [...prev, antiDeduce(data, next[next.length-1])], drawing: deduce(data, next[next.length-1]) } : state;
     case 'editor/forceUpdate':
         return { ...state, ...action.payload };
     case 'editor/load':
@@ -207,13 +227,10 @@ const deduce = (drawing:DrawingState, action: DrawingAction):DrawingState => {
 };
 
 export const EditorContext = createContext<[EditorState, React.Dispatch<EditorAction>]>([
-    {
-        prev: [],
-        next: [],
-    }, ()=>undefined]);
+    {}, ()=>undefined]);
 
 export const EditorContextProvider = (props: { children: ReactNode; }) => {
-    const useDrawing = useReducer(reducer, { prev: [], next: [], });
+    const useDrawing = useReducer(reducer, {});
     return<EditorContext.Provider value={useDrawing}>
         {props.children}
     </EditorContext.Provider>;

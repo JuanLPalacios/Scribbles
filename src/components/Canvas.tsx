@@ -1,7 +1,6 @@
-import { createContext, useEffect, useCallback, useState, useRef, useContext } from 'react';
+import { useEffect, useCallback, useState, useRef, useContext } from 'react';
 import '../css/Canvas.css';
-import Layer from './Layer';
-import { DrawingState, EditorContext } from '../contexts/DrawingState';
+import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { QuickStart } from './QuickStart';
 import { useTool } from '../hooks/useTool';
@@ -13,8 +12,6 @@ import { useToolOptions } from '../hooks/useToolOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';
 import { MenuOptions } from '../contexts/MenuOptions';
 import { Drawing } from './Drawing';
-
-export const CanvasContext = createContext({});
 
 function Canvas() {
     const editorContext = useContext(EditorContext);
@@ -36,6 +33,7 @@ function Canvas() {
     const [options, onChange] = menuContext;
     const [prevTool, setTool] = useState<Tool<any>>();
     const [keys, setKeys] = useState<{[key:string]:boolean}>({});
+    // FIXME: touches oldTouches and oldTransform cause unnecessary rerenders on tool actions
     const [touches, setTouches] = useState<{[key:number]:React.PointerEvent<HTMLDivElement>}>({});
     const [oldTouches, setOldTouches] = useState<{[key:number]:React.PointerEvent<HTMLDivElement>}>({});
     const [oldTransform, setOldTransform] = useState<DOMMatrix>(new DOMMatrix());
@@ -214,30 +212,28 @@ function Canvas() {
             document.removeEventListener('keyup', keyUpHandler);
         };
     }, [keys]);
-
+    console.log('Canvas');
     return (
-        <CanvasContext.Provider value={{ brush: tool }}>
-            <div className="Canvas"
-                ref={containerRef}
-                onPointerDown={pointerdownHandler}
-                onPointerMove={pointermoveHandler}
-                onPointerUp={pointerupHandler}
-                onPointerCancel={pointerupHandler}
-                onPointerLeave={pointermoveHandler}
-                onWheel={wheelHandler}
-            >
-                {editor.drawing?
-                    <div
-                        style={{
-                            transform: `${transform}`,
-                            transformOrigin: 'top left'
-                        }}
-                    >
-                        <Drawing drawing={editor.drawing} getPointer={getPointer} />
-                    </div>
-                    :<QuickStart/>}
-            </div>
-        </CanvasContext.Provider>
+        <div className="Canvas"
+            ref={containerRef}
+            onPointerDown={pointerdownHandler}
+            onPointerMove={pointermoveHandler}
+            onPointerUp={pointerupHandler}
+            onPointerCancel={pointerupHandler}
+            onPointerLeave={pointermoveHandler}
+            onWheel={wheelHandler}
+        >
+            {editor.drawing?
+                <div
+                    style={{
+                        transform: `${transform}`,
+                        transformOrigin: 'top left'
+                    }}
+                >
+                    <Drawing drawing={editor.drawing} getPointer={getPointer} />
+                </div>
+                :<QuickStart/>}
+        </div>
     );
 }
 

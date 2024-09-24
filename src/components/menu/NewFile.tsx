@@ -1,12 +1,11 @@
-import { useCallback, useContext, useState, useEffect } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import '../../css/Menu.css';
 import addFileIcon from '../../icons/file-add-svgrepo-com.svg';
-import { createLayer } from '../../generators/createLayer';
-import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
+import { useEditor } from '../../hooks/useEditor';
 
 export const NewFile = () => {
-    const [editor, editorDispatch] = useContext(EditorContext);
+    const [editor, { newFile }] = useEditor();
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600, isValid: false, errors: { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() } });
     const { isOpen, name, width, height, isValid, errors } = state;
     const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
@@ -25,38 +24,19 @@ export const NewFile = () => {
         setState({ ...state, isOpen: false });
     }, [state]);
     const openModal = useCallback(() => {
-        const { width, height } = editor.drawing || { width: 600, height: 600 };
+        const { width, height } = editor.drawing?.data || { width: 600, height: 600 };
         setState({ ...state, isOpen: true, width, height });
     }, [editor, state]);
-    const newfile = useCallback(() => {
-        editorDispatch({
-            type: 'editor/load',
-            payload: {
-                name,
-                drawing: {
-                    width,
-                    height,
-                    layers: [
-                        createLayer(
-                            'Image',
-                            {
-                                position: [0, 0],
-                                size: [width, height]
-                            }
-                        ),
-                    ],
-                    selectedLayer: 0
-                }
-            }
-        });
+    const createNewFile = useCallback(() => {
+        newFile({ name, width, height });
         close();
-    }, [close, height, name, editorDispatch, width]);
+    }, [newFile, name, width, height, close]);
     useEffect(() => {
         const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
         if(name.length<1)
             errors.name.push('Must have at least 1 character');
         if(name.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
-            errors.name.push('Shuld not contain forbidden characters');
+            errors.name.push('Should not contain forbidden characters');
         setState({ ...state, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [height, name, width]);
@@ -86,7 +66,7 @@ export const NewFile = () => {
                     <input type="number" min={1} name='height' value={height} onChange={update} />
                 </label>
                 <div className='actions'>
-                    <button onClick={newfile} disabled={!isValid}>create</button>
+                    <button onClick={createNewFile} disabled={!isValid}>create</button>
                     <button onClick={close}>cancel</button>
                 </div>
             </div>

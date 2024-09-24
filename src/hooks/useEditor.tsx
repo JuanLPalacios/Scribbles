@@ -1,8 +1,8 @@
 import { useContext, useMemo } from 'react';
-import { EditorContext } from '../contexts/DrawingState';
 import { createLayer } from '../generators/createLayer';
+import { EditorContext } from '../contexts/EditorContext';
 
-export const useBrush = () => {
+export const useEditor = () => {
     const [editor, dispatch] = useContext(EditorContext);
     return [editor, useMemo(()=>({
         openFile(file:File){
@@ -12,23 +12,20 @@ export const useBrush = () => {
                 type: 'editor/load',
                 payload: {
                     name,
-                    drawing: {
-                        width,
-                        height,
-                        layers: [
-                            createLayer(
-                                'layer 1',
-                                {
-                                    position: [0, 0],
-                                    size: [width, height]
-                                }
-                            ),
-                        ],
-                        selectedLayer: 0
-                    }
+                    width,
+                    height,
+                    layers: [
+                        createLayer(
+                            'layer 1',
+                            {
+                                position: [0, 0],
+                                size: [width, height]
+                            }
+                        )
+                    ]
                 }
             });
         },
-    }), [])];
+    }), [])] as const;
 };
 

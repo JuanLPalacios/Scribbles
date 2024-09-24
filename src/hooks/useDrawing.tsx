@@ -1,8 +1,8 @@
-import { useContext, useMemo } from "react";
-import { EditorContext } from "../contexts/EditorContext";
-import { createLayer2 } from "../generators/createLayer2";
-import { LayerState2 } from "../types/LayerState";
-
+import { useContext, useMemo } from 'react';
+import { EditorContext, EditorDrawingState } from '../contexts/EditorContext';
+import { createLayer2 } from '../generators/createLayer2';
+import { LayerState2 } from '../types/LayerState';
+import { DrawingState } from '../contexts/DrawingContext';
 
 export const useDrawing = () => {
     const [editorState, dispatch] = useContext(EditorContext);
@@ -63,6 +63,12 @@ export const useDrawing = () => {
                     }
                 });
             },
+            selectLayer(payload: number) {
+                dispatch({
+                    type: 'editor/selectLayer',
+                    payload
+                });
+            },
             removeLayer(payload: number) {
                 dispatch({
                     type: 'editor/do',
@@ -72,16 +78,24 @@ export const useDrawing = () => {
                     }
                 });
             },
-            updateLayer(layer: Partial<LayerState2>) {
+            updateLayer(...[index, layer]:[number, Partial<LayerState2>]|[Partial<LayerState2>]) {
+                layer = layer || index as Partial<LayerState2>;
+                index = (typeof index == 'number')?index:selectedLayer;
                 dispatch({
                     type: 'editor/do',
                     payload: {
                         type: 'drawing/updateLayer',
                         payload: {
-                            at: selectedLayer,
+                            at: index,
                             layer
                         }
                     }
+                });
+            },
+            forceUpdate(drawing: {data?:Partial<DrawingState>, editor?:Partial<EditorDrawingState>}) {
+                dispatch({
+                    type: 'editor/forceUpdate',
+                    payload: drawing
                 });
             },
             workLayer(layer: LayerState2) {

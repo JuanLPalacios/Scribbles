@@ -1,35 +1,18 @@
 import '../css/QuickStart.css';
-import { useContext } from 'react';
-import { createLayer } from '../generators/createLayer';
-import { EditorContext } from '../contexts/DrawingState';
+import { useEditor } from '../hooks/useEditor';
 
 export const QuickStart = () => {
-    const [, editorDispatch] = useContext(EditorContext);
-    const newFile = () => {
-        editorDispatch({
-            type: 'editor/load',
-            payload: {
-                name: 'new Scribble',
-                drawing: {
-                    width: 600,
-                    height: 600,
-                    layers: [
-                        createLayer(
-                            'Image',
-                            {
-                                position: [0, 0],
-                                size: [600, 600]
-                            }
-                        ),
-                    ],
-                    selectedLayer: 0
-                }
-            }
+    const [, { newFile }] = useEditor();
+    const quickNewFile = () => {
+        newFile({
+            name: 'new Scribble',
+            width: 600,
+            height: 600
         });
     };
 
     return <div className='QuickStart'>
         <h1>Quick Start</h1>
-        <button onClick={newFile}>open New Scribble</button>
+        <button onClick={quickNewFile}>open New Scribble</button>
     </div>;
 };

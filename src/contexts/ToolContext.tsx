@@ -1,5 +1,4 @@
 import { createContext, ReactNode } from 'react';
-import { ToolEvent } from '../types/ToolEvent';
 import { CanvasEvent } from '../types/CanvasEvent';
 
 export const ToolContext = createContext<Tool>({
@@ -12,8 +11,8 @@ export const ToolContext = createContext<Tool>({
 });
 
 export type Tool<P = any> = {
-    setup: (event:ToolEvent<P>)=>void
-    dispose: (event:ToolEvent<P>)=>void
+    setup: ()=>void
+    dispose: ()=>void
     mouseDown: (_event: CanvasEvent<P>)=>void
     mouseUp: (_event: CanvasEvent<P>)=>void
     mouseMove: (_event: CanvasEvent<P>)=>void

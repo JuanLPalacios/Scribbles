@@ -1,8 +1,8 @@
 import { ReactNode } from 'react';
-import { EditorContextProvider } from './DrawingState';
 import { MenuContextProvider } from './MenuOptions';
 import { SingletonElementReferencesContextProvider } from './SingletonElementReferences';
 import { StorageContextProvider } from './StorageContext';
+import { EditorContextProvider } from './EditorDrawingState';
 
 export const AppStateProvider = (props: { children: ReactNode }) => {
     return<StorageContextProvider>

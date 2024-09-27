@@ -34,7 +34,7 @@ function LayerMenu() {
     const { moveLayerDown, moveLayerUp } = editorDispatch||{};
     const { onAddLayer, onModeChange, onOpacityChange, onOpacityChangePrev, onRemoveLayer, onSelect, onVisibilityChange } = useMemo(()=>{
         if(!d)return{};
-        const { editor: { selectedLayer } } = d;
+        const { editorState: { selectedLayer } } = d;
         const { addLayer, removeLayer, updateLayer, forceUpdate, selectLayer } = editorDispatch;
         return{
             onAddLayer(){
@@ -64,7 +64,7 @@ function LayerMenu() {
         };
     }, []);
     if(!d) return <></>;
-    const { data, editor: { layers: editorLayers, selectedLayer } } = d;
+    const { data, editorState: { layers: editorLayers, selectedLayer } } = d;
     const { layers } = data;
     return (
         <div className="LayerMenu">
@@ -100,7 +100,7 @@ function LayerMenu() {
                                 opacity
                                     <input type="range" value={layers[selectedLayer]?.opacity} min="0" max="1" step="0.004" onChange={(e) => {
                                         if(onOpacityChangePrev)onOpacityChangePrev(parseFloat(e.target.value));
-                                    }} onMouseUp={(e) => {
+                                    }} onMouseUp={(_e) => {
                                         if(onOpacityChange)onOpacityChange(layers[selectedLayer]?.opacity);
                                     }} />
                                 </label>

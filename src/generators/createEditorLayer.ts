@@ -15,6 +15,5 @@ export const createEditorLayer = ({ imageData }: LayerState2): EditorLayerState 
         key: uid(),
         canvas,
         thumbnail,
-        handles: [],
     };
 };

@@ -3,7 +3,6 @@ import '../css/Canvas.css';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { QuickStart } from './QuickStart';
 import { useTool } from '../hooks/useTool';
-import { Tool } from '../contexts/ToolContext';
 import { useAlphaOptions } from '../hooks/useAlphaOptions';
 import { useBrushesOptions } from '../hooks/useBrushesOptions';
 import { useColorOptions } from '../hooks/useColorOptions';
@@ -15,7 +14,7 @@ import { useEditor } from '../hooks/useEditor';
 
 function Canvas() {
     const editorContext = useEditor();
-    const [editor, editorDispatch] = editorContext;
+    const [editor] = editorContext;
     const [{ alpha }, setAlphaOptions] = useAlphaOptions();
     const [{ brushWidth, brushesPacks, selectedBrush }, setBrushesOptions] = useBrushesOptions();
     const [{ color }, setColorOptions] = useColorOptions();
@@ -30,8 +29,6 @@ function Canvas() {
             setToolOptions({ selectedTool, tools });
             setToleranceOptions({ tolerance });
         }] as const;
-    const [options, onChange] = menuContext;
-    const [prevTool, setTool] = useState<Tool<any>>();
     const [keys, setKeys] = useState<{[key:string]:boolean}>({});
     // FIXME: touches oldTouches and oldTransform cause unnecessary rerenders on tool actions
     const [touches, setTouches] = useState<{[key:number]:React.PointerEvent<HTMLDivElement>}>({});
@@ -44,40 +41,14 @@ function Canvas() {
     const { top, left } = containerRef.current?.getBoundingClientRect() || { top: 0, left: 0 };
 
     useEffect(()=>{
-        let temp = options;
-        let temp2 = editor;
-        prevTool?.dispose({
-            menuContext: [temp, (o)=>{
-                if(typeof o == 'function') temp = o(temp);
-                else temp = o;
-                return temp;
-            }],
-            editorContext: [temp2, (o) => {
-                if(o.type == 'editor/forceUpdate')
-                    temp2 = { ...temp2, ...o.payload };
-            }]
-        });
-        tool.setup({
-            menuContext: [temp, (o)=>{
-                if(typeof o == 'function') temp = o(temp);
-                else temp = o;
-                return temp;
-            }],
-            editorContext: [temp2, (o) => {
-                if(o.type == 'editor/forceUpdate')
-                    temp2 = { ...temp2, ...o.payload };
-            }]
-        });
-        setTool(tool);
-        onChange(temp);
-        editorDispatch({ type: 'editor/forceUpdate', payload: temp2 });
+        //editorDispatch({ type: 'editor/forceUpdate', payload: temp2 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tool]);
 
     useEffect(()=>{
         if(editor.drawing){
-            document.documentElement.style.setProperty('--doc-width', `${editor.drawing.width}px`);
-            document.documentElement.style.setProperty('--doc-height', `${editor.drawing.height}px`);
+            document.documentElement.style.setProperty('--doc-width', `${editor.drawing.data.width}px`);
+            document.documentElement.style.setProperty('--doc-height', `${editor.drawing.data.height}px`);
         }
     }, [editor]);
 

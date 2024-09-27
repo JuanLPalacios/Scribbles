@@ -1,9 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { ToolFunctions, ToolContext, Tool } from '../contexts/ToolContext';
-import { CanvasEvent } from '../types/CanvasEvent';
 import { DrawableState } from '../types/DrawableState';
-import { renderThumbnail } from './Draw';
 import { ColorInput } from '../components/inputs/ColorInput';
 import { ToleranceInput } from '../components/inputs/ToleranceInput';
 import { Point } from '../types/Point';
@@ -11,10 +9,13 @@ import { AlphaOptions, ColorOptions, ToleranceOptions } from '../contexts/MenuOp
 import { useColorOptions } from '../hooks/useColorOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';
 import { useAlphaOptions } from '../hooks/useAlphaOptions';
+import { useDrawing } from '../hooks/useDrawing';
+import { renderThumbnail } from '../lib/Graphics';
 
 export type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
 export const FillC = ({ children }: ToolFunctions) => {
+    const [drawing, { updateLayer }] = useDrawing();
     const [{ color }, setColor] = useColorOptions();
     const [{ tolerance }, setTolerance] = useToleranceOptions();
     const [{ alpha }, setAlpha] = useAlphaOptions();
@@ -111,48 +112,32 @@ export const FillC = ({ children }: ToolFunctions) => {
         };
 
         return {
-            setup({ editorContext: [drawing] }) {
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                const { canvas, buffer } = layer;
-                if(!canvas.ctx || !buffer.ctx) return;
-                canvas.ctx.restore();
-                canvas.ctx.globalCompositeOperation = 'source-over';
-                buffer.ctx.restore();
-                buffer.ctx.globalCompositeOperation = 'source-over';
+            setup() {
             },
             dispose(){},
-            click({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, tolerance }] }: CanvasEvent<FillOptions>,): void {
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                const { rect, canvas: { ctx } } = layer;
-                if(!ctx)return;
-                setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
+            click({ point }): void {
+                const { width, height } = drawing.data;
+                const { buffer, selectedLayer, layers } = drawing.editorState;
+                const { canvas, thumbnail } = layers[selectedLayer];
                 const { x, y } = point;
-                const { rect: { position: [dx, dy] } } = layer;
-                const px = x - dx, py = y - dy;
-                const { canvas, buffer } = layer;
-                if(!buffer.ctx) return;
                 buffer.ctx.fillStyle = color;
                 buffer.ctx.globalAlpha = alpha;
                 fill(
                     canvas,
                     buffer,
                     tolerance,
-                    Math.floor(px),
-                    Math.floor(py),
+                    Math.floor(x),
+                    Math.floor(y),
                     parseColor(color+Math.round(alpha*255).toString(16)),
-                    canvas.ctx?.getImageData(px, py, 1, 1).data || [0, 0, 0, 0]
+                    canvas.ctx?.getImageData(x, y, 1, 1).data || [0, 0, 0, 0]
                 );
-                if(!canvas.ctx) return;
                 canvas.ctx.globalCompositeOperation = 'source-over';
                 canvas.ctx.globalAlpha = 1;
                 canvas.ctx.drawImage(buffer.canvas, 0, 0);
                 buffer.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
-                setDrawing({ type: 'editor/forceUpdate', payload: { drawing: { ...drawing.drawing, layers: layers.map((x, i)=>(i==selectedLayer)?{ ...x, imageData: ctx.getImageData(0, 0, ...rect.size) }:x), } } });
-                renderThumbnail(layer);
+                const imageData = canvas.ctx.getImageData(0, 0, width, height);
+                updateLayer({ imageData });
+                renderThumbnail(imageData, thumbnail);
             },
             mouseDown(){},
             mouseMove(){},
@@ -164,6 +149,12 @@ export const FillC = ({ children }: ToolFunctions) => {
         if(alpha === undefined)setAlpha({ alpha: 1 });
         if(tolerance === undefined)setTolerance({ tolerance: .15 });
     }, [alpha, color, setAlpha, setColor, setTolerance, tolerance]);
+    useEffect(()=>{
+        r.setup();
+        return ()=>{
+            r.dispose();
+        };
+    }, [r]);
     return <ToolContext.Provider value={r}>
         {children}
         <ColorInput   />

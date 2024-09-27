@@ -6,9 +6,8 @@ import { MenuOptions } from '../contexts/MenuOptions';
 
 export interface EditorLayerState {
   key: number;
-  canvas?: DrawableState
-  thumbnail?: DrawableState
-  handles: Handle<MenuOptions>[]
+  canvas: DrawableState
+  thumbnail: DrawableState
 }
 
 export interface LayerState2 {

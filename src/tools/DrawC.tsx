@@ -1,76 +1,62 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { ColorInput } from '../components/inputs/ColorInput';
 import { ToolFunctions, ToolContext, Tool } from '../contexts/ToolContext';
-import { renderThumbnail } from './Draw';
+import { useBrush } from '../hooks/useBrush';
+import { useColorOptions } from '../hooks/useColorOptions';
+import { useAlphaOptions } from '../hooks/useAlphaOptions';
+import { useBrushesOptions } from '../hooks/useBrushesOptions';
+import { useDrawing } from '../hooks/useDrawing';
+import { renderThumbnail } from '../lib/Graphics';
 
 export const DrawC = ({ children }: ToolFunctions) => {
+    const brush = useBrush();
+    const [{ brushWidth }] = useBrushesOptions();
+    const [{ color }] = useColorOptions();
+    const [{ alpha }] = useAlphaOptions();
+    const [drawing, { updateLayer }] = useDrawing();
     const r = useMemo<Tool<any>>(()=>{
         let down = false;
 
         return {
-            setup({ editorContext: [drawing] }){
-                if (!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                const { canvas, buffer } = layer;
-                canvas.ctx?.save();
-                buffer.ctx?.save();
-                down = false;
-            },
-            dispose({ editorContext: [drawing] }){
-                if (!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                const { canvas, buffer } = layer;
-                canvas.ctx?.restore();
-                buffer.ctx?.restore();
+            setup(){},
+            dispose(){
             },
             click: () => { },
-            mouseDown({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }){
-                if (!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const brush = brushes[selectedBrush];
-                const layer = layers[selectedLayer];
-                const { rect, canvas: { ctx } } = layer;
-                if(!ctx)return;
-                setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
-                down = true;
+            mouseDown({ point }){
+                const { buffer } = drawing.editorState;
                 const { x, y } = point;
-                const { rect: { position: [dx, dy] } } = layer;
-                brush.brush.startStroke(layer.buffer, [x - dx, y - dy], color, alpha, brushWidth);
+                brush.startStroke(buffer, [x, y], color, alpha, brushWidth);
             },
-            mouseMove({ point, editorContext: [drawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }){
-                if (!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const brush = brushes[selectedBrush];
-                const layer = layers[selectedLayer];
-                const { x, y } = point;
-                const { rect: { position: [dx, dy] } } = layer;
+            mouseMove({ point }){
                 if (!down) return;
-                brush.brush.drawStroke(layer.buffer, [x - dx, y - dy], color, alpha, brushWidth);
+                const { buffer } = drawing.editorState;
+                const { x, y } = point;
+                brush.drawStroke(buffer, [x, y], color, alpha, brushWidth);
             },
-            mouseUp({ point, editorContext: [drawing, setDrawing], menuContext: [{ color, alpha, brushesPacks: brushes, brushWidth, selectedBrush }] }){
-                if (!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const brush = brushes[selectedBrush];
-                const layer = layers[selectedLayer];
-                const { x, y } = point;
-                const { rect: { position: [dx, dy] } } = layer;
+            mouseUp({ point }){
                 if (!down) return;
-                const { canvas, buffer } = layer;
-                brush.brush.endStroke(layer.buffer, [x - dx, y - dy], color, alpha, brushWidth);
-                canvas.ctx?.drawImage(buffer.canvas, 0, 0);
-                buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
+                const { width, height } = drawing.data;
+                const { buffer, selectedLayer, layers } = drawing.editorState;
+                const { canvas, thumbnail } = layers[selectedLayer];
+                const { x, y } = point;
+                brush.endStroke(buffer, [x, y], color, alpha, brushWidth);
+                canvas.ctx.drawImage(buffer.canvas, 0, 0);
+                buffer.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
                 down = false;
-                const { rect, canvas: { ctx } } = layer;
-                if(!ctx)return;
-                setDrawing({ type: 'editor/forceUpdate', payload: { drawing: { ...drawing.drawing, layers: layers.map((x, i)=>(i==selectedLayer)?{ ...x, imageData: ctx.getImageData(0, 0, ...rect.size) }:x), } } });
-                renderThumbnail(layer);
+                const imageData = canvas.ctx.getImageData(0, 0, width, height);
+                updateLayer({ imageData });
+                renderThumbnail(imageData, thumbnail);
             },
         };
-    }, []);
+    }, [alpha, brush, brushWidth, color, drawing.data, drawing.editorState, updateLayer]);
+    useEffect(()=>{
+        r.setup();
+        return ()=>{
+            r.dispose();
+        };
+    }, [r]);
     return <ToolContext.Provider value={r}>
         {children}
         <BrushSelectInput  />

@@ -1,7 +1,7 @@
 import { uid } from '../lib/uid';
 import { scalePoint, sub } from '../lib/DOMMath';
 import { Handle } from '../types/Handle';
-import { LayerState } from '../types/LayerState';
+import { EditorLayerState, LayerState2 } from '../types/LayerState';
 import square from '../icons/square-svgrepo-com.svg';
 import hSkew from '../icons/arrows-h-alt-svgrepo-com.svg';
 import vSkew from '../icons/arrows-v-alt-svgrepo-com.svg';
@@ -12,9 +12,9 @@ import rotateTopRight from '../icons/corner-double-top-right-svgrepo-com.svg';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { ToolEvent } from '../types/ToolEvent';
 import { createDrawable } from '../generators/createDrawable';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Tool, ToolContext, ToolFunctions } from '../contexts/ToolContext';
-import { renderThumbnail } from './Draw';
+import { useDrawing } from '../hooks/useDrawing';
 
 const SKEW_ICONS = [
     rotateTopLeft,
@@ -30,6 +30,7 @@ const SKEW_ICONS = [
 type TransformOptions = unknown;
 
 export const TransformC = ({ children }: ToolFunctions) => {
+    const [drawing, { updateLayer }] = useDrawing();
     const r = useMemo<Tool<any>>(() => {
         let lastclickTime = 0;
         let center = new DOMPoint();
@@ -44,7 +45,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
         let skewMode = false;
         let action: 'none' | 'scale' | 'rotate' | 'skew' | 'translate' | 'rect-cut' | 'transform' = 'none';
 
-        const startTranslation = function(e: CanvasEvent<TransformOptions>, layer: LayerState){
+        const startTranslation = function(e: CanvasEvent<TransformOptions>, layer: LayerState2){
             inverseMatrix = DOMMatrix.fromFloat32Array(matrix.inverse().toFloat32Array());
             const { point }  = e;
             const { x: projectionX, y: projectionY } = point.matrixTransform(inverseMatrix);
@@ -64,7 +65,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             action = 'translate';
         };
 
-        const translate = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+        const translate = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
             const movement =
         sub(
             pivot,
@@ -77,7 +78,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             render(layer);
         };
 
-        const startSkewering = function({ point: e }: CanvasEvent<TransformOptions>, layer: LayerState){
+        const startSkewering = function({ point: e }: CanvasEvent<TransformOptions>, layer: LayerState2){
             inverseMatrix = DOMMatrix.fromFloat32Array(matrix.inverse().toFloat32Array());
             center = pivot.matrixTransform(matrix);
             prevMatrix = matrix;
@@ -87,7 +88,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             action = 'skew';
         };
 
-        const skew = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+        const skew = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
             const angle = Math.atan2(e.y - center.y, e.x - center.x) - initAngle;
 
             if(axis[0])
@@ -103,7 +104,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             render(layer);
         };
 
-        const startScaling = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+        const startScaling = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
             inverseMatrix = DOMMatrix.fromFloat32Array(matrix.inverse().toFloat32Array());
             center = pivot.matrixTransform(matrix);
             const dv = sub(
@@ -125,7 +126,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             action = 'scale';
         };
 
-        const scale = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+        const scale = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
             const dv = sub(
                 new DOMPoint(0, 0).matrixTransform(inverseMatrix),
                 new DOMPoint(e.x -center.x, e.y -center.y).matrixTransform(inverseMatrix)
@@ -144,7 +145,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             render(layer);
         };
 
-        const startRotation = function({ point: e }: CanvasEvent<TransformOptions>, layer: LayerState){
+        const startRotation = function({ point: e }: CanvasEvent<TransformOptions>, layer: LayerState2){
             inverseMatrix = DOMMatrix.fromFloat32Array(matrix.inverse().toFloat32Array());
             center = pivot.matrixTransform(matrix);
             prevMatrix = matrix;
@@ -154,7 +155,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             action = 'rotate';
         };
 
-        const rotate = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+        const rotate = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
             const angle = Math.atan2(e.y - center.y, e.x - center.x) - initAngle;
             const subPivot = pivot.matrixTransform(prevMatrix);
 
@@ -167,12 +168,10 @@ export const TransformC = ({ children }: ToolFunctions) => {
             render(layer);
         };
 
-        const startRectCut = function({ editorContext: [drawing, setDrawing], point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
-            if(!drawing.drawing) return;
-            const { selectedLayer } = drawing.drawing;
-            center = e;
+        const startRectCut = function({ point }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
+            center = point;
             action = 'rect-cut';
-            const { buffer } = layer;
+            const { buffer } = drawing.editorState;
             if(!buffer.ctx) return;
             const tile = document.createElement('canvas');
             const square = 5;
@@ -187,26 +186,26 @@ export const TransformC = ({ children }: ToolFunctions) => {
             buffer.ctx.strokeStyle = buffer.ctx.createPattern(tile, 'repeat') || '';
             buffer.ctx.lineWidth = 1;
             buffer.ctx.fillStyle = '#000000';
-            setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer } } });
         };
 
-        const endRectCut = function(e: CanvasEvent<TransformOptions>, layer:LayerState){
+        const endRectCut = function(e: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
             const { x: cx, y: cy } = center;
             const { point: { x: px, y: py } } = e;
-            const { rect: { position: [dx, dy], size: [dw, dh] } } = layer;
+            const { height, width } = drawing.data;
             const
-                x = Math.min(px, cx)-dx,
-                y = Math.min(py, cy)-dy,
+                x = Math.min(px, cx),
+                y = Math.min(py, cy),
                 w = Math.abs(px-cx),
                 h = Math.abs(py-cy);
             if((w==0)||(h==0)){
                 action = 'none';
                 return;
             }
-            const { buffer, canvas } = layer;
+            const { canvas } = layer;
+            const { buffer } = drawing.editorState;
             const mask = createDrawable({ size: [buffer.canvas.width, buffer.canvas.height] });
             if(!buffer.ctx || !mask.ctx || !canvas.ctx) return;
-            buffer.ctx.clearRect(0, 0, dw, dh);
+            buffer.ctx.clearRect(0, 0, width, height);
             //this is unnecesary but is ment to be a reference, once the other selection are bing implemented
             buffer.ctx.fillRect(x, y, w, h);
             mask.ctx.drawImage(buffer.canvas, 0, 0);
@@ -226,19 +225,19 @@ export const TransformC = ({ children }: ToolFunctions) => {
             startTransform(e, layer, x, y);
         };
 
-        const rectCut = function({ point: e }: CanvasEvent<TransformOptions>, layer:LayerState){
+        const rectCut = function({ point }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState){
             const { x: cx, y: cy } = center;
-            const { x, y } = e;
-            const { rect: { position: [dx, dy], size: [w, h] } } = layer;
-            const { buffer } = layer;
+            const { x, y } = point;
+            const { imageData: { width, height } } = layer;
+            const { buffer } = drawing.editorState;
             if(!buffer.ctx) return;
-            buffer.ctx.clearRect(0, 0, w, h);
-            buffer.ctx.strokeRect(Math.min(x, cx)-dx, Math.min(y, cy)-dy, Math.abs(x-cx), Math.abs(y-cy));
+            buffer.ctx.clearRect(0, 0, width, height);
+            buffer.ctx.strokeRect(Math.min(x, cx), Math.min(y, cy), Math.abs(x-cx), Math.abs(y-cy));
         };
 
-        const startTransform = function({ editorContext: [drawing, setDrawing] }: CanvasEvent<TransformOptions>, layer:LayerState, dx = 0, dy = 0){
-            const { canvas, buffer, rect: { position: [x, y] } } = layer;
-
+        const startTransform = function({ point: { x, y } }: CanvasEvent<TransformOptions>, layer:LayerState2&EditorLayerState, dx = 0, dy = 0){
+            const { canvas } = layer;
+            const { buffer } = drawing.editorState;
             const mw = buffer.canvas.width/2;
             const mh = buffer.canvas.height/2;
 
@@ -309,7 +308,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
         };
 
-        const endTransform = function({ editorContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState) {
+        const endTransform = function({ editorContext: [drawing, setDrawing] }: ToolEvent<TransformOptions>, layer: LayerState2) {
             if(!drawing.drawing) return;
             const { layers, selectedLayer } = drawing.drawing;
             const { canvas, buffer } = layers[selectedLayer];
@@ -334,7 +333,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
             renderThumbnail(layer);
         };
 
-        const render = function(layer: LayerState) {
+        const render = function(layer: LayerState2) {
             const hx = Math.sqrt(matrix.b*matrix.b+matrix.a*matrix.a);
             const hy = Math.sqrt(matrix.d*matrix.d+matrix.c*matrix.c);
             const handleMatrix = new DOMMatrix([
@@ -350,19 +349,10 @@ export const TransformC = ({ children }: ToolFunctions) => {
             layer.buffer.canvas.style.transform = matrix.toString();
         };
         return {
-            setup({ editorContext: [drawing, setDrawing] }){
-                if(!drawing.drawing) return;
-                action = 'none';
-                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            setup(){
             },
-            dispose(e){
-                action = 'none';
-                const { editorContext: [drawing, setDrawing] } = e;
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                endTransform(e, layer);
-                setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
+            dispose(){
+                if(action!='none')endTransform();
             },
             click({ point, editorContext: [drawing, setDrawing] }){
                 if(!drawing.drawing) return;
@@ -426,20 +416,20 @@ export const TransformC = ({ children }: ToolFunctions) => {
                 setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
             },
             mouseUp(e){
-                const { editorContext: [drawing, setDrawing] } = e;
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                const { rect, canvas: { ctx } } = layer;
+                const { width, height } = drawing.data;
+                const { buffer, selectedLayer, layers } = drawing.editorState;
+                const { canvas, thumbnail } = layers[selectedLayer];
+                const { x, y } = point;
+                const imageData = canvas.ctx.getImageData(0, 0, width, height);
+                const layer:LayerState2&EditorLayerState = { ...layers[selectedLayer], ...drawing.data.layers[selectedLayer] };
                 switch(action){
                 case 'rect-cut':
-                    if(!ctx)return;
-                    setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
                     endRectCut(e, layer);
                     break;
                 case 'none':
                     endTransform(e, layer);
-                    setDrawing({ type: 'editor/forceUpdate', payload: { drawing: { ...drawing.drawing, layers: layers.map((x, i)=>(i==selectedLayer)?{ ...x, imageData: ctx.getImageData(0, 0, ...rect.size) }:x), } } });
+                    updateLayer({ imageData });
+                    renderThumbnail(imageData, thumbnail);
                     break;
                 default:
                     action = 'transform';
@@ -450,6 +440,12 @@ export const TransformC = ({ children }: ToolFunctions) => {
             }
         };
     }, []);
+    useEffect(()=>{
+        r.setup();
+        return ()=>{
+            r.dispose();
+        };
+    }, [r]);
     return <ToolContext.Provider value={r}>
         {children}
     </ToolContext.Provider>;

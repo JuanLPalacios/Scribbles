@@ -4,16 +4,16 @@ import { MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { EditorState } from '../contexts/EditorContext';
 
-export function Drawing({ drawing: { data, editor }, getPointer }:{ drawing: NonNullable<EditorState['drawing']>, getPointer: (e: React.PointerEvent<HTMLDivElement>) => CanvasEvent<MenuOptions> }) {
+export function Drawing({ drawing: { data, editorState }, getPointer }:{ drawing: NonNullable<EditorState['drawing']>, getPointer: (e: React.PointerEvent<HTMLDivElement>) => CanvasEvent<MenuOptions> }) {
     const { width, height, layers } = data;
-    const { selectedLayer, layers: editorLayers, buffer } = editor;
+    const { selectedLayer, layers: editorLayers, buffer } = editorState;
     const ref = useRef<HTMLDivElement>(null);
     return <div
         ref={ref}
         style={{ width: `${width}px`, height: `${height}px` }}
     >
         {layers.map((layer, i)=>({ layer, editorLayer: editorLayers[i] })).map(({ layer, editorLayer }, i) => <Layer key={editorLayer.key} values={layer} buffer={(selectedLayer==i)?buffer:undefined} editor={editorLayer} />)}
-        {editorLayers[selectedLayer].handles.map(({ key, icon, position, rotation, onMouseDown }) => <img
+        {editorState.handles.map(({ key, icon, position, rotation, onMouseDown }) => <img
             key={key}
             src={icon}
             style={{

@@ -3,23 +3,21 @@ import Menu from './components/Menu';
 import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
-import { useContext } from 'react';
-
-import { EditorContext } from './contexts/DrawingState';
 import { TopMenu } from './components/portals/TopMenu';
 import { LeftMenu } from './components/portals/LeftMenu';
 import { RightMenu } from './components/portals/RightMenu';
 import { BottomMenu } from './components/portals/BottomMenu';
 import { ToolContextProvider } from './contexts/ToolContextProvider';
+import { useEditor } from './hooks/useEditor';
 
 function App() {
-    const [drawing] = useContext(EditorContext);
+    const [editor] = useEditor();
     return (
         <>
             <div className="App">
                 <TopMenu>
                     <Menu />
-                    <h1 className='filename'>{drawing?.name}</h1>
+                    <h1 className='filename'>{editor.drawing?.data.name}</h1>
                 </TopMenu>
                 <LeftMenu></LeftMenu>
                 <ToolContextProvider>

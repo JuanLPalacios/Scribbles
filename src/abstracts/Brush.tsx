@@ -1,4 +1,4 @@
-import { Serialized, Compressed } from '../lib/Serialization';
+import { Serialized } from '../lib/Serialization';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 

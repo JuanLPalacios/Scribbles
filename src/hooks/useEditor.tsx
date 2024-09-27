@@ -1,11 +1,11 @@
 import { useContext, useMemo } from 'react';
 import { createLayer } from '../generators/createLayer';
-import { EditorContext } from '../contexts/EditorContext';
+import { EditorContext } from '../contexts/EditorDrawingState';
 
 export const useEditor = () => {
     const [editor, dispatch] = useContext(EditorContext);
     return [editor, useMemo(()=>({
-        openFile(file:File){
+        openFile(_file:File){
         },
         newFile({ name, width, height }:{name:string, width:number, height:number}){
             dispatch({

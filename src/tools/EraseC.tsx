@@ -1,16 +1,24 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { AlphaInput } from '../components/inputs/AlphaInput';
 import { BrushSelectInput } from '../components/inputs/BrushSelectInput';
 import { BrushOptions } from '../contexts/BrushesOptionsContext';
 import { AlphaOptions } from '../contexts/MenuOptions';
 import { createDrawable } from '../generators/createDrawable';
-import { renderThumbnail } from './Draw';
 import { DrawableState } from '../types/DrawableState';
 import { Tool, ToolContext, ToolFunctions } from '../contexts/ToolContext';
+import { useBrush } from '../hooks/useBrush';
+import { useBrushesOptions } from '../hooks/useBrushesOptions';
+import { useAlphaOptions } from '../hooks/useAlphaOptions';
+import { useDrawing } from '../hooks/useDrawing';
+import { renderThumbnail } from '../lib/Graphics';
 
 export type EraseOptions = BrushOptions & AlphaOptions;
 
 export const EraseC = ({ children }: ToolFunctions) => {
+    const brush = useBrush();
+    const [{ brushWidth }] = useBrushesOptions();
+    const [{ alpha }] = useAlphaOptions();
+    const [drawing, { updateLayer }] = useDrawing();
     const mask = useMemo(()=>createDrawable({ size: [1, 1] }), []);
     const r = useMemo<Tool<any>>(()=>{
         let down = false;
@@ -25,67 +33,36 @@ export const EraseC = ({ children }: ToolFunctions) => {
         };
 
         return {
-            setup({ editorContext: [drawing] }){
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                const { canvas, buffer } = layer;
-                mask.canvas.width = canvas.canvas.width;
-                mask.canvas.height = canvas.canvas.height;
-                canvas.ctx?.save();
-                buffer.ctx?.save();
-                down = false;
+            setup(){
             },
-            dispose({ editorContext: [drawing] }){
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const layer = layers[selectedLayer];
-                const { canvas, buffer } = layer;
-                canvas.ctx?.restore();
-                buffer.ctx?.restore();
-                mask.canvas.width = 0;
-                mask.canvas.height = 0;
+            dispose(){
             },
             click(){},
-            mouseDown({ point, editorContext: [drawing, setDrawing], menuContext: [{ brushesPacks: brushes, brushWidth, selectedBrush, alpha }] }){
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const brush = brushes[selectedBrush];
-                const layer = layers[selectedLayer];
-                const { rect, canvas: { ctx } } = layer;
-                if(!ctx)return;
-                setDrawing({ type: 'editor/do', payload: { type: 'drawing/workLayer', payload: { at: selectedLayer, layer: { ...layer, imageData: ctx.getImageData(0, 0, ...rect.size) } } } });
+            mouseDown({ point }){
+                const { buffer, selectedLayer, layers } = drawing.editorState;
                 const { x, y } = point;
-                const { rect: { position: [dx, dy] } } = layer;
-                const { canvas, buffer } = layer;
-                mask.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
-                layer.canvas.canvas.style.display = 'none';
+                const { canvas } = layers[selectedLayer];
+                mask.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
+                canvas.canvas.style.display = 'none';
                 renderMask(canvas, buffer);
-                brush.brush.startStroke(mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
+                brush.startStroke(mask, [x, y], '#000000', alpha, brushWidth);
                 down = true;
             },
-            mouseMove({ point, editorContext: [drawing], menuContext: [{ brushesPacks: brushes, brushWidth, selectedBrush, alpha }] }){
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const brush = brushes[selectedBrush];
-                const layer = layers[selectedLayer];
-                const { x, y } = point;
-                const { rect: { position: [dx, dy] } } = layer;
+            mouseMove({ point }){
                 if (!down) return;
-                const { canvas, buffer } = layer;
-                brush.brush.drawStroke(mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
+                const { buffer, selectedLayer, layers } = drawing.editorState;
+                const { x, y } = point;
+                const { canvas } = layers[selectedLayer];
+                brush.drawStroke(mask, [x, y], '#000000', alpha, brushWidth);
                 renderMask(canvas, buffer);
             },
-            mouseUp({ point, editorContext: [drawing, setDrawing], menuContext: [{ brushesPacks: brushes, brushWidth, selectedBrush, alpha }] }){
-                if(!drawing.drawing) return;
-                const { layers, selectedLayer } = drawing.drawing;
-                const brush = brushes[selectedBrush];
-                const layer = layers[selectedLayer];
-                const { x, y } = point;
-                const { rect: { position: [dx, dy] } } = layer;
+            mouseUp({ point }){
                 if (!down) return;
-                const { canvas, buffer } = layer;
-                brush.brush.endStroke(mask, [x-dx, y-dy], '#000000', alpha, brushWidth);
+                const { width, height } = drawing.data;
+                const { buffer, selectedLayer, layers } = drawing.editorState;
+                const { canvas, thumbnail } = layers[selectedLayer];
+                const { x, y } = point;
+                brush.endStroke(mask, [x, y], '#000000', alpha, brushWidth);
                 renderMask(canvas, buffer);
                 if(canvas.ctx){
                     canvas.ctx.globalCompositeOperation = 'copy';
@@ -94,14 +71,19 @@ export const EraseC = ({ children }: ToolFunctions) => {
                 }
                 buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
                 canvas.canvas.style.display = 'inline';
-                const { rect, canvas: { ctx } } = layer;
-                if(!ctx)return;
-                setDrawing({ type: 'editor/forceUpdate', payload: { drawing: { ...drawing.drawing, layers: layers.map((x, i)=>(i==selectedLayer)?{ ...x, imageData: ctx.getImageData(0, 0, ...rect.size) }:x), } } });
-                renderThumbnail(layer);
+                const imageData = canvas.ctx.getImageData(0, 0, width, height);
+                updateLayer({ imageData });
+                renderThumbnail(imageData, thumbnail);
                 down = false;
             },
         };
     }, [mask]);
+    useEffect(()=>{
+        r.setup();
+        return ()=>{
+            r.dispose();
+        };
+    }, [r]);
     return <ToolContext.Provider value={r}>
         {children}
         <BrushSelectInput  />

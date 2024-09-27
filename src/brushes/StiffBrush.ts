@@ -5,7 +5,7 @@ import { scalePoint } from '../lib/DOMMath';
 import { parseSerializedJSON, serializeJSON } from '../lib/serializeJSON';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
-import { CompressedJSON } from "./CompressedOject";
+import { CompressedJSON } from './CompressedOject';
 
 export type SerializedStiffBrush ={
     scribbleBrushType: BrushList.Stiff,

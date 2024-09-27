@@ -1,5 +1,5 @@
 import { useContext, useMemo } from 'react';
-import { EditorContext, EditorDrawingState } from '../contexts/EditorContext';
+import { EditorContext, EditorDrawingState } from '../contexts/EditorDrawingState';
 import { createLayer2 } from '../generators/createLayer2';
 import { LayerState2 } from '../types/LayerState';
 import { DrawingState } from '../contexts/DrawingContext';
@@ -7,9 +7,10 @@ import { DrawingState } from '../contexts/DrawingContext';
 export const useDrawing = () => {
     const [editorState, dispatch] = useContext(EditorContext);
     const { drawing } = editorState;
+    if (!drawing) throw new Error('useDrawing should only be used inside components or hook where a drawing presence is guaranteed');
     const drawingActions = useMemo(() => {
-        if (!drawing) return;
-        const { data, editor } = drawing;
+        if (!drawing) throw new Error('useDrawing should only be used inside components or hook where a drawing presence is guaranteed');
+        const { data, editorState: editor } = drawing;
         const { selectedLayer, next, prev } = editor;
         const { width, height, layers } = data;
         return {
@@ -112,5 +113,5 @@ export const useDrawing = () => {
             },
         };
     }, [dispatch, drawing]);
-    return (drawing && drawingActions) ? [drawing, drawingActions] as const : [undefined, undefined] as const;
+    return [drawing, drawingActions] as const;
 };

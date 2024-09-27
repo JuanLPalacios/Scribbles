@@ -117,7 +117,7 @@ function unzipDataV1S1(value : CompressedValue, context:Context): Promise<Serial
         if(typeof value !=  'object')return resolve(value);
         if(Array.isArray(value))return resolve(Promise.all(value.map(x=>unzipDataV1S1(x, context))));
         if(value.type === 'json')return resolve(value);
-        if(!CTX) return;
+        if(!CTX) return reject();
         const file = value.value.substring(5);
         const contentType = getContentType(file);
         return resolve(context.zip
@@ -125,7 +125,7 @@ function unzipDataV1S1(value : CompressedValue, context:Context): Promise<Serial
             .async('base64')
             .then(base64=>(dataURLFormat(contentType, base64)))
             .then(url=>(new Promise<SerializedValue>((resolve, reject) => {
-                if(!CTX) return;
+                if(!CTX) return reject();
                 const img = new Image;
                 img.onload = async ()=>{
                     CANVAS.width = 0; //forces the canvas to clear

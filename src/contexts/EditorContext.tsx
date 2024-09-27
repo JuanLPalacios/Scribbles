@@ -2,6 +2,8 @@ import { createContext, ReactNode, useReducer } from 'react';
 import { EditorLayerState } from '../types/LayerState';
 import { createEditorLayer } from '../generators/createEditorLayer';
 import { DrawingState, DrawingAction, drawingReducer, invertDrawingAction } from './DrawingContext';
+import { DrawableState } from '../types/DrawableState';
+import { createDrawable } from '../generators/createDrawable';
 
 export type EditorState = {
     drawing?: {
@@ -14,7 +16,8 @@ export type EditorDrawingState = {
     layers: EditorLayerState[],
     prev:DrawingAction[],
     next:DrawingAction[],
-    selectedLayer:number
+    selectedLayer:number,
+    buffer: DrawableState
 }
 
 export type EditorAction =
@@ -58,7 +61,7 @@ export const reducer = (state:EditorState, action: EditorAction):EditorState => 
     const { drawing } = state;
     switch (action.type) {
     case 'editor/load':
-        return action.payload? { ...state, drawing: { data: action.payload, editor: { layers: action.payload.layers.map(createEditorLayer), next: [], prev: [], selectedLayer: 0 } } } : { ...state, drawing: undefined };
+        return action.payload? { ...state, drawing: { data: action.payload, editor: { layers: action.payload.layers.map(createEditorLayer), next: [], prev: [], selectedLayer: 0, buffer: createDrawable({ size: [action.payload.width, action.payload.height] }) } } } : { ...state, drawing: undefined };
     }
     if(!drawing){
         switch (action.type) {

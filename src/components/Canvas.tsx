@@ -1,6 +1,5 @@
-import { useEffect, useCallback, useState, useRef, useContext } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import '../css/Canvas.css';
-import { EditorContext } from '../contexts/DrawingState';
 import { CanvasEvent } from '../types/CanvasEvent';
 import { QuickStart } from './QuickStart';
 import { useTool } from '../hooks/useTool';
@@ -12,9 +11,10 @@ import { useToolOptions } from '../hooks/useToolOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';
 import { MenuOptions } from '../contexts/MenuOptions';
 import { Drawing } from './Drawing';
+import { useEditor } from '../hooks/useEditor';
 
 function Canvas() {
-    const editorContext = useContext(EditorContext);
+    const editorContext = useEditor();
     const [editor, editorDispatch] = editorContext;
     const [{ alpha }, setAlphaOptions] = useAlphaOptions();
     const [{ brushWidth, brushesPacks, selectedBrush }, setBrushesOptions] = useBrushesOptions();

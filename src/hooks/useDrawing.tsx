@@ -1,11 +1,12 @@
-import { useContext, useMemo } from 'react';
-import { EditorContext, EditorDrawingState } from '../contexts/EditorDrawingState';
+import { useMemo } from 'react';
 import { createLayer2 } from '../generators/createLayer2';
 import { LayerState2 } from '../types/LayerState';
 import { DrawingState } from '../contexts/DrawingContext';
+import { useEditor } from './useEditor';
+import { EditorDrawingState } from '../contexts/EditorDrawingContext';
 
 export const useDrawing = () => {
-    const [editorState, dispatch] = useContext(EditorContext);
+    const [editorState, { editDrawing }] = useEditor();
     const { drawing } = editorState;
     if (!drawing) throw new Error('useDrawing should only be used inside components or hook where a drawing presence is guaranteed');
     const drawingActions = useMemo(() => {
@@ -14,11 +15,11 @@ export const useDrawing = () => {
         const { selectedLayer, next, prev } = editor;
         const { width, height, layers } = data;
         return {
-            undo: (prev.length > 0) ? () => { dispatch({ type: 'editor/undo' }); } : undefined,
-            redo: (next.length > 0) ? () => { dispatch({ type: 'editor/redo' }); } : undefined,
+            undo: (prev.length > 0) ? () => { editDrawing({ type: 'editor-drawing/undo' }); } : undefined,
+            redo: (next.length > 0) ? () => { editDrawing({ type: 'editor-drawing/redo' }); } : undefined,
             moveLayerUp: (layers.length > selectedLayer + 1) ? () => {
-                dispatch({
-                    type: 'editor/do',
+                editDrawing({
+                    type: 'editor-drawing/do',
                     payload: {
                         type: 'drawing/moveLayer',
                         payload: {
@@ -29,8 +30,8 @@ export const useDrawing = () => {
                 });
             } : undefined,
             moveLayerDown: (0 <= selectedLayer - 1) ? () => {
-                dispatch({
-                    type: 'editor/do',
+                editDrawing({
+                    type: 'editor-drawing/do',
                     payload: {
                         type: 'drawing/moveLayer',
                         payload: {
@@ -41,8 +42,8 @@ export const useDrawing = () => {
                 });
             } : undefined,
             addLayer(layerName: string) {
-                dispatch({
-                    type: 'editor/do',
+                editDrawing({
+                    type: 'editor-drawing/do',
                     payload: {
                         type: 'drawing/addLayer',
                         payload: {
@@ -53,8 +54,8 @@ export const useDrawing = () => {
                 });
             },
             loadLayer(imageData: ImageData) {
-                dispatch({
-                    type: 'editor/do',
+                editDrawing({
+                    type: 'editor-drawing/do',
                     payload: {
                         type: 'drawing/loadLayer',
                         payload: {
@@ -65,14 +66,14 @@ export const useDrawing = () => {
                 });
             },
             selectLayer(payload: number) {
-                dispatch({
-                    type: 'editor/selectLayer',
+                editDrawing({
+                    type: 'editor-drawing/selectLayer',
                     payload
                 });
             },
             removeLayer(payload: number) {
-                dispatch({
-                    type: 'editor/do',
+                editDrawing({
+                    type: 'editor-drawing/do',
                     payload: {
                         type: 'drawing/removeLayer',
                         payload
@@ -82,8 +83,8 @@ export const useDrawing = () => {
             updateLayer(...[index, layer]:[number, Partial<LayerState2>]|[Partial<LayerState2>]) {
                 layer = layer || index as Partial<LayerState2>;
                 index = (typeof index == 'number')?index:selectedLayer;
-                dispatch({
-                    type: 'editor/do',
+                editDrawing({
+                    type: 'editor-drawing/do',
                     payload: {
                         type: 'drawing/updateLayer',
                         payload: {
@@ -93,15 +94,18 @@ export const useDrawing = () => {
                     }
                 });
             },
-            forceUpdate(drawing: {data?:Partial<DrawingState>, editor?:Partial<EditorDrawingState>}) {
-                dispatch({
-                    type: 'editor/forceUpdate',
-                    payload: drawing
+            forceUpdate({ data, editorState }: {data?:Partial<DrawingState>, editorState?:Partial<EditorDrawingState['editorState']>}) {
+                editDrawing({
+                    type: 'editor-drawing/forceUpdate',
+                    payload: {
+                        data: { ...drawing.data, ...data },
+                        editorState: { ...drawing.editorState, ...editorState }
+                    }
                 });
             },
             workLayer(layer: LayerState2) {
-                dispatch({
-                    type: 'editor/do',
+                editDrawing({
+                    type: 'editor-drawing/do',
                     payload: {
                         type: 'drawing/workLayer',
                         payload: {
@@ -112,6 +116,6 @@ export const useDrawing = () => {
                 });
             },
         };
-    }, [dispatch, drawing]);
+    }, [editDrawing, drawing]);
     return [drawing, drawingActions] as const;
 };

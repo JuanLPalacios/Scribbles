@@ -1,6 +1,7 @@
 import { useContext, useMemo } from 'react';
 import { createLayer } from '../generators/createLayer';
-import { EditorContext } from '../contexts/EditorDrawingState';
+import { EditorContext } from '../contexts/EditorContext';
+import { EditorDrawingAction } from '../contexts/EditorDrawingContext';
 
 export const useEditor = () => {
     const [editor, dispatch] = useContext(EditorContext);
@@ -24,6 +25,12 @@ export const useEditor = () => {
                         )
                     ]
                 }
+            });
+        },
+        editDrawing(payload:EditorDrawingAction){
+            dispatch({
+                type: 'editor/edit',
+                payload
             });
         },
     }), [])] as const;

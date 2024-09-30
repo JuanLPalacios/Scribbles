@@ -1,5 +1,4 @@
-import { ToolEvent } from './ToolEvent';
 
-export type CanvasEvent<O> = {
+export type CanvasEvent = {
     point:DOMPoint
-} & ToolEvent<O>
+}

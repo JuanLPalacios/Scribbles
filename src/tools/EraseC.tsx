@@ -20,7 +20,7 @@ export const EraseC = ({ children }: ToolFunctions) => {
     const [{ alpha }] = useAlphaOptions();
     const [drawing, { updateLayer }] = useDrawing();
     const mask = useMemo(()=>createDrawable({ size: [1, 1] }), []);
-    const r = useMemo<Tool<any>>(()=>{
+    const r = useMemo<Tool>(()=>{
         let down = false;
 
         const renderMask = function(canvas:DrawableState, buffer:DrawableState){
@@ -34,6 +34,8 @@ export const EraseC = ({ children }: ToolFunctions) => {
 
         return {
             setup(){
+                mask.canvas.width = drawing.data.width;
+                mask.canvas.height = drawing.data.height;
             },
             dispose(){
             },
@@ -42,10 +44,10 @@ export const EraseC = ({ children }: ToolFunctions) => {
                 const { buffer, selectedLayer, layers } = drawing.editorState;
                 const { x, y } = point;
                 const { canvas } = layers[selectedLayer];
-                mask.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
                 canvas.canvas.style.display = 'none';
-                renderMask(canvas, buffer);
+                mask.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
                 brush.startStroke(mask, [x, y], '#000000', alpha, brushWidth);
+                renderMask(canvas, buffer);
                 down = true;
             },
             mouseMove({ point }){

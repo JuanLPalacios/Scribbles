@@ -16,7 +16,7 @@ export const DrawC = ({ children }: ToolFunctions) => {
     const [{ color }] = useColorOptions();
     const [{ alpha }] = useAlphaOptions();
     const [drawing, { updateLayer }] = useDrawing();
-    const r = useMemo<Tool<any>>(()=>{
+    const r = useMemo<Tool>(()=>{
         let down = false;
 
         return {
@@ -28,6 +28,7 @@ export const DrawC = ({ children }: ToolFunctions) => {
                 const { buffer } = drawing.editorState;
                 const { x, y } = point;
                 brush.startStroke(buffer, [x, y], color, alpha, brushWidth);
+                down = true;
             },
             mouseMove({ point }){
                 if (!down) return;

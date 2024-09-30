@@ -19,7 +19,7 @@ export const FillC = ({ children }: ToolFunctions) => {
     const [{ color }, setColor] = useColorOptions();
     const [{ tolerance }, setTolerance] = useToleranceOptions();
     const [{ alpha }, setAlpha] = useAlphaOptions();
-    const r = useMemo<Tool<any>>(() => {
+    const r = useMemo<Tool>(() => {
         const fill = function(canvas: DrawableState, buffer: DrawableState, tolerance:number, ox: number, oy: number, color: Uint8ClampedArray | number[], oColor: Uint8ClampedArray | number[]) {
             const canvasWidth = canvas.canvas.width;
             const canvasHeight = canvas.canvas.height;

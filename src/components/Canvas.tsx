@@ -8,7 +8,6 @@ import { useBrushesOptions } from '../hooks/useBrushesOptions';
 import { useColorOptions } from '../hooks/useColorOptions';
 import { useToolOptions } from '../hooks/useToolOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';
-import { MenuOptions } from '../contexts/MenuOptions';
 import { Drawing } from './Drawing';
 import { useEditor } from '../hooks/useEditor';
 
@@ -63,11 +62,11 @@ function Canvas() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [containerRef.current]);
 
-    const getPointer = useCallback((e:React.PointerEvent<HTMLDivElement>):CanvasEvent<MenuOptions>=>{
-        if(!containerRef.current) return { point: new DOMPoint(0, 0), editorContext: editorContext, menuContext: menuContext as any };
+    const getPointer = useCallback((e:React.PointerEvent<HTMLDivElement>):CanvasEvent=>{
+        if(!containerRef.current) return { point: new DOMPoint(0, 0) };
         const { clientX, clientY } = e;
         const { top, left } = containerRef.current.getBoundingClientRect();
-        return { point: (new DOMPoint(clientX - left, clientY - top)).matrixTransform(transform.inverse()), editorContext: editorContext, menuContext: menuContext as any };
+        return { point: (new DOMPoint(clientX - left, clientY - top)).matrixTransform(transform.inverse()) };
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [editorContext, menuContext, transform, containerRef.current]);
 
@@ -183,7 +182,6 @@ function Canvas() {
             document.removeEventListener('keyup', keyUpHandler);
         };
     }, [keys]);
-    console.log('Canvas');
     return (
         <div className="Canvas"
             ref={containerRef}

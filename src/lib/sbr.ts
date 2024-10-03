@@ -42,7 +42,6 @@ export const SBR = {
                                     }
                                     brushes.push(brush);
                                 }
-                                console.log(brushes);
                                 return brushes;
                             })
                     )
@@ -71,7 +70,6 @@ export const SBR = {
             }
             zippedBrushes.push(zippedBrush);
         }
-        console.log(zippedBrushes);
         zip.file('content.json', JSON.stringify(zippedBrushes));
         return zip.generateAsync({ type: 'blob' });
     }

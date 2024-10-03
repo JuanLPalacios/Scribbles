@@ -106,9 +106,9 @@ export const drawingReducer = (drawing: DrawingState, action: DrawingAction): Dr
         return drawing &&
             {
                 ...drawing,
-                layers: [...layers.slice(0, action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((x, i) => action.payload.at !== i),
+                layers: [...layers.slice(0, action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((_x, i) => action.payload.at !== i),
                     layers[action.payload.at],
-                    ...layers.slice(action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((x, i) => action.payload.at !== (i + action.payload.to))
+                    ...layers.slice(action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((_x, i) => action.payload.at !== (i + action.payload.to))
                 ]
             };
     case 'drawing/updateLayer':

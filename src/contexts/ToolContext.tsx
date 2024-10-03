@@ -10,13 +10,13 @@ export const ToolContext = createContext<Tool>({
     click: () => { },
 });
 
-export type Tool<P = any> = {
+export type Tool = {
     setup: ()=>void
     dispose: ()=>void
-    mouseDown: (_event: CanvasEvent<P>)=>void
-    mouseUp: (_event: CanvasEvent<P>)=>void
-    mouseMove: (_event: CanvasEvent<P>)=>void
-    click: (_event: CanvasEvent<P>)=>void
+    mouseDown: (_event: CanvasEvent)=>void
+    mouseUp: (_event: CanvasEvent)=>void
+    mouseMove: (_event: CanvasEvent)=>void
+    click: (_event: CanvasEvent)=>void
 };
 
 export type ToolFunctions = {

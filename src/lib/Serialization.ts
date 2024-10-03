@@ -38,7 +38,7 @@ function abrComputedBrushToSolid({ angle, diameter, hardness, name, roundness, s
     return { scribbleBrushType: BrushList.Solid, angle, diameter, hardness, name, roundness, spacing };
 }
 
-function abrSampledBrushToTextured({ antiAliasing, brushTipImage, name, spacing, valid }: AbrSampledBrush): SerializedTextureBrush {
+function abrSampledBrushToTextured({ antiAliasing, brushTipImage, name, spacing }: AbrSampledBrush): SerializedTextureBrush {
     const ctx = brushTipImage.getContext('2d');
     if(!ctx)throw new Error('can\'t create image context');
     const imageData = ctx.getImageData(0, 0, brushTipImage.width, brushTipImage.height);

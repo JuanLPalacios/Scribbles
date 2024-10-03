@@ -15,10 +15,10 @@ export default abstract class Tool<P = any> {
 
     abstract setup(event:ToolEvent<P>):void
     abstract dispose(event:ToolEvent<P>):void
-    mouseDown(_event: CanvasEvent<P>){ return; }
-    mouseUp(_event: CanvasEvent<P>){ return; }
-    mouseMove(_event: CanvasEvent<P>){ return; }
-    click(_event: CanvasEvent<P>){ return; }
+    mouseDown(_event: CanvasEvent){ return; }
+    mouseUp(_event: CanvasEvent){ return; }
+    mouseMove(_event: CanvasEvent){ return; }
+    click(_event: CanvasEvent){ return; }
 
     Menu:(props: {config:P, onChange:Dispatch<SetStateAction<P>>}) => JSX.Element = () => <></>;
 }

@@ -59,7 +59,7 @@ export default class TextureBrush extends Brush {
         this.brushTipImage = DEFAULT_BRUSH_TIP;
     }
 
-    startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
+    startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, _width:number) {
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: buffer } = this.buffer;
         const { ctx: previewCtx, canvas: preview } = this.previewBuffer;
@@ -83,7 +83,7 @@ export default class TextureBrush extends Brush {
         ctx.drawImage(buffer, 0, 0);
     }
 
-    drawStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
+    drawStroke(drawable:DrawableState, point:Point, _color:string, _alpha:number, width:number) {
         const { ctx, canvas } = drawable;
         const { ctx: bufferCtx, canvas: buffer } = this.buffer;
         const { ctx: previewCtx, canvas: preview } = this.previewBuffer;

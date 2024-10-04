@@ -3,8 +3,9 @@ import '../../css/Menu.css';
 import optionsIcon from '../../icons/options-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { useDrawing } from '../../hooks/useDrawing';
+import { DrawingRequired } from '../../hoc/DrawingRequired';
 
-export const Properties = () => {
+export const Properties = DrawingRequired(() => {
     const [drawing, editorDispatch] = useDrawing();
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600 });
     const { forceUpdate } = editorDispatch||{};
@@ -56,5 +57,5 @@ export const Properties = () => {
             </div>
         </ReactModal>
     </>;
-};
+});
 

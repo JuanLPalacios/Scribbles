@@ -10,8 +10,9 @@ import { Drawable } from './Drawable';
 import { BlendMode, blendModes } from '../types/BlendMode';
 import ReactModal from 'react-modal';
 import { useDrawing } from '../hooks/useDrawing';
+import { DrawingRequired } from '../hoc/DrawingRequired';
 
-function LayerMenu() {
+const LayerMenu = DrawingRequired(()=>{
     const [sideMenu, setSideMenu] = useState({
         isOpen: false,
     });
@@ -170,6 +171,6 @@ function LayerMenu() {
             </ReactModal>
         </div>
     );
-}
+});
 
 export default LayerMenu;

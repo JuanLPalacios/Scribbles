@@ -1,10 +1,9 @@
 import { useRef } from 'react';
 import { CanvasEvent } from '../types/CanvasEvent';
-import { MenuOptions } from '../contexts/MenuOptions';
 import Layer from './Layer';
 import { EditorState } from '../contexts/EditorContext';
 
-export function Drawing({ drawing: { data, editorState }, getPointer }:{ drawing: NonNullable<EditorState['drawing']>, getPointer: (e: React.PointerEvent<HTMLDivElement>) => CanvasEvent<MenuOptions> }) {
+export function Drawing({ drawing: { data, editorState }, getPointer }:{ drawing: NonNullable<EditorState['drawing']>, getPointer: (e: React.PointerEvent<HTMLDivElement>) => CanvasEvent }) {
     const { width, height, layers } = data;
     const { selectedLayer, layers: editorLayers, buffer } = editorState;
     const ref = useRef<HTMLDivElement>(null);

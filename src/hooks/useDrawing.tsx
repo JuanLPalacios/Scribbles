@@ -48,7 +48,7 @@ export const useDrawing = () => {
                         type: 'drawing/addLayer',
                         payload: {
                             at: selectedLayer,
-                            layer: createLayer2(layerName, { position: [0, 0], size: [width, height] })
+                            layer: createLayer2(layerName, [width, height])
                         }
                     }
                 });
@@ -113,6 +113,12 @@ export const useDrawing = () => {
                             layer
                         }
                     }
+                });
+            },
+            setTransform(payload: DOMMatrix) {
+                editDrawing({
+                    type: 'editor-drawing/transform',
+                    payload
                 });
             },
         };

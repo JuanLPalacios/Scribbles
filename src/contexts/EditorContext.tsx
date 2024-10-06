@@ -1,8 +1,6 @@
 import { createContext, ReactNode, useReducer } from 'react';
 import { DrawingState } from './DrawingContext';
 import { EditorDrawingAction, editorDrawingReducer, EditorDrawingState } from './EditorDrawingContext';
-import { createDrawable } from '../generators/createDrawable';
-import { createEditorLayer } from '../generators/createEditorLayer';
 
 export type EditorState = {
     drawing?: EditorDrawingState
@@ -30,17 +28,7 @@ function reducer(state:EditorState, action:EditorAction):EditorState{
     case 'editor/load':
         return action.payload? {
             ...state,
-            drawing: {
-                data: action.payload,
-                editorState: {
-                    layers: action.payload.layers.map(createEditorLayer),
-                    next: [],
-                    prev: [],
-                    handles: [],
-                    selectedLayer: 0,
-                    buffer: createDrawable({ size: [action.payload.width, action.payload.height] })
-                }
-            }
+            drawing: editorDrawingReducer(state.drawing, { type: 'editor-drawing/load', payload: action.payload })
         } : { ...state, drawing: undefined };
     case 'editor/edit':
         return {

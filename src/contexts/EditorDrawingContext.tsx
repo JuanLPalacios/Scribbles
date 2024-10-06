@@ -13,6 +13,7 @@ export type EditorDrawingState = {
         selectedLayer: number;
         buffer: DrawableState;
         handles: Handle[];
+        transform: DOMMatrix
     },
     data:DrawingState,
 };
@@ -24,6 +25,7 @@ export type EditorDrawingAction =
     SelectLayer |
     ForceUpdate |
     Load|
+    Transform|
     Edit;
 type Do = {
     type: 'editor-drawing/do';
@@ -51,6 +53,10 @@ type Edit = {
     type: 'editor-drawing/edit';
     payload?: DrawingAction;
 };
+type Transform = {
+    type: 'editor-drawing/transform';
+    payload: DOMMatrix;
+};
 
 const updateLayers = (state:EditorDrawingState):EditorDrawingState => {
     const { editorState, data: { layers } } = state;
@@ -77,7 +83,8 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
                 prev: [],
                 handles: [],
                 selectedLayer: 0,
-                buffer: createDrawable({ size: [action.payload.width, action.payload.height] })
+                buffer: createDrawable({ size: [action.payload.width, action.payload.height] }),
+                transform: new DOMMatrix()
             }
 
         }):undefined;
@@ -125,6 +132,15 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
             editorState: {
                 ...editorState,
                 selectedLayer: action.payload
+            }
+        };
+    case 'editor-drawing/transform':
+        return {
+            ...state,
+            data,
+            editorState: {
+                ...editorState,
+                transform: action.payload
             }
         };
     case 'editor-drawing/forceUpdate':

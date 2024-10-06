@@ -22,7 +22,7 @@ const LayerMenu = DrawingRequired(()=>{
         isValid: true,
         errors: { layerName: new Array<string> }
     });
-    const [d, editorDispatch] = useDrawing();
+    const [drawing, drawingActions] = useDrawing();
     useEffect(() => {
         const errors = { layerName: new Array<string>() };
         if(newLayerPopup.layerName.length<1)
@@ -32,11 +32,12 @@ const LayerMenu = DrawingRequired(()=>{
         setNewLayerPopup({ ...newLayerPopup, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newLayerPopup.layerName]);
-    const { moveLayerDown, moveLayerUp } = editorDispatch||{};
+    const { moveLayerDown, moveLayerUp } = drawingActions||{};
+    const { data, editorState: { layers: editorLayers, selectedLayer } } = drawing;
+    const { layers } = data;
     const { onAddLayer, onModeChange, onOpacityChange, onOpacityChangePrev, onRemoveLayer, onSelect, onVisibilityChange } = useMemo(()=>{
-        if(!d)return{};
-        const { editorState: { selectedLayer } } = d;
-        const { addLayer, removeLayer, updateLayer, forceUpdate, selectLayer } = editorDispatch;
+        const { editorState: { selectedLayer } } = drawing;
+        const { addLayer, removeLayer, updateLayer, forceUpdate, selectLayer } = drawingActions;
         return{
             onAddLayer(){
                 setNewLayerPopup({ ...newLayerPopup, isOpen: false });
@@ -63,10 +64,7 @@ const LayerMenu = DrawingRequired(()=>{
                 updateLayer({ mixBlendMode });
             },
         };
-    }, []);
-    if(!d) return <></>;
-    const { data, editorState: { layers: editorLayers, selectedLayer } } = d;
-    const { layers } = data;
+    }, [drawing, data, drawingActions, layers, newLayerPopup]);
     return (
         <div className="LayerMenu">
             <button className='layer-button round-btn' onClick={() => setSideMenu({ ...sideMenu, isOpen: true })}>

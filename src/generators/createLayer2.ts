@@ -1,9 +1,8 @@
 import { blendModes } from '../types/BlendMode';
 import { LayerState2 } from '../types/LayerState';
-import { Rect } from '../types/Rect';
+import { Point } from '../types/Point';
 
-export const createLayer2 = (name:string, rect:Rect):LayerState2 => {
-    const { size } = rect;
+export const createLayer2 = (name:string, size:Point):LayerState2 => {
     const [width, height] = size;
     // dummy context and canvas for creating initial imageData state
     const ctx = document.createElement('canvas').getContext('2d');

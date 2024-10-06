@@ -100,7 +100,7 @@ export const drawingReducer = (drawing: DrawingState, action: DrawingAction): Dr
     case 'drawing/removeLayer':
         return drawing && {
             ...drawing,
-            layers: layers.filter((x, i) => action.payload !== i)
+            layers: layers.filter((_x, i) => action.payload !== i)
         };
     case 'drawing/moveLayer':
         return drawing &&

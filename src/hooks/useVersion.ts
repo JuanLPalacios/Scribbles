@@ -1,10 +1,12 @@
 import { useEffect, useMemo } from 'react';
-import { useStorage } from './useStorage';
+import { createStorageHook } from '../generators/createStorageHook';
 
-const TARGET_VERSION_REGEX = /^([^\d])(\d+)\.(\d+)\.(\d+)/g;
+const TARGET_VERSION_REGEX = /^([^\d]*)(\d+)\.(\d+)\.(\d+)/;
+
+const useStoredVersion = createStorageHook<{ version: string }>('version', 'local', { version: '0.3.0' });
 
 export function useVersion<T>(value:T, targetVersion:string, updateFunctions:{version:string, update:(v:any)=>[string, any]}[]) {
-    const [ver, setVer] = useStorage<{ version: string }>('version', 'local', { version: '0.3.0' });
+    const [ver, setVer] = useStoredVersion();
     let updated = false;
     const updatedValue = useMemo<T>(()=>{
         if(fits(ver.version, targetVersion))return value;
@@ -15,6 +17,7 @@ export function useVersion<T>(value:T, targetVersion:string, updateFunctions:{ve
                 [currentVersion, updatedValue] = update(updatedValue);
         });
         if(!fits(currentVersion, targetVersion)) throw new Error('version failed to bee updated');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         updated = true;
         return updatedValue;
     }, [targetVersion, updateFunctions, value, ver.version]);
@@ -25,6 +28,7 @@ export function useVersion<T>(value:T, targetVersion:string, updateFunctions:{ve
             if(versionAsNumber(...current)>versionAsNumber(...previous))
                 setVer({ ...ver, version: current.join('.') });
         }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     return updatedValue;
 }

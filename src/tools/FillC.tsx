@@ -10,7 +10,7 @@ import { useColorOptions } from '../hooks/useColorOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';
 import { useAlphaOptions } from '../hooks/useAlphaOptions';
 import { useDrawing } from '../hooks/useDrawing';
-import { renderThumbnail } from '../lib/Graphics';
+import { parseColor, renderThumbnail } from '../lib/Graphics';
 
 export type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
@@ -143,7 +143,7 @@ export const FillC = ({ children }: ToolFunctions) => {
             mouseMove(){},
             mouseUp(){},
         };
-    }, []);
+    }, [alpha, color, drawing.data, drawing.editorState, tolerance, updateLayer]);
     useEffect(()=>{
         if(color === undefined)setColor({ color: '#000000' });
         if(alpha === undefined)setAlpha({ alpha: 1 });
@@ -162,15 +162,4 @@ export const FillC = ({ children }: ToolFunctions) => {
         <ToleranceInput   />
     </ToolContext.Provider>;
 };
-
-export function parseColor(color:string): [number, number, number, number] {
-    //this needs to be moved to a lib or repaced by one
-
-    return [
-        parseInt(color.substring(1, 3), 16),
-        parseInt(color.substring(3, 5), 16),
-        parseInt(color.substring(5, 7), 16),
-        parseInt(color.substring(7), 16)
-    ];
-}
 

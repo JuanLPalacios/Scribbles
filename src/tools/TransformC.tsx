@@ -30,7 +30,7 @@ const SKEW_ICONS = [
 ];
 
 export const TransformC = ({ children }: ToolFunctions) => {
-    const d = useDrawing();
+    const drawingController = useDrawing();
     const r = useMemo<Tool>(() => {
         let drawing: EditorDrawingState,
             updateLayer: (...[index, layer]: [number, Partial<LayerState2>] | [Partial<LayerState2>]) => void,
@@ -314,19 +314,17 @@ export const TransformC = ({ children }: ToolFunctions) => {
             const { width, height } = drawing.data;
             const { buffer } = drawing.editorState;
             const { canvas, thumbnail } = layer;
-            if(canvas.ctx){
-                canvas.ctx.globalCompositeOperation = 'source-over';
-                canvas.ctx.globalAlpha = 1;
-                canvas.ctx.setTransform(matrix);
-                canvas.ctx.drawImage(buffer.canvas, 0, 0);
-                canvas.ctx.resetTransform();
-                canvas.canvas.style.transform = '';
-                buffer.canvas.width = canvas.canvas.width;
-                buffer.canvas.height = canvas.canvas.height;
-                buffer.canvas.style.transform = '';
-                buffer.canvas.style.transformOrigin = 'top left';
-                buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.width);
-            }
+            canvas.ctx.globalCompositeOperation = 'source-over';
+            canvas.ctx.globalAlpha = 1;
+            canvas.ctx.setTransform(matrix);
+            canvas.ctx.drawImage(buffer.canvas, 0, 0);
+            canvas.ctx.resetTransform();
+            canvas.canvas.style.transform = '';
+            buffer.canvas.width = canvas.canvas.width;
+            buffer.canvas.height = canvas.canvas.height;
+            buffer.canvas.style.transform = '';
+            buffer.canvas.style.transformOrigin = 'top left';
+            buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.width);
             drawing.editorState.handles = [];
             action = 'none';
             const imageData = canvas.ctx.getImageData(0, 0, width, height);
@@ -346,7 +344,7 @@ export const TransformC = ({ children }: ToolFunctions) => {
                 ...handle,
                 icon: skewMode? SKEW_ICONS[i] : square,
                 position: handles[i].matrixTransform(matrix),
-                rotation: handleMatrix })) as any;
+                rotation: handleMatrix }));
             drawing.editorState.buffer.canvas.style.transform = matrix.toString();
         };
         return {
@@ -422,10 +420,8 @@ export const TransformC = ({ children }: ToolFunctions) => {
                 forceUpdate({ ...drawing });
             },
             mouseUp(e){
-                const { width, height, layers } = drawing.data;
+                const { layers } = drawing.data;
                 const { selectedLayer, layers: editorLayers } = drawing.editorState;
-                const { canvas, thumbnail } = editorLayers[selectedLayer];
-                const imageData = canvas.ctx.getImageData(0, 0, width, height);
                 const layer = { ...layers[selectedLayer], ...editorLayers[selectedLayer] };
                 switch(action){
                 case 'rect-cut':
@@ -433,8 +429,6 @@ export const TransformC = ({ children }: ToolFunctions) => {
                     break;
                 case 'none':
                     endTransform(e, layer);
-                    updateLayer({ imageData });
-                    renderThumbnail(imageData, thumbnail);
                     break;
                 default:
                     action = 'transform';
@@ -447,8 +441,8 @@ export const TransformC = ({ children }: ToolFunctions) => {
     }, []);
     useEffect(()=>{
         // FIXME this should use a reference instead
-        r.setup(...([d] as unknown as []));
-    }, [d, r]);
+        r.setup(...([drawingController] as unknown as []));
+    }, [drawingController, r]);
     useEffect(()=>{
         r.setup();
         return ()=>{

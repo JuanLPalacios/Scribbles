@@ -15,5 +15,6 @@ export type BrushFunctions<B extends { name: string; scribbleBrushType: number; 
     brush: B;
     children: ReactNode;
 };
+
 export type BrushPair<B extends Serialized & { name: string; scribbleBrushType: number; }> = [(props: BrushFunctions<any>) => ReactNode, B];
 

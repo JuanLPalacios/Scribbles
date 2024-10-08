@@ -79,7 +79,7 @@ export const EraseC = ({ children }: ToolFunctions) => {
                 down = false;
             },
         };
-    }, [mask]);
+    }, [alpha, brush, brushWidth, drawing.data, drawing.editorState, mask, updateLayer]);
     useEffect(()=>{
         r.setup();
         return ()=>{

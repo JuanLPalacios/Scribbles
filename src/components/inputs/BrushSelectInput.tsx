@@ -1,13 +1,13 @@
 import '../../css/inputs/BrushSelectInput.css';
-import { useState, CSSProperties, useMemo } from 'react';
+import { useState, CSSProperties, useMemo, useEffect } from 'react';
 import { uid } from '../../lib/uid';
 import { LeftMenuPortal } from '../portals/LeftMenu';
 import { TopMenuPortal } from '../portals/TopMenu';
 import { BrushPreview } from './BrushPreview';
-import Brush from '../../abstracts/Brush';
 import { DrawableState } from '../../types/DrawableState';
-import { BrushC } from '../../brushes/BrushC';
+import { BrushC } from '../../abstracts/BrushC';
 import { useBrushesOptions } from '../../hooks/useBrushesOptions';
+import { SerializedBrush } from '../../lib/Serialization';
 
 const style:CSSProperties = {
     display: 'flex',
@@ -17,26 +17,32 @@ const style:CSSProperties = {
 export const BrushSelectInput = () => {
     const [{ brushesPacks, selectedBrush, brushWidth }, onChange] = useBrushesOptions();
     const [currentSelectedBrush, setCurrentSelectedBrush] = useState<{
-        brush: Brush;
+        brush: SerializedBrush;
         preview?: DrawableState;
     }>({ brush: brushesPacks[selectedBrush].brush });
     const { preview } = currentSelectedBrush;
-    useMemo(()=>{
+    const [id] = useState(uid());
+    const memoBrushes = useMemo(()=>brushesPacks.map((brush, i) => ({
+        key: id+'-'+i,
+        brush: brush,
+        selected: i===selectedBrush,
+        onMouseDown: ()=>onChange({ brushesPacks, brushWidth, selectedBrush: i })
+    })), [brushWidth, brushesPacks, id, onChange, selectedBrush]);
+    useEffect(()=>{
         setCurrentSelectedBrush({ brush: brushesPacks[selectedBrush].brush, preview });
     }, [brushesPacks, preview, selectedBrush]);
-    const [id] = useState(uid());
     return <>
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
                 <button>
-                    <BrushC brush={currentSelectedBrush.brush.toObj()as any}>
+                    <BrushC brush={currentSelectedBrush.brush}>
                         <BrushPreview brush={currentSelectedBrush} />Brush
                     </BrushC>
                 </button>
                 <ul>
-                    {brushesPacks.map((brush, i) => <li key={id+'-'+i}>
-                        <BrushC brush={brush.brush.toObj()as any}>
-                            <BrushPreview brush={brush} selected={i===selectedBrush} onMouseDown={() => onChange({ brushesPacks, brushWidth, selectedBrush: i })} />
+                    {memoBrushes.map(({ brush, key, onMouseDown, selected }) => <li key={key}>
+                        <BrushC brush={brush.brush}>
+                            <BrushPreview brush={brush} selected={selected} onMouseDown={onMouseDown} />
                         </BrushC>
                     </li>)}
                 </ul>

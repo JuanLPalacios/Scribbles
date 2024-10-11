@@ -1,11 +1,11 @@
-import { ChangeEventHandler, CSSProperties, useMemo, useRef } from 'react';
+import { ChangeEventHandler, CSSProperties, useEffect, useMemo, useRef } from 'react';
 import '../../css/inputs/InputImage.css';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { CustomInput } from '../../types/CustomInput';
-import { SerializedImageData } from '../../brushes/SerializedImageData';
+import { SerializedImageData } from '../../types/SerializedImageData';
 import { Drawable } from '../Drawable';
 import { createDrawable } from '../../generators/createDrawable';
-import { serializeImageData } from '../../lib/serializeJSON';
+import { deserializeImageData, serializeImageData } from '../../lib/serializeJSON';
 
 export type ImageInput = CustomInput<SerializedImageData>;
 
@@ -65,7 +65,15 @@ export const InputImage = ({ name, onChange, style, value }:Params)=>{
             img.src = image;
         };
         fr.readAsDataURL(files[0]);
-    }, [name, onChange], { accept: '.png' });
+    }, [canvas, ctx, name, onChange], { accept: '.png' });
+    useEffect(()=>{
+        if(value){
+            const { width, height } = value;
+            canvas.width = width;
+            canvas.height = height;
+            ctx.putImageData(deserializeImageData(value, canvas, ctx), 0, 0);
+        }
+    }, [canvas, ctx, value]);
     return <div className='InputImage' style={style} onClick={openImage} onChange={onChange}>
         {value&&<Drawable canvas={canvas}></Drawable>}
         <input type="text" name={name} ref={ref2} style={{ display: 'none' }}/>

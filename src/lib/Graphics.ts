@@ -33,3 +33,11 @@ export const renderThumbnail = (imageData:ImageData, thumbnail:DrawableState) =>
         thumbnail.ctx.drawImage(CANVAS, 0, 0, thumbnail.canvas.width, thumbnail.canvas.height);
     }
 };
+export function parseColor(color: string): [number, number, number, number] {
+    return [
+        parseInt(color.substring(1, 3), 16),
+        parseInt(color.substring(3, 5), 16),
+        parseInt(color.substring(5, 7), 16),
+        parseInt(color.substring(7), 16)
+    ];
+}

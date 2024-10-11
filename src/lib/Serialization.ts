@@ -1,18 +1,19 @@
-import Brush from '../abstracts/Brush';
-import Marker, { SerializedMarkerBrush } from '../brushes/Marker';
-import SolidBrush, { SerializedSolidBrush } from '../brushes/Solid';
-import StiffBrush, { SerializedStiffBrush } from '../brushes/StiffBrush';
-import TextureBrush, { SerializedTextureBrush } from '../brushes/TextureBrush';
 import { BrushList } from './BrushList';
-import { SerializedImageData } from '../brushes/SerializedImageData';
-import { CompressedOject } from '../brushes/CompressedOject';
+import { SerializedImageData } from '../types/SerializedImageData';
+import { CompressedOject } from '../types/CompressedOject';
 import { serializeImageData } from './serializeJSON';
+import { SerializedSolidBrush } from '../brushes/SolidC';
+import { SerializedTextureBrush } from '../brushes/TextureC';
+import { SerializedStiffBrush } from '../brushes/StiffC';
+import { SerializedMarkerBrush } from '../brushes/MarkerC';
+import { BRUSH_TYPE_LIST } from '../abstracts/BrushC';
 
 export type SerializedBrush =
 | SerializedSolidBrush
 | SerializedTextureBrush
 | SerializedStiffBrush
 | SerializedMarkerBrush;
+
 export type Compressed = {[key:string]:CompressedValue};
 export type CompressedValue = number | string | boolean | CompressedOject  | CompressedValue[];
 
@@ -31,7 +32,7 @@ export const abrToScribblesSerializable = (abrBrush: AbrBrush): SerializedBrush 
     case 2:
         return abrSampledBrushToTextured(abrBrush);
     default:
-        return new SolidBrush().toObj();
+        return BRUSH_TYPE_LIST[0][1];
     }
 };
 function abrComputedBrushToSolid({ angle, diameter, hardness, name, roundness, spacing }: AbrComputedBrush): SerializedSolidBrush {
@@ -50,20 +51,3 @@ function abrSampledBrushToTextured({ antiAliasing, brushTipImage, name, spacing 
     }
     return { scribbleBrushType: BrushList.Texture, antiAliasing, brushTipImage: serializeImageData(imageData), name, spacing };
 }
-
-export const brushFormObj = (brushObj:SerializedBrush): Brush => {
-    const { scribbleBrushType } = brushObj;
-    switch (scribbleBrushType) {
-    case BrushList.Solid:
-        return SolidBrush.formObj(brushObj);
-    case BrushList.Texture:
-        return TextureBrush.formObj(brushObj);
-    case BrushList.Marker:
-        return Marker.formObj(brushObj);
-    case BrushList.Stiff:
-        return StiffBrush.formObj(brushObj);
-    default:
-        return new SolidBrush();
-    }
-};
-

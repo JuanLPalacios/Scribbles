@@ -1,5 +1,5 @@
-import { CompressedJSON } from '../brushes/CompressedOject';
-import { SerializedImageData } from '../brushes/SerializedImageData';
+import { CompressedJSON } from '../types/CompressedOject';
+import { SerializedImageData } from '../types/SerializedImageData';
 import { Serialized } from './Serialization';
 
 export const serializeJSON = (value: unknown): Serialized => ({ type: 'json', value: JSON.stringify(value) });

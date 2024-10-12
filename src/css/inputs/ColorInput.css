@@ -14,3 +14,16 @@
   opacity: 0;
   width: calc(var(--button-diameter) / 2);
 }
+
+.ColorInput.dropdown > ul {
+  height: auto;
+  max-width: 25vw;
+  max-height: 25vh;
+  flex-wrap: wrap;
+  left: var(--button-diameter);
+}
+
+.ColorInput.dropdown:focus-within > ul {
+  overflow-y: scroll;
+  position: absolute;
+}

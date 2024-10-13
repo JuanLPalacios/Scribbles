@@ -18,7 +18,8 @@ root.render(
     </AppStateProvider>);
 // TODO: re implement pinch event on the drawing viewport
 window.addEventListener('wheel', e=>{
-    if (e.ctrlKey)e.preventDefault();
+    if (e.ctrlKey||e.deltaX !== 0)
+        e.preventDefault();
 }, { passive: false });
 
 serviceWorkerRegistration.register();

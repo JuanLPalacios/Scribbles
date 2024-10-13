@@ -1,6 +1,5 @@
 import './css/App.css';
 import Menu from './components/Menu';
-import Canvas from './components/Canvas';
 import Toolbar from './components/Toolbar';
 import LayerMenu from './components/LayerMenu';
 import { TopMenu } from './components/portals/TopMenu';
@@ -9,6 +8,8 @@ import { RightMenu } from './components/portals/RightMenu';
 import { BottomMenu } from './components/portals/BottomMenu';
 import { ToolContextProvider } from './contexts/ToolContextProvider';
 import { useEditor } from './hooks/useEditor';
+import { QuickStart } from './components/QuickStart';
+import { Canvas } from './components/Canvas';
 
 function App() {
     const [editor] = useEditor();
@@ -21,7 +22,9 @@ function App() {
                 </TopMenu>
                 <LeftMenu></LeftMenu>
                 <ToolContextProvider>
-                    <Canvas/>
+                    {editor.drawing?
+                        <Canvas/>
+                        :<QuickStart/>}
                 </ToolContextProvider>
                 <RightMenu>
                     <Toolbar />

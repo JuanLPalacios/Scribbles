@@ -1,17 +1,20 @@
 .QuickStart {
-  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - var(--button-diameter) * 2 - 21px);
+  width: calc(100% - var(--button-diameter) * 2);
+}
+.QuickStart > .QuickStart-modal {
   width: var(--quick-start-width);
   height: var(--quick-start-height);
-  left: 50%;
-  top: 50%;
-  margin: calc(var(--quick-start-height) / -2) calc(var(--quick-start-width) / -2);
 }
 
-.QuickStart,
-.QuickStart > * {
+.QuickStart > .QuickStart-modal,
+.QuickStart > .QuickStart-modal > * {
   background: var(--background2-color);
 }
 
-.QuickStart button {
+.QuickStart > .QuickStart-modal button {
   color: var(--main-color);
 }

@@ -17,8 +17,8 @@ export const QuickStart = () => {
     };
 
     return (
-        <div className="Canvas">
-            <div className='QuickStart'>
+        <div className="QuickStart">
+            <div className='QuickStart-modal'>
                 <h1>Quick Start</h1>
                 <button onClick={quickNewFile}>Open blank scribble</button>
                 <button onClick={quickNewFile}>Recover last session</button>

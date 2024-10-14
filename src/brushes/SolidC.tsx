@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
 import { createDrawable } from '../generators/createDrawable';
-import { createBezier, createPerpendicularVector } from '../lib/DOMMath';
+import { Bezier, bezierArcLength, createBezier, createPerpendicularVector, length } from '../lib/Vectors2d';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 import { BrushRenderer, BrushRendererContext } from '../contexts/BrushRendererContext';
 import { BrushFunctions } from '../contexts/BrushRendererContext';
 import { BrushList } from '../lib/BrushList';
+import { dotProduct2D, vectorProjection, difference } from '../lib/Vectors2d';
 
 export type SerializedSolidBrush = {
     scribbleBrushType: BrushList.Solid,
@@ -23,31 +24,26 @@ export const SolidC = (({ brush, children }:BrushFunctions<SerializedSolidBrush>
     const strokeAngle = useMemo<Point >(()=>[Math.sin(brush.angle*Math.PI/180), -Math.cos(brush.angle*Math.PI/180)], [brush.angle]);
     const r = useMemo<BrushRenderer>(() => {
         let lastPoint:Point =  [0, 0];
+        let lastVector:Point =  [0, 0];
         let lastSegments:Point[] =  [];
         let finished = false;
         let idealSpacing = 0;
         let currentLength = 0;
-        const drawSegment = (bufferCtx: CanvasRenderingContext2D, width: number, v1: number[], v2: number[], point: Point)=>{
+        const drawLine = (bufferCtx: CanvasRenderingContext2D, width: number, v1: Point, v2: Point, point: Point)=>{
             bufferCtx.beginPath();
             bufferCtx.moveTo(...lastPoint);
-            const previousWidth = bufferCtx.lineWidth;
-            bufferCtx.lineWidth = width * (1 - (1 - brush.roundness) * (Math.abs(v1[0] * v2[1] - v1[1] * v2[0])) / (Math.sqrt((v2[0] ** 2) + (v2[1] ** 2))));
+            bufferCtx.lineWidth = width * (1 - (1 - brush.roundness) * vectorProjection(v1, v2));
             bufferCtx.filter = `blur(${~~(width * (1 - brush.hardness) / 2)}px)`;
-            if (lastSegments.length > 2) {
-                drawBezier(previousWidth, bufferCtx);
-            }
-            else {
-                drawLine(bufferCtx, point);
-            }
-        };
-
-        const drawLine = (bufferCtx: CanvasRenderingContext2D, point: Point)=>{
             bufferCtx.lineTo(...point);
             bufferCtx.stroke();
         };
 
-        const drawBezier = (previousWidth: number, bufferCtx: CanvasRenderingContext2D)=>{
-            const [[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]] = createBezier(lastSegments);
+        const drawBezier = ([[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]]:Bezier, bufferCtx: CanvasRenderingContext2D, width: number, v1: Point, v2: Point)=>{
+            bufferCtx.beginPath();
+            bufferCtx.moveTo(...lastPoint);
+            const previousWidth = bufferCtx.lineWidth;
+            bufferCtx.lineWidth = width * (1 - (1 - brush.roundness) * vectorProjection(v1, v2));
+            bufferCtx.filter = `blur(${~~(width * (1 - brush.hardness) / 2)}px)`;
             const [w0x, w0y] = createPerpendicularVector([p1x - p0x, p1y - p0y], previousWidth / 2);
             const [w1x, w1y] = createPerpendicularVector([p2x - x, p2y - y], bufferCtx.lineWidth / 2);
             bufferCtx.moveTo(p0x + w0x, p0y + w0y);
@@ -73,7 +69,6 @@ export const SolidC = (({ brush, children }:BrushFunctions<SerializedSolidBrush>
             bufferCanvas.height = canvas.height;
             previewCanvas.width = canvas.width;
             previewCanvas.height = canvas.height;
-            if (!ctx || !bufferCtx || !previewCtx) return;
             bufferCtx.lineCap = 'round';
             bufferCtx.lineJoin = 'round';
             bufferCtx.strokeStyle = color;
@@ -89,6 +84,7 @@ export const SolidC = (({ brush, children }:BrushFunctions<SerializedSolidBrush>
             previewCtx.globalCompositeOperation = 'source-over';
             ctx.globalAlpha = alpha;
             lastPoint = point;
+            lastVector = [0, 0];
             lastSegments = [point];
             bufferCtx.filter = `blur(${~~(width*(1-brush.hardness)/2)}px)`;
             bufferCtx.beginPath();
@@ -108,22 +104,39 @@ export const SolidC = (({ brush, children }:BrushFunctions<SerializedSolidBrush>
             const { ctx, canvas } = drawable;
             const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
             const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
-            const v2 = [point[0]-lastPoint[0],  point[1]-lastPoint[1]];
+            const v2 = difference(point, lastPoint);
             const v1 = strokeAngle;
             finished = false;
             lastSegments.push(point);
-            if (!ctx || !bufferCtx || !previewCtx) return;
-            currentLength = currentLength + Math.abs(Math.sqrt((point[0]-lastPoint[0])**2+(point[1]-lastPoint[1])**2));
-            if (currentLength<idealSpacing) {
+            const dotProduct = dotProduct2D(v2, lastVector);
+            lastVector = v2;
+            const strokeLength = length(v2);
+            currentLength += strokeLength;
+            if ((dotProduct>=0)||(currentLength<idealSpacing)) {
                 previewCtx.clearRect(0, 0, canvas.width, canvas.height);
                 previewCtx.drawImage(bufferCanvas, 0, 0);
-                drawSegment(previewCtx, width, v1, v2, point);
+                if (lastSegments.length > 2) {
+                    const bezier = createBezier(lastSegments);
+                    currentLength = bezierArcLength(bezier);
+                    drawBezier(bezier, previewCtx, width, v1, v2);
+                }
+                else {
+                    drawLine(previewCtx, width, v1, v2, point);
+                }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(previewCanvas, 0, 0);
                 return;
             }
-            currentLength = 0;
-            drawSegment(bufferCtx, width, v1, v2, point);
+            currentLength = currentLength%brush.spacing;
+            if (lastSegments.length > 2) {
+                const bezier = createBezier(lastSegments);
+                drawBezier(bezier, bufferCtx, width, v1, v2);
+            }
+            else {
+                drawLine(bufferCtx, width, v1, v2, point);
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(previewCanvas, 0, 0);
             finished = true;
             lastPoint = point;
             lastSegments = [point];

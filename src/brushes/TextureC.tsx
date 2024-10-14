@@ -24,83 +24,92 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
         ctx.putImageData(deserializeImageData(brush.brushTipImage, canvas, ctx), 0, 0);
         return ctx.getImageData(0, 0, canvas.width, canvas.height);
     }, [brush.brushTipImage, that_brushTipImage]);
-    const thatbuffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
-    const thatpreviewBuffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
-    const thattextureWith = Math.max(brushTipImageData?.width || 1, brushTipImageData?.height || 1);
+    const buffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
+    const preview: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
+    const textureWith = Math.max(brushTipImageData?.width || 1, brushTipImageData?.height || 1);
 
     const r = useMemo<BrushRenderer>(() => {
-        let thatlastPoint: Point = [0, 0];
-        let thatlastSegments: Point[] = [];
-        let thatfinished = false;
-        let thatcurrentLength = 0;
-        function drawSegment(bufferCtx: CanvasRenderingContext2D, width: number, [x, y]: Point) {
-            const texture = that_brushTipImage.canvas;
-            const { width: sWidth, height: sHeight } = texture;
-            const dWidth = sWidth * width / thattextureWith, dHeight = sHeight * width / thattextureWith;
-            bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
+        let lastPoint: Point = [0, 0];
+        let lastSegments: Point[] = [];
+        let finished = false;
+        let currentLength = 0;
+        function drawSegment(bufferCtx: CanvasRenderingContext2D, width: number, [xf, yf]: Point, length:number) {
+            const [x0, y0] = lastPoint;
+            const spacing = (brush.spacing!=0)?brush.spacing:0.5;
+            const dSpacing = currentLength-length;
+            const iterations = Math.floor(currentLength/spacing);
+            for (let i = 0; i < iterations; i++) {
+                const
+                    x = x0 + (xf-x0)*(i*spacing + dSpacing)/length,
+                    y = y0 + (yf-y0)*(i*spacing + dSpacing)/length;
+                const texture = that_brushTipImage.canvas;
+                const { width: sWidth, height: sHeight } = texture;
+                const dWidth = sWidth * width / textureWith, dHeight = sHeight * width / textureWith;
+                bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
+            }
         }
         const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number) => {
             const { ctx, canvas } = drawable;
-            const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
-            const { ctx: previewCtx, canvas: preview } = thatpreviewBuffer;
-            const { ctx: brushTipCtx, canvas: brushTip } = that_brushTipImage;
-            thatfinished = true;
-            thatcurrentLength = 0;
-            buffer.width = canvas.width;
-            buffer.height = canvas.height;
-            preview.width = canvas.width;
-            preview.height = canvas.height;
+            const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
+            const { ctx: previewCtx, canvas: previewCanvas } = preview;
+            const { ctx: brushTipCtx, canvas: brushTipCanvas } = that_brushTipImage;
+            finished = true;
+            currentLength = 0;
+            bufferCanvas.width = canvas.width;
+            bufferCanvas.height = canvas.height;
+            previewCanvas.width = canvas.width;
+            previewCanvas.height = canvas.height;
             if (!ctx || !bufferCtx || !previewCtx || !brushTipCtx) return;
             brushTipCtx.fillStyle = color;
             ctx.globalCompositeOperation = 'source-over';
             bufferCtx.globalCompositeOperation = 'source-over';
             previewCtx.globalCompositeOperation = 'source-over';
             brushTipCtx.globalCompositeOperation = 'source-in';
-            brushTipCtx.fillRect(0, 0, brushTip.width, brushTip.height);
+            brushTipCtx.fillRect(0, 0, brushTipCanvas.width, brushTipCanvas.height);
             ctx.globalAlpha = alpha;
-            thatlastPoint = point;
-            thatlastSegments = [point];
-            ctx.drawImage(buffer, 0, 0);
+            lastPoint = point;
+            lastSegments = [point];
+            ctx.drawImage(bufferCanvas, 0, 0);
         };
 
         const drawStroke = (drawable: DrawableState, point: Point, _color: string, _alpha: number, width: number) => {
             const { ctx, canvas } = drawable;
-            const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
-            const { ctx: previewCtx, canvas: preview } = thatpreviewBuffer;
-            thatfinished = false;
-            thatlastSegments.push(point);
+            const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
+            const { ctx: previewCtx, canvas: previewCanvas } = preview;
+            finished = false;
+            lastSegments.push(point);
             if (!ctx || !bufferCtx || !previewCtx) return;
-            thatcurrentLength += Math.abs(Math.sqrt((point[0] - thatlastPoint[0]) ** 2 + (point[1] - thatlastPoint[1]) ** 2));
-            if (thatcurrentLength < brush.spacing) {
+            const length = Math.abs(Math.sqrt((point[0] - lastPoint[0]) ** 2 + (point[1] - lastPoint[1]) ** 2));
+            currentLength += length;
+            if (currentLength < brush.spacing) {
                 previewCtx.clearRect(0, 0, canvas.width, canvas.height);
-                previewCtx.drawImage(buffer, 0, 0);
-                drawSegment(previewCtx, width, point);
+                previewCtx.drawImage(bufferCanvas, 0, 0);
+                drawSegment(previewCtx, width, point, length);
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(preview, 0, 0);
+                ctx.drawImage(previewCanvas, 0, 0);
                 return;
             }
-            thatcurrentLength = 0;
-            drawSegment(bufferCtx, width, point);
-            thatfinished = true;
-            thatlastPoint = point;
-            thatlastSegments = [point];
+            drawSegment(bufferCtx, width, point, length);
+            currentLength = 0;
+            finished = true;
+            lastPoint = point;
+            lastSegments = [point];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(buffer, 0, 0);
+            ctx.drawImage(bufferCanvas, 0, 0);
         };
 
         const endStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
             const { ctx, } = drawable;
-            if (!thatfinished) {
+            if (!finished) {
                 const temp = brush.spacing;
                 brush.spacing = 0;
                 drawStroke(drawable, point, color, alpha, width);
                 brush.spacing = temp;
             }
-            // FIXME: draw tip shape to create the illusion of the more complex brush
             ctx?.restore();
         };
         return { drawStroke, endStroke, startStroke };
-    }, [brush, that_brushTipImage, thatbuffer, thatpreviewBuffer, thattextureWith]);
+    }, [brush, that_brushTipImage, buffer, preview, textureWith]);
     return <BrushRendererContext.Provider value={r}>
         {children}
     </BrushRendererContext.Provider>;

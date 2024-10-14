@@ -16,12 +16,22 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
         let currentLength = 0;
 
         const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
+            const { ctx, canvas } = drawable;
+            const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
+            const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
+            bufferCanvas.width = canvas.width;
+            bufferCanvas.height = canvas.height;
+            previewCanvas.width = canvas.width;
+            previewCanvas.height = canvas.height;
+            ctx.globalCompositeOperation = 'source-over';
+            bufferCtx.globalCompositeOperation = 'source-over';
+            previewCtx.globalCompositeOperation = 'source-over';
             finished = true;
             currentLength = 0;
             lastPoint = point;
             lastVector = [0, 0];
             lastSegments = [point];
-            setup(drawable, point, color, alpha, width);
+            setup(drawable, buffer, previewBuffer, point, color, alpha, width);
         };
 
         const drawStroke = (drawable: DrawableState, point: Point, _color: string, _alpha: number, width: number) => {
@@ -41,10 +51,10 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
                 if (lastSegments.length > 2) {
                     const bezier = createBezier(lastSegments);
                     currentLength = bezierArcLength(bezier);
-                    drawBezier(bezier, previewCtx, width, v2);
+                    drawBezier(bezier, previewCtx, width, v2, true);
                 }
                 else {
-                    drawLine(previewCtx, width, v2, point);
+                    drawLine(previewCtx, width, v2, point, true);
                 }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(previewCanvas, 0, 0);

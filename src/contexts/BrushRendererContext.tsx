@@ -18,9 +18,9 @@ export type BrushFunctions<B extends { name: string; scribbleBrushType: number; 
 };
 
 export type Renderer = {
-    drawLine: (previewCtx: CanvasRenderingContext2D, width: number, v2: Point, point: Point) => void;
-    drawBezier: (bezier: Bezier, previewCtx: CanvasRenderingContext2D, width: number, v2: Point) => void;
-    setup: (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
+    drawLine: (previewCtx: CanvasRenderingContext2D, width: number, v2: Point, point: Point, preview?:boolean) => void;
+    drawBezier: (bezier: Bezier, previewCtx: CanvasRenderingContext2D, width: number, v2: Point, preview?:boolean) => void;
+    setup: (drawable: DrawableState, buffer: DrawableState, previewBuffer: DrawableState, point: Point, color: string, alpha: number, width: number) => void;
 };
 
 export type NonRenderBrushFunctions<B extends { name: string; scribbleBrushType: number; }> = {

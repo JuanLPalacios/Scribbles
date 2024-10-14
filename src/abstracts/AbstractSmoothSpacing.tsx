@@ -12,8 +12,10 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
         let lastPoint: Point = [0, 0];
         let lastVector: Point = [0, 0];
         let lastSegments: Point[] = [];
+        let lastVectors: Point[] = [];
         let finished = false;
         let currentLength = 0;
+        let lastStrokeLength = 0;
 
         const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
             const { ctx, canvas } = drawable;
@@ -28,9 +30,11 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             previewCtx.globalCompositeOperation = 'source-over';
             finished = true;
             currentLength = 0;
+            lastStrokeLength = 0;
             lastPoint = point;
             lastVector = [0, 0];
             lastSegments = [point];
+            lastVectors = [lastVector];
             setup(drawable, buffer, previewBuffer, point, color, alpha, width);
         };
 
@@ -40,33 +44,59 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
             const v2 = difference(point, lastPoint);
             finished = false;
-            lastSegments.push(point);
             const dotProduct = dotProduct2D(v2, lastVector);
-            lastVector = v2;
+            const lastVector2 = lastVector;
             const strokeLength = length(v2);
             currentLength += strokeLength;
-            if ((dotProduct >= 0) || (currentLength < brush.spacing)) {
+            if (dotProduct < -(((strokeLength==0)||(brush.spacing==0))?0:(strokeLength+lastStrokeLength)/(brush.spacing))) {
+                currentLength = currentLength % brush.spacing;
+                if (lastSegments.length > 2) {
+                    const bezier = createBezier(lastSegments);
+                    lastVector = difference(bezier[3], bezier[2]);
+                    lastStrokeLength = length(lastVector);
+                    drawBezier(bezier, bufferCtx, width, lastVector);
+                }
+                else {
+                    lastStrokeLength = strokeLength;
+                    drawLine(bufferCtx, width, lastVector, lastPoint);
+                }
+                finished = true;
+                lastSegments = [lastPoint];
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(bufferCanvas, 0, 0);
+            }
+            lastSegments.push(point);
+            if ((currentLength < brush.spacing)) {
                 previewCtx.clearRect(0, 0, canvas.width, canvas.height);
                 previewCtx.drawImage(bufferCanvas, 0, 0);
                 if (lastSegments.length > 2) {
                     const bezier = createBezier(lastSegments);
                     currentLength = bezierArcLength(bezier);
-                    drawBezier(bezier, previewCtx, width, v2, true);
+                    lastVector = difference(bezier[3], bezier[2]);
+                    drawBezier(bezier, previewCtx, width, lastVector, true);
                 }
                 else {
-                    drawLine(previewCtx, width, v2, point, true);
+                    console.log(v2, lastVector2, dotProduct);
+                    lastVector = v2;
+                    drawLine(previewCtx, width, lastVector, point, true);
                 }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(previewCanvas, 0, 0);
+                finished = true;
+                lastPoint = point;
                 return;
             }
             currentLength = currentLength % brush.spacing;
             if (lastSegments.length > 2) {
                 const bezier = createBezier(lastSegments);
-                drawBezier(bezier, bufferCtx, width, v2);
+                lastVector = difference(bezier[3], bezier[2]);
+                lastStrokeLength = length(lastVector);
+                drawBezier(bezier, bufferCtx, width, lastVector);
             }
             else {
-                drawLine(bufferCtx, width, v2, point);
+                lastVector = v2;
+                lastStrokeLength = strokeLength;
+                drawLine(bufferCtx, width, lastVector, point);
             }
             finished = true;
             lastPoint = point;

@@ -2,7 +2,7 @@ import { Point } from '../types/Point';
 
 export type Bezier = [Point, Point, Point, Point];
 
-export const dotProduct2D = (a: Point, b: Point) => (a[0] * b[1] - a[1] * b[0]);
+export const dotProduct2D = (a: Point, b: Point) => (a[0] * b[0] + a[1] * b[1]);
 export const vectorProjection = (a: Point, b: Point) => (Math.abs(dotProduct2D(a, b))) / (Math.sqrt((b[0] ** 2) + (b[1] ** 2)));
 export const difference = (a: Point, b: Point):Point =>[a[0]-b[0],  a[1]-b[1]];
 export const length = (v: Point) =>Math.sqrt(v[0]**2 + v[1]**2);

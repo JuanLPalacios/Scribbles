@@ -17,13 +17,13 @@ export type SerializedTextureBrush = {
 }
 
 export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureBrush>) => {
-    const that_brushTipImage: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
+    const _brushTipImage: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
     const brushTipImageData = useMemo(() => {
-        const { ctx, canvas } = that_brushTipImage;
+        const { ctx, canvas } = _brushTipImage;
         if (!ctx) return;
         ctx.putImageData(deserializeImageData(brush.brushTipImage, canvas, ctx), 0, 0);
         return ctx.getImageData(0, 0, canvas.width, canvas.height);
-    }, [brush.brushTipImage, that_brushTipImage]);
+    }, [brush.brushTipImage, _brushTipImage]);
     const buffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
     const preview: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
     const textureWith = Math.max(brushTipImageData?.width || 1, brushTipImageData?.height || 1);
@@ -42,7 +42,7 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
                 const
                     x = x0 + (xf-x0)*(i*spacing + dSpacing)/length,
                     y = y0 + (yf-y0)*(i*spacing + dSpacing)/length;
-                const texture = that_brushTipImage.canvas;
+                const texture = _brushTipImage.canvas;
                 const { width: sWidth, height: sHeight } = texture;
                 const dWidth = sWidth * width / textureWith, dHeight = sHeight * width / textureWith;
                 bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
@@ -52,7 +52,7 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
             const { ctx, canvas } = drawable;
             const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
             const { ctx: previewCtx, canvas: previewCanvas } = preview;
-            const { ctx: brushTipCtx, canvas: brushTipCanvas } = that_brushTipImage;
+            const { ctx: brushTipCtx, canvas: brushTipCanvas } = _brushTipImage;
             finished = true;
             currentLength = 0;
             bufferCanvas.width = canvas.width;
@@ -109,7 +109,7 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
             ctx?.restore();
         };
         return { drawStroke, endStroke, startStroke };
-    }, [brush, that_brushTipImage, buffer, preview, textureWith]);
+    }, [brush, _brushTipImage, buffer, preview, textureWith]);
     return <BrushRendererContext.Provider value={r}>
         {children}
     </BrushRendererContext.Provider>;

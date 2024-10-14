@@ -34,13 +34,17 @@ export const InputImage = ({ name, onChange, style, value }:Params)=>{
             const img = new Image;
             img.onload = ()=>{
                 if(ref2.current&&onChange){
+                    const { width, height } = img;
                     canvas.width = 0; //forces the canvas to clear
-                    canvas.width = img.width;
-                    canvas.height = img.height;
+                    canvas.width = width;
+                    canvas.height = height;
                     ctx.globalCompositeOperation = 'source-over';
                     ctx.drawImage(img, 0, 0);
                     ref2.current.value = image;
-                    const target:EventTarget & ImageInput = { ...ref2.current, value: serializeImageData(ctx.getImageData(0, 0, 20, 20)), name: name||'' };
+                    const target:EventTarget & ImageInput = {
+                        ...ref2.current,
+                        value: serializeImageData(ctx.getImageData(0, 0, width, height)),
+                        name: name||'' };
                     const nativeEvent = new Event('change', { bubbles: false, cancelable: false, composed: true });
                     const { bubbles, type, cancelable, defaultPrevented, eventPhase, isTrusted, preventDefault, stopPropagation, timeStamp } = nativeEvent;
                     onChange({

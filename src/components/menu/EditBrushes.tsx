@@ -137,6 +137,14 @@ export const EditBrushes = () => {
         setBrush(editorSelectedBrush.brush);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedBrushIndex]);
+    const currentBrushProxy = useMemo(() => {
+        const currentBrushProxy:SerializedBrush = { ...(BRUSH_TYPE_LIST.map(x=>x[1]).find(x=>x.scribbleBrushType==currentBrush.scribbleBrushType)|| BRUSH_TYPE_LIST[0][1]) };
+        Object.keys(currentBrushProxy).forEach((x)=>{
+            const key = x as keyof SerializedBrush;
+            currentBrushProxy[key] = (currentBrush[key]||currentBrushProxy[key]) as never;
+        });
+        return currentBrushProxy;
+    }, [currentBrush]);
     useMemo(() => {
         const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
         if(('name' in currentBrush)&&(typeof currentBrush.name == 'string'))
@@ -144,7 +152,7 @@ export const EditBrushes = () => {
                 errors.name.push('Should not contain forbidden characters');
         const isValid = Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0;
         if((isValid)&&(tempBrushes.length>selectedBrushIndex)){
-            editorSelectedBrush.brush = currentBrush;
+            editorSelectedBrush.brush = currentBrushProxy;
         }
         if(isValid)setTempBrushes(tempBrushes.map((x, i)=>(selectedBrushIndex===i)?{ ...x, brush: currentBrush }:x));
         setState({ ...state, errors, isValid });
@@ -182,83 +190,82 @@ export const EditBrushes = () => {
                         </ul>
                     </div>
                     <div style={{ width: '8rem' }} className='brush-props'>
-                        {('scribbleBrushType' in currentBrush)&&(typeof currentBrush.scribbleBrushType == 'number') &&
-                            <label>
-                                <div>
-                                Type
-                                </div>
-                                <select name="scribbleBrushType" value={currentBrush.scribbleBrushType} onChange={update}>
-                                    {Object.values(BrushList)
-                                        .filter(x=>(typeof x == 'number'))
-                                        .map((value, i)=><option  key={id+'-options-'+i} value={value} >{BrushList[value]}</option>)}
-                                </select>
-                            </label>}
-                        {('name' in currentBrush)&&(typeof currentBrush.name == 'string') &&
-                            <label>
-                                <div>
-                                Name
-                                </div>
-                                <input type="text" name='name' autoComplete="off" value={currentBrush.name} onChange={update} />
-                            </label>}
-                        {('brushTipImage' in currentBrush)
-                        &&(typeof currentBrush.brushTipImage == 'object')
-                        &&(isSerializedImageData(currentBrush.brushTipImage))&&
-                            <label>
-                                <div>
-                                Tip
-                                </div>
-                                <InputImage name='brushTipImage' value={currentBrush.brushTipImage} onChange={update} style={{ width: '3rem', height: '3rem' }} />
-                            </label>
+                        {('scribbleBrushType' in currentBrushProxy)&&(typeof currentBrushProxy.scribbleBrushType == 'number') &&
+                        <label>
+                            <div>
+                            Type
+                            </div>
+                            <select name="scribbleBrushType" value={currentBrushProxy.scribbleBrushType} onChange={update}>
+                                {Object.values(BrushList)
+                                    .filter(x=>(typeof x == 'number'))
+                                    .map((value, i)=><option  key={id+'-options-'+i} value={value} >{BrushList[value]}</option>)}
+                            </select>
+                        </label>}
+                        {('name' in currentBrushProxy)&&(typeof currentBrushProxy.name == 'string') &&
+                        <label>
+                            <div>
+                            Name
+                            </div>
+                            <input type="text" name='name' autoComplete="off" value={currentBrushProxy.name} onChange={update} />
+                        </label>}
+                        {('brushTipImage' in currentBrushProxy)
+                    &&(typeof currentBrushProxy.brushTipImage == 'object')
+                    &&(isSerializedImageData(currentBrushProxy.brushTipImage))&&
+                        <label>
+                            <div>
+                            Tip
+                            </div>
+                            <InputImage name='brushTipImage' value={currentBrushProxy.brushTipImage} onChange={update} style={{ width: '3rem', height: '3rem' }} />
+                        </label>
                         }
-                        {('roundness' in currentBrush)&&(typeof currentBrush.roundness == 'number') &&
-                            <label>
-                                <div>
-                                Roundness
-                                </div>
-                                <input type="number" name='roundness' value={currentBrush.roundness} min={0} max={1} step={0.01} onChange={update} style={{ width: '5rem' }} />
-                            </label>
+                        {('roundness' in currentBrushProxy)&&(typeof currentBrushProxy.roundness == 'number') &&
+                        <label>
+                            <div>
+                            Roundness
+                            </div>
+                            <input type="number" name='roundness' value={currentBrushProxy.roundness} min={0} max={1} step={0.01} onChange={update} style={{ width: '5rem' }} />
+                        </label>
                         }
-                        {('hardness' in currentBrush)&&(typeof currentBrush.hardness == 'number') &&
-                            <label>
-                                <div>
-                                Hardness
-                                </div>
-                                <input type="number" name='hardness' value={currentBrush.hardness} min={0} max={1} step={0.01} onChange={update} style={{ width: '5rem' }} />
-                            </label>
+                        {('hardness' in currentBrushProxy)&&(typeof currentBrushProxy.hardness == 'number') &&
+                        <label>
+                            <div>
+                            Hardness
+                            </div>
+                            <input type="number" name='hardness' value={currentBrushProxy.hardness} min={0} max={1} step={0.01} onChange={update} style={{ width: '5rem' }} />
+                        </label>
                         }
-                        {('angle' in currentBrush)&&(typeof currentBrush.angle == 'number') &&
-                            <label>
-                                <div>
-                                Angle
-                                </div>
-                                <input type="number" name='angle' value={currentBrush.angle} min={0} max={359} onChange={update} style={{ width: '5rem' }} />
-                            </label>
+                        {('angle' in currentBrushProxy)&&(typeof currentBrushProxy.angle == 'number') &&
+                        <label>
+                            <div>
+                            Angle
+                            </div>
+                            <input type="number" name='angle' value={currentBrushProxy.angle} min={0} max={359} onChange={update} style={{ width: '5rem' }} />
+                        </label>
                         }
-                        {('diameter' in currentBrush)&&(typeof currentBrush.diameter == 'number') &&
-                            <label>
-                                <div>
-                                Diameter
-                                </div>
-                                <input type="number" name='diameter' value={currentBrush.diameter} min={0} max={5} step={0.05} onChange={update} style={{ width: '5rem' }} />
-                            </label>
+                        {('diameter' in currentBrushProxy)&&(typeof currentBrushProxy.diameter == 'number') &&
+                        <label>
+                            <div>
+                            Diameter
+                            </div>
+                            <input type="number" name='diameter' value={currentBrushProxy.diameter} min={0} max={5} step={0.05} onChange={update} style={{ width: '5rem' }} />
+                        </label>
                         }
-                        {('spacing' in currentBrush)&&(typeof currentBrush.spacing == 'number') &&
-                            <label>
-                                <div>
-                                Spacing
-                                </div>
-                                <input type="number" name='spacing' value={currentBrush.spacing} min={0} max={30} step={0.1} onChange={update} style={{ width: '5rem' }} />
-                            </label>
+                        {('spacing' in currentBrushProxy)&&(typeof currentBrushProxy.spacing == 'number') &&
+                        <label>
+                            <div>
+                            Spacing
+                            </div>
+                            <input type="number" name='spacing' value={currentBrushProxy.spacing} min={0} max={30} step={0.1} onChange={update} style={{ width: '5rem' }} />
+                        </label>
                         }
-                        {('antiAliasing' in currentBrush)&&(typeof currentBrush.antiAliasing == 'number') &&
-                            <label>
-                                <div>
-                                Anti aliasing
-                                </div>
-                                <input type="checkbox" name='antiAliasing' value={currentBrush.antiAliasing} onChange={update} style={{ width: '5rem' }} />
-                            </label>
+                        {('antiAliasing' in currentBrushProxy)&&(typeof currentBrushProxy.antiAliasing == 'boolean') &&
+                        <label>
+                            <div>
+                            Anti aliasing
+                            </div>
+                            <input type="checkbox" name='antiAliasing' checked={currentBrushProxy.antiAliasing} onChange={update} />
+                        </label>
                         }
-                        antiAliasing
                     </div>
                 </div>
                 <div className='actions'>

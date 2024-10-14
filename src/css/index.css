@@ -67,6 +67,10 @@ input[type=range] {
   filter: grayscale(1) invert(0.9);
 }
 
+input[type=checkbox] {
+  filter: grayscale(1) invert(0.9);
+}
+
 input[type=submit]:disabled,
 input[type=submit][disabled],
 button:disabled,

@@ -1,6 +1,6 @@
 import { blendModes } from '../types/BlendMode';
 import { LayerState2 } from '../types/LayerState';
-import { Point } from '../types/Point';
+import { Point } from '../lib/Vectors2d';
 
 export const createLayer2 = (name:string, size:Point):LayerState2 => {
     const [width, height] = size;

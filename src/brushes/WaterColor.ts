@@ -1,7 +1,7 @@
 import Brush from '../abstracts/Brush';
 import { createDrawable } from '../generators/createDrawable';
 import { DrawableState } from '../types/DrawableState';
-import { Point } from '../types/Point';
+import { Point } from "../lib/Vectors2d";
 
 export default class WaterColor extends Brush {
     loadObj(_obj: object): void {

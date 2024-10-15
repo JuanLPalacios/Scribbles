@@ -4,7 +4,7 @@ import { ToolFunctions, ToolContext, Tool } from '../contexts/ToolContext';
 import { DrawableState } from '../types/DrawableState';
 import { ColorInput } from '../components/inputs/ColorInput';
 import { ToleranceInput } from '../components/inputs/ToleranceInput';
-import { Point } from '../types/Point';
+import { Point } from '../lib/Vectors2d';
 import { AlphaOptions, ColorOptions, ToleranceOptions } from '../contexts/MenuOptions';
 import { useColorOptions } from '../hooks/useColorOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';

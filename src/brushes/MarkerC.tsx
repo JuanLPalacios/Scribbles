@@ -1,7 +1,7 @@
 import { BrushFunctions, BrushRenderer } from '../contexts/BrushRendererContext';
 import { createDrawable } from '../generators/createDrawable';
 import { DrawableState } from '../types/DrawableState';
-import { Point } from '../types/Point';
+import { Point } from '../lib/Vectors2d';
 import { BrushRendererContext } from '../contexts/BrushRendererContext';
 import { BrushList } from '../lib/BrushList';
 import { useMemo } from 'react';

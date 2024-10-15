@@ -1,5 +1,6 @@
-import { Point } from '../types/Point';
 
+export type Point = [number, number];
+export type Line = [Point, Point];
 export type Bezier = [Point, Point, Point, Point];
 
 export const dotProduct2D = (a: Point, b: Point) => (a[0] * b[0] + a[1] * b[1]);
@@ -35,16 +36,11 @@ export const createBezier = (points: Point[]):Bezier => {
 
         for (let i = 1; i < points.length - 1; i++) {
             const t = i / (points.length - 1);
-            const b0 = (1 - t)**3;
-            const b1 = 3 * t * (1 - t)**2;
-            const b2 = 3 * t**2 * (1 - t);
-            const b3 = t**3;
+            const factors = calculateBezierInfluenceFactors(t),
+                [, b1, b2] = factors;
 
             const point = points[i];
-            const bezierPoint = [
-                b0 * p0[0] + b1 * p1[0] + b2 * p2[0] + b3 * p3[0],
-                b0 * p0[1] + b1 * p1[1] + b2 * p2[1] + b3 * p3[1]
-            ];
+            const bezierPoint = calculateBezierPoint([p0, p1, p2, p3], factors);
 
             error += squaredDistanceToSegment2d(point, p0, p3);
 
@@ -67,7 +63,32 @@ export const createBezier = (points: Point[]):Bezier => {
     return [p0, p1, p2, p3];
 };
 
-export const bezierArcLength = (bezier: Bezier) =>(length(difference(bezier[0], bezier[1]))+length(difference(bezier[1], bezier[2]))+length(difference(bezier[2], bezier[3]))+length(difference(bezier[0], bezier[3])))/2;
+export function calculateBezierPoint(bezier:Bezier, t:number):Point
+export function calculateBezierPoint(bezier:Bezier, t:[number, number, number, number]):Point
+export function calculateBezierPoint([p0, p1, p2, p3]:Bezier, t:[number, number, number, number]|number) {
+    const [b0, b1, b2, b3] = Array.isArray(t)?t:calculateBezierInfluenceFactors(t);
+
+    return [
+        b0 * p0[0] + b1 * p1[0] + b2 * p2[0] + b3 * p3[0],
+        b0 * p0[1] + b1 * p1[1] + b2 * p2[1] + b3 * p3[1]
+    ];
+}
+
+export function calculateBezierInfluenceFactors(t:number):[number, number, number, number] {
+    return [
+        (1 - t)**3,
+        3 * t * (1 - t)**2,
+        3 * t**2 * (1 - t),
+        t**3
+    ];
+}
+
+export const bezierArcLength = (bezier: Bezier) =>(
+    length(difference(bezier[0], bezier[1]))
+    +length(difference(bezier[1], bezier[2]))
+    +length(difference(bezier[2], bezier[3]))
+    +length(difference(bezier[0], bezier[3]))
+)/2;
 
 export function createPerpendicularVector(v: Point, l = 1) {
     const magnitude = length(v);
@@ -76,3 +97,4 @@ export function createPerpendicularVector(v: Point, l = 1) {
         v[0] * l / magnitude
     ];
 }
+

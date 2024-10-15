@@ -5,7 +5,7 @@ import { Drawable } from '../Drawable';
 import { createDrawable } from '../../generators/createDrawable';
 import { DrawableState } from '../../types/DrawableState';
 import { useBrush } from '../../hooks/useBrush';
-import { Point } from '../../types/Point';
+import { Point } from '../../lib/Vectors2d';
 import { SerializedBrush } from '../../lib/Serialization';
 
 export function BrushPreview({ brush, selected, onMouseDown }:{ brush:{ brush: SerializedBrush; preview?: DrawableState | undefined; }, selected?: boolean, onMouseDown?: React.MouseEventHandler<HTMLDivElement> }) {

@@ -3,7 +3,7 @@ import { createDrawable } from '../generators/createDrawable';
 import { scalePoint } from '../lib/DOMMath';
 import { parseSerializedJSON } from '../lib/serializeJSON';
 import { DrawableState } from '../types/DrawableState';
-import { Point } from '../types/Point';
+import { Point } from '../lib/Vectors2d';
 import { BrushRendererContext } from '../contexts/BrushRendererContext';
 import { BrushList } from '../lib/BrushList';
 import { CompressedJSON } from '../types/CompressedOject';

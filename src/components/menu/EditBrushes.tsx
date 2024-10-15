@@ -141,7 +141,7 @@ export const EditBrushes = () => {
         const currentBrushProxy:SerializedBrush = { ...(BRUSH_TYPE_LIST.map(x=>x[1]).find(x=>x.scribbleBrushType==currentBrush.scribbleBrushType)|| BRUSH_TYPE_LIST[0][1]) };
         Object.keys(currentBrushProxy).forEach((x)=>{
             const key = x as keyof SerializedBrush;
-            currentBrushProxy[key] = (currentBrush[key]||currentBrushProxy[key]) as never;
+            currentBrushProxy[key] = ((currentBrush[key]!==undefined)?currentBrush[key]:currentBrushProxy[key]) as never;
         });
         return currentBrushProxy;
     }, [currentBrush]);
@@ -180,7 +180,6 @@ export const EditBrushes = () => {
                 </div>
                 <div style={{ display: 'flex' }}>
                     <div className='brush-list' style={{ width: '10rem', flex: '1 1 auto' }}>
-                        {tempBrushes.length}
                         <ul className='brushes'>
                             {tempBrushes.map((brush, i) => <li key={id+'-'+i}>
                                 <BrushC brush={brush.brush}>

@@ -1,3 +1,17 @@
+.brush.dropdown {
+}
+
+.brush.dropdown ul {
+  top: var(--button-diameter);
+}
+
+.brush.dropdown:focus-within ul {
+  position: absolute;
+  overflow-y: scroll;
+  height: 50vh;
+  opacity: .8;
+}
+
 .brush.dropdown li > div {
   display: flex;
   justify-content: center;

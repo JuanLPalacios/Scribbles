@@ -1,3 +1,4 @@
+import '../../css/inputs/BrushPreview.css';
 import demoStroke from '../../demo/strokePreview.json';
 import { useMemo } from 'react';
 import { Drawable } from '../Drawable';
@@ -26,7 +27,10 @@ export function BrushPreview({ brush, selected, onMouseDown }:{ brush:{ brush: S
         brush.preview = preview;
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [brush]);
-    return <Drawable canvas={brush.preview?.canvas} className={ selected ? 'selected' : ''} onMouseDown={onMouseDown} />;
+    return <div className='BrushPreview' onMouseDown={onMouseDown}>
+        <span className='name'>{brush.brush.name}</span>
+        <Drawable canvas={brush.preview?.canvas} className={ selected ? 'selected' : ''} />
+    </div>;
 }
 
 const createPreview = () => createDrawable({ size: [150, 30] });

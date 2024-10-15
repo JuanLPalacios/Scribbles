@@ -134,6 +134,8 @@ button:focus {
 
 .dropdown > ul {
   display: flex;
+  max-width: vw;
+  max-height: vh;
   flex-direction: column;
   background: var(--background2-color);
   list-style: none;

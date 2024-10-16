@@ -10,7 +10,6 @@ export type SerializedSolidBrush = {
     scribbleBrushType: BrushList.Solid,
     name:string
     angle: number,
-    diameter: number,
     hardness: number,
     roundness: number,
     spacing: number

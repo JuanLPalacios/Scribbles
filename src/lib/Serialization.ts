@@ -6,13 +6,15 @@ import { SerializedSolidBrush } from '../brushes/SolidC';
 import { SerializedTextureBrush } from '../brushes/TextureC';
 import { SerializedStiffBrush } from '../brushes/StiffC';
 import { SerializedMarkerBrush } from '../brushes/MarkerC';
+import { SerializedPatternBrush } from '../brushes/Pattern';
 import { BRUSH_TYPE_LIST } from '../abstracts/BrushC';
 
 export type SerializedBrush =
 | SerializedSolidBrush
 | SerializedTextureBrush
 | SerializedStiffBrush
-| SerializedMarkerBrush;
+| SerializedMarkerBrush
+| SerializedPatternBrush;
 
 export type Compressed = {[key:string]:CompressedValue};
 export type CompressedValue = number | string | boolean | CompressedOject  | CompressedValue[];
@@ -35,8 +37,8 @@ export const abrToScribblesSerializable = (abrBrush: AbrBrush): SerializedBrush 
         return BRUSH_TYPE_LIST[0][1];
     }
 };
-function abrComputedBrushToSolid({ angle, diameter, hardness, name, roundness, spacing }: AbrComputedBrush): SerializedSolidBrush {
-    return { scribbleBrushType: BrushList.Solid, angle, diameter, hardness, name, roundness, spacing };
+function abrComputedBrushToSolid({ angle, hardness, name, roundness, spacing }: AbrComputedBrush): SerializedSolidBrush {
+    return { scribbleBrushType: BrushList.Solid, angle, hardness, name, roundness, spacing };
 }
 
 function abrSampledBrushToTextured({ antiAliasing, brushTipImage, name, spacing }: AbrSampledBrush): SerializedTextureBrush {

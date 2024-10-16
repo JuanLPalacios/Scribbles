@@ -6,13 +6,13 @@ import { BrushMapper } from '../contexts/BrushMapper';
 import { StiffC } from '../brushes/StiffC';
 import { TextureC } from '../brushes/TextureC';
 import { BrushPair } from '../contexts/BrushRendererContext';
+import { Pattern } from '../brushes/Pattern';
 
 export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
     [SolidC, {
         scribbleBrushType: BrushList.Solid,
         name: 'SolidBrush',
         angle: 0,
-        diameter: 1,
         hardness: 1,
         roundness: 1,
         spacing: 300
@@ -37,6 +37,9 @@ export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
         scribbleBrushType: BrushList.Stiff,
         name: 'Stiff',
         fibers: []
+    }],
+    [Pattern, {
+        scribbleBrushType
     }]
 ];
 

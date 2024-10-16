@@ -1,12 +1,12 @@
 import { useMemo } from 'react';
-import { BrushFunctions, BrushRenderer } from '../contexts/BrushRendererContext';
+import { BrushFunctions, Renderer } from '../contexts/BrushRendererContext';
 import { createDrawable } from '../generators/createDrawable';
 import { deserializeImageData } from '../lib/serializeJSON';
 import { DrawableState } from '../types/DrawableState';
-import { Point } from '../types/Point';
-import { BrushRendererContext } from '../contexts/BrushRendererContext';
+import { bezierArcLength, calculateBezierPoint, difference, distance2d, length, Point } from '../lib/Vectors2d';
 import { BrushList } from '../lib/BrushList';
 import { SerializedImageData } from '../types/SerializedImageData';
+import { AbstractSmoothSpacing } from '../abstracts/AbstractSmoothSpacing';
 
 export type SerializedTextureBrush = {
     scribbleBrushType: BrushList.Texture,
@@ -24,93 +24,93 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
         ctx.putImageData(deserializeImageData(brush.brushTipImage, canvas, ctx), 0, 0);
         return ctx.getImageData(0, 0, canvas.width, canvas.height);
     }, [brush.brushTipImage, _brushTipImage]);
-    const buffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
-    const preview: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
     const textureWith = Math.max(brushTipImageData?.width || 1, brushTipImageData?.height || 1);
 
-    const r = useMemo<BrushRenderer>(() => {
-        let lastPoint: Point = [0, 0];
-        let lastSegments: Point[] = [];
-        let finished = false;
-        let currentLength = 0;
-        function drawSegment(bufferCtx: CanvasRenderingContext2D, width: number, [xf, yf]: Point, length:number) {
-            const [x0, y0] = lastPoint;
-            const spacing = (brush.spacing!=0)?brush.spacing:0.5;
-            const dSpacing = currentLength-length;
-            const iterations = Math.floor(currentLength/spacing);
-            for (let i = 0; i < iterations; i++) {
-                const
-                    x = x0 + (xf-x0)*(i*spacing + dSpacing)/length,
-                    y = y0 + (yf-y0)*(i*spacing + dSpacing)/length;
+    const spacing = useMemo(()=>Math.min(brush.spacing, 0.5), [brush.spacing]);
+    const r = useMemo<Renderer>(() => {
+        return {
+            drawLine(bufferCtx, line, width, offset, preview){
                 const texture = _brushTipImage.canvas;
                 const { width: sWidth, height: sHeight } = texture;
                 const dWidth = sWidth * width / textureWith, dHeight = sHeight * width / textureWith;
-                bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
+                if(preview){
+                    const[, [x, y]] = line;
+                    bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
+                    return;
+                }
+                const [lastPoint, point] = line;
+                const [x0, y0] = lastPoint;
+                const [xf, yf] = point;
+                const strokeLength = distance2d(...line);
+                const iterations = Math.floor((offset+strokeLength)/spacing);
+                if(!preview)console.log('drawLine', iterations, offset, strokeLength);
+                for (let i = 0; i < iterations; i++) {
+                    const t = ((i+1)*spacing - offset)/strokeLength;
+                    if(!preview)console.log((i+1)*spacing - offset);
+                    const
+                        x = x0 + (xf-x0)*t,
+                        y = y0 + (yf-y0)*t;
+                    if(!preview)console.log(x, y);
+                    bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
+                }
+            },
+            drawBezier(bufferCtx, bezier, width, offset, preview){
+                const texture = _brushTipImage.canvas;
+                const { width: sWidth, height: sHeight } = texture;
+                const dWidth = sWidth * width / textureWith, dHeight = sHeight * width / textureWith;
+                if(preview){
+                    const[,,, [x, y]] = bezier;
+                    bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
+                    return;
+                }
+                const strokeLength = bezierArcLength(bezier);
+                const iterations = Math.floor((offset+strokeLength)/spacing);
+                const steps = Math.floor(strokeLength/10);
+                let [lastPoint] = bezier;
+                let currentLength = 0;
+                let step = 1;
+                let vec:Point;
+                let point:Point =[0, 0];
+                if(!preview)console.log('drawBezier', iterations, offset, strokeLength);
+                for (let i = 0; i < iterations; i++) {
+                    const targetLength = (i+1)*spacing - offset;
+                    while (currentLength <= targetLength) {
+                        if(!preview)console.log((step+1)*spacing - offset);
+                        point = calculateBezierPoint(bezier, step/steps);
+                        vec = difference(lastPoint, point);
+                        currentLength += length(vec);
+                        lastPoint = point;
+                        step++;
+                    }
+                    const [x0, y0] = point;
+                    const [xf, yf] = lastPoint;
+                    const strokeLength = distance2d(point, lastPoint);
+                    const t = (spacing - currentLength + targetLength)/strokeLength;
+                    const
+                        x = x0 + (xf-x0)*t,
+                        y = y0 + (yf-y0)*t;
+                    bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
+                }
+            },
+            setup(drawable, buffer, previewBuffer, point, color, alpha, width){
+                const { ctx } = drawable;
+                const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
+                const { ctx: previewCtx } = previewBuffer;
+                const { ctx: brushTipCtx, canvas: brushTipCanvas } = _brushTipImage;
+                if (!ctx || !bufferCtx || !previewCtx || !brushTipCtx) return;
+                brushTipCtx.fillStyle = color;
+                ctx.globalCompositeOperation = 'source-over';
+                bufferCtx.globalCompositeOperation = 'source-over';
+                previewCtx.globalCompositeOperation = 'source-over';
+                bufferCtx.strokeStyle = '#f00';
+                brushTipCtx.globalCompositeOperation = 'source-in';
+                brushTipCtx.fillRect(0, 0, brushTipCanvas.width, brushTipCanvas.height);
+                ctx.globalAlpha = alpha;
+                ctx.drawImage(bufferCanvas, 0, 0);
             }
-        }
-        const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number) => {
-            const { ctx, canvas } = drawable;
-            const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
-            const { ctx: previewCtx, canvas: previewCanvas } = preview;
-            const { ctx: brushTipCtx, canvas: brushTipCanvas } = _brushTipImage;
-            finished = true;
-            currentLength = 0;
-            bufferCanvas.width = canvas.width;
-            bufferCanvas.height = canvas.height;
-            previewCanvas.width = canvas.width;
-            previewCanvas.height = canvas.height;
-            if (!ctx || !bufferCtx || !previewCtx || !brushTipCtx) return;
-            brushTipCtx.fillStyle = color;
-            ctx.globalCompositeOperation = 'source-over';
-            bufferCtx.globalCompositeOperation = 'source-over';
-            previewCtx.globalCompositeOperation = 'source-over';
-            brushTipCtx.globalCompositeOperation = 'source-in';
-            brushTipCtx.fillRect(0, 0, brushTipCanvas.width, brushTipCanvas.height);
-            ctx.globalAlpha = alpha;
-            lastPoint = point;
-            lastSegments = [point];
-            ctx.drawImage(bufferCanvas, 0, 0);
         };
-
-        const drawStroke = (drawable: DrawableState, point: Point, _color: string, _alpha: number, width: number) => {
-            const { ctx, canvas } = drawable;
-            const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
-            const { ctx: previewCtx, canvas: previewCanvas } = preview;
-            finished = false;
-            lastSegments.push(point);
-            if (!ctx || !bufferCtx || !previewCtx) return;
-            const length = Math.abs(Math.sqrt((point[0] - lastPoint[0]) ** 2 + (point[1] - lastPoint[1]) ** 2));
-            currentLength += length;
-            if (currentLength < brush.spacing) {
-                previewCtx.clearRect(0, 0, canvas.width, canvas.height);
-                previewCtx.drawImage(bufferCanvas, 0, 0);
-                drawSegment(previewCtx, width, point, length);
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(previewCanvas, 0, 0);
-                return;
-            }
-            drawSegment(bufferCtx, width, point, length);
-            currentLength = 0;
-            finished = true;
-            lastPoint = point;
-            lastSegments = [point];
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(bufferCanvas, 0, 0);
-        };
-
-        const endStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
-            const { ctx, } = drawable;
-            if (!finished) {
-                const temp = brush.spacing;
-                brush.spacing = 0;
-                drawStroke(drawable, point, color, alpha, width);
-                brush.spacing = temp;
-            }
-            ctx?.restore();
-        };
-        return { drawStroke, endStroke, startStroke };
-    }, [brush, _brushTipImage, buffer, preview, textureWith]);
-    return <BrushRendererContext.Provider value={r}>
+    }, [_brushTipImage, spacing, textureWith]);
+    return <AbstractSmoothSpacing brush={brush} renderer={r}>
         {children}
-    </BrushRendererContext.Provider>;
+    </AbstractSmoothSpacing>;
 });

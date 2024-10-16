@@ -35,6 +35,8 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             lastVector = [0, 0];
             lastSegments = [point];
             setup(drawable, buffer, previewBuffer, point, color, alpha, width);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(bufferCanvas, 0, 0);
         };
 
         const drawStroke = (drawable: DrawableState, point: Point, _color: string, _alpha: number, width: number) => {
@@ -77,7 +79,7 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
                 else {
                     lastVector = v2;
                     const [p1, p2] = lastSegments;
-                    drawLine(bufferCtx, [p1, p2], width, offset, true);
+                    drawLine(previewCtx, [p1, p2], width, offset, true);
                 }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.drawImage(previewCanvas, 0, 0);

@@ -22,9 +22,15 @@ export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
         name: 'TextureBrush',
         brushTipImage: {
             colorSpace: 'srgb',
-            height: 1,
-            width: 1,
-            data: [0, 0, 0, 0]
+            height: 5,
+            width: 5,
+            data: [
+                0, 1, 1, 1, 0,
+                1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1,
+                0, 1, 1, 1, 0,
+            ].map((x)=>[0, 0, 0, x*255]).flat()
         },
         spacing: 0,
         antiAliasing: true,
@@ -39,7 +45,22 @@ export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
         fibers: []
     }],
     [Pattern, {
-        scribbleBrushType
+        scribbleBrushType: BrushList.Pattern,
+        name: 'Pattern',
+        brushPatternImage: {
+            colorSpace: 'srgb',
+            height: 5,
+            width: 5,
+            data: [
+                0, 1, 0, 1, 0,
+                1, 0, 1, 0, 1,
+                0, 1, 0, 1, 0,
+                1, 0, 1, 0, 1,
+                0, 1, 0, 1, 0,
+            ].map((x)=>[0, 0, 0, x*255]).flat()
+        },
+        hardness: 1,
+        spacing: 30
     }]
 ];
 

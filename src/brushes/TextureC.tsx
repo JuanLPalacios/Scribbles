@@ -65,7 +65,6 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
                 let step = 1;
                 let vec:Point;
                 let lastPoint:Point =[0, 0];
-                console.log(iterations, steps);
                 for (let i = 0; i < iterations; i++) {
                     const targetLength = (i+1)*spacing - offset;
                     while (currentLength <= targetLength) {
@@ -82,7 +81,6 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
                     const
                         x = x0 + (xf-x0)*t,
                         y = y0 + (yf-y0)*t;
-                    console.log(t, x, y, targetLength, currentLength, strokeLength);
                     bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
                 }
             },

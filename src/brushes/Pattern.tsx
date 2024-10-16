@@ -23,73 +23,95 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
         ctx.putImageData(deserializeImageData(brush.brushPatternImage, canvas, ctx), 0, 0);
         return ctx.getImageData(0, 0, canvas.width, canvas.height);
     }, [brush.brushPatternImage, _brushPatternImage]);
-    const pattern = useMemo(() => {
-        const { ctx, canvas } = _brushPatternImage;
-        return ctx.createPattern(canvas, 'repeat');
-    }, [_brushPatternImage]);
-
+    const brushPatternBuffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
     const r = useMemo<Renderer>(() => {
-        let width = 0;
-        let height = 0;
+        let pattern = _brushPatternImage.ctx.createPattern(_brushPatternImage.canvas, 'repeat');
+        let patternData:ImageData;
+        let bufferPatternData:ImageData;
         return {
             drawBezier(bufferCtx, bezier, brushWidth, offset, preview){
+                const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 const [[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]] = bezier;
+                bufferPatternCtx.putImageData(bufferPatternData, 0, 0);
+                bufferPatternCtx.filter = `blur(${~~(brushWidth * (1 - brush.hardness) / 2)}px)`;
+                bufferPatternCtx.lineCap = 'round';
+                bufferPatternCtx.lineJoin = 'round';
+                bufferPatternCtx.lineWidth = brushWidth;
+                bufferPatternCtx.beginPath();
+                bufferPatternCtx.moveTo(p0x, p0y);
+                bufferPatternCtx.bezierCurveTo(p1x, p1y, p2x, p2y, x, y);
+                bufferPatternCtx.stroke();
+                bufferCtx.putImageData(patternData, 0, 0);
+                bufferCtx.globalCompositeOperation = 'destination-in';
+                bufferCtx.drawImage(bufferPatternCanvas, 0, 0);
                 bufferCtx.globalCompositeOperation = 'source-over';
-                bufferCtx.filter = `blur(${~~(brushWidth * (1 - brush.hardness) / 2)}px)`;
-                bufferCtx.beginPath();
-                bufferCtx.moveTo(p0x, p0y);
-                bufferCtx.bezierCurveTo(p1x, p1y, p2x, p2y, x, y);
-                bufferCtx.stroke();
-                bufferCtx.globalCompositeOperation = 'source-in';
-                bufferCtx.fillRect(0, 0, width, height);
+                if(!preview){
+                    bufferPatternData = bufferPatternCtx.getImageData(0, 0, bufferPatternCanvas.width, bufferPatternCanvas.height);
+                }
             },
             drawLine(bufferCtx, line, brushWidth, offset, preview){
+                const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 const [lastPoint, point] = line;
+                bufferPatternCtx.putImageData(bufferPatternData, 0, 0);
+                bufferPatternCtx.filter = `blur(${~~(brushWidth * (1 - brush.hardness) / 2)}px)`;
+                bufferPatternCtx.lineCap = 'round';
+                bufferPatternCtx.lineJoin = 'round';
+                bufferPatternCtx.lineWidth = brushWidth;
+                bufferPatternCtx.beginPath();
+                bufferPatternCtx.moveTo(...lastPoint);
+                bufferPatternCtx.lineTo(...point);
+                bufferPatternCtx.stroke();
+                bufferCtx.putImageData(patternData, 0, 0);
+                bufferCtx.globalCompositeOperation = 'destination-in';
+                bufferCtx.drawImage(bufferPatternCanvas, 0, 0);
                 bufferCtx.globalCompositeOperation = 'source-over';
-                bufferCtx.filter = `blur(${~~(brushWidth * (1 - brush.hardness) / 2)}px)`;
-                bufferCtx.beginPath();
-                bufferCtx.moveTo(...lastPoint);
-                bufferCtx.lineTo(...point);
-                bufferCtx.stroke();
-                bufferCtx.globalCompositeOperation = 'source-in';
-                bufferCtx.fillRect(0, 0, width, height);
+                if(!preview){
+                    bufferPatternData = bufferPatternCtx.getImageData(0, 0, bufferPatternCanvas.width, bufferPatternCanvas.height);
+                }
             },
             setup(drawable, buffer, previewBuffer, point, color, alpha, brushWidth){
                 const { ctx, canvas } = drawable;
                 const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
                 const { ctx: previewCtx } = previewBuffer;
                 const { ctx: brushPatternCtx, canvas: brushPatternCanvas } = _brushPatternImage;
+                const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 ctx?.restore();
-                width = canvas.width;
-                height = canvas.height;
-                bufferCtx.lineCap = 'round';
-                bufferCtx.lineJoin = 'round';
-                bufferCtx.strokeStyle = color;
-                bufferCtx.fillStyle = color;
-                bufferCtx.lineWidth = brushWidth;
+                bufferPatternCtx.lineCap = 'round';
+                bufferPatternCtx.lineJoin = 'round';
+                bufferPatternCtx.lineWidth = brushWidth;
                 previewCtx.lineCap = 'round';
                 previewCtx.lineJoin = 'round';
-                previewCtx.strokeStyle = color;
-                previewCtx.fillStyle = color;
                 previewCtx.lineWidth = brushWidth;
+                bufferPatternCanvas.width = canvas.width;
+                bufferPatternCanvas.height = canvas.height;
                 brushPatternCtx.globalCompositeOperation = 'source-in';
+                brushPatternCtx.fillStyle = color;
                 brushPatternCtx.fillRect(0, 0, brushPatternCanvas.width, brushPatternCanvas.height);
+                pattern = brushPatternCtx.createPattern(brushPatternCanvas, 'repeat');
+                bufferPatternCtx.clearRect(0, 0, canvas.width, canvas.height);
+                bufferPatternCtx.fillStyle = pattern||'';
+                bufferPatternCtx.fillRect(0, 0, canvas.width, canvas.height);
+                patternData = bufferPatternCtx.getImageData(0, 0, canvas.width, canvas.height);
+                bufferPatternCtx.clearRect(0, 0, canvas.width, canvas.height);
+                //bufferCtx.strokeStyle = pattern||'';
+                previewCtx.fillStyle = pattern||'';
+                //previewCtx.strokeStyle = pattern||'';
                 ctx.globalAlpha = alpha;
-                bufferCtx.filter = `blur(${~~(brushWidth*(1-brush.hardness)/2)}px)`;
-                bufferCtx.beginPath();
-                bufferCtx.moveTo(...point);
-                bufferCtx.lineTo(...point);
-                previewCtx.filter = `blur(${~~(brushWidth*(1-brush.hardness)/2)}px)`;
-                previewCtx.beginPath();
-                previewCtx.moveTo(...point);
-                previewCtx.lineTo(...point);
-                bufferCtx.fillStyle = pattern||'';
-                bufferCtx.stroke();
-                previewCtx.stroke();
+                bufferPatternCtx.filter = `blur(${~~(brushWidth*(1-brush.hardness)/2)}px)`;
+                bufferPatternCtx.beginPath();
+                bufferPatternCtx.moveTo(...point);
+                bufferPatternCtx.lineTo(...point);
+                bufferPatternCtx.stroke();
+                bufferCtx.putImageData(patternData, 0, 0);
+                bufferCtx.globalCompositeOperation = 'destination-in';
+                bufferCtx.drawImage(bufferPatternCanvas, 0, 0);
+                bufferCtx.globalCompositeOperation = 'source-over';
                 ctx.drawImage(bufferCanvas, 0, 0);
+                //bufferCtx.drawImage(brushPatternCanvas, 0, 0);
+                bufferPatternData = bufferPatternCtx.getImageData(0, 0, bufferPatternCanvas.width, bufferPatternCanvas.height);
             }
         };
-    }, [_brushPatternImage, brush.hardness, pattern]);
+    }, [_brushPatternImage, brush.hardness, brushPatternBuffer]);
     return <AbstractSmoothSpacing brush={brush} renderer={r}>
         {children}
     </AbstractSmoothSpacing>;

@@ -79,7 +79,7 @@ export const FillC = ({ children }: ToolFunctions) => {
         };
 
         const colorPixel = function(imageData: ImageData, dataPos: number, color: Uint8ClampedArray | number[]) {
-            //this needs to affect cache
+            // TODO: this needs to affect cache
 
             imageData.data[dataPos] = color[0];
             imageData.data[dataPos+1] = color[1];
@@ -88,27 +88,35 @@ export const FillC = ({ children }: ToolFunctions) => {
         };
 
         const matchStartColor = function(imageData: ImageData, dataPos: number, color: Uint8ClampedArray | number[]) {
-            //this needs a cache
+            // TODO: this needs a cache
 
-            const r0 = color[0];
-            const g0 = color[1];
-            const b0 = color[2];
-            const a0 = color[3];
+            const [r0, g0, b0, a0] = color;
 
             const r = imageData.data[dataPos];
             const g = imageData.data[dataPos+1];
             const b = imageData.data[dataPos+2];
             const a = imageData.data[dataPos+3];
 
-            const dA = (a-a0)/255;
-            return colorDifferenceCh(r, r0, dA) +
-                   colorDifferenceCh(g, g0, dA) +
-                   colorDifferenceCh(b, b0, dA);
-        };
+            if (a0 === 0 && a === 0) {
+                return 0;
+            }
+            const colorDifferenceWeight = Math.sqrt(a0 * a * 3 / 255 / 255);
+            const dA2 = (Math.abs(a-a0)/255)**2;
 
-        const colorDifferenceCh = function(a:number, b:number, dA:number){
-            const black = (a-b)/255, white = black+dA;
-            return Math.max(black*black, white*white);
+            if (colorDifferenceWeight == 0) return Math.sqrt(dA2 / 2);
+
+            return Math.sqrt(
+                (
+                    (
+                        (Math.abs(r-r0)/255)**2
+                        + (Math.abs(g-g0)/255)**2
+                        + (Math.abs(b-b0)/255)**2
+                    )
+                * colorDifferenceWeight
+                + dA2
+                )
+                / 2
+            );
         };
 
         return {

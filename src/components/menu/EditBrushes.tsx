@@ -39,7 +39,7 @@ export const EditBrushes = () => {
     const addBrush = useCallback(() => {
         setTempBrushes([
             ...tempBrushes,
-            { brush: BRUSH_TYPE_LIST[0][1] }
+            { brush: { scribbleBrushType: BrushList.Solid } as any }
         ]);
     }, [tempBrushes]);
     const deleteBrush = useCallback(() => {
@@ -208,13 +208,23 @@ export const EditBrushes = () => {
                             <input type="text" name='name' autoComplete="off" value={currentBrushProxy.name} onChange={update} />
                         </label>}
                         {('brushTipImage' in currentBrushProxy)
-                    &&(typeof currentBrushProxy.brushTipImage == 'object')
-                    &&(isSerializedImageData(currentBrushProxy.brushTipImage))&&
+                        &&(typeof currentBrushProxy.brushTipImage == 'object')
+                        &&(isSerializedImageData(currentBrushProxy.brushTipImage))&&
                         <label>
                             <div>
                             Tip
                             </div>
                             <InputImage name='brushTipImage' value={currentBrushProxy.brushTipImage} onChange={update} style={{ width: '3rem', height: '3rem' }} />
+                        </label>
+                        }
+                        {('brushPatternImage' in currentBrushProxy)
+                        &&(typeof currentBrushProxy.brushPatternImage == 'object')
+                        &&(isSerializedImageData(currentBrushProxy.brushPatternImage))&&
+                        <label>
+                            <div>
+                            Pattern
+                            </div>
+                            <InputImage name='brushPatternImage' value={currentBrushProxy.brushPatternImage} onChange={update} style={{ width: '3rem', height: '3rem' }} />
                         </label>
                         }
                         {('roundness' in currentBrushProxy)&&(typeof currentBrushProxy.roundness == 'number') &&

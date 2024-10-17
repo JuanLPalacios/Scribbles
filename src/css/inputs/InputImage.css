@@ -7,6 +7,11 @@
   justify-content: center;
 }
 
+.InputImage > div {
+  display: flex;
+  justify-content: center;
+}
+
 .InputImage canvas {
   filter: brightness(0) invert(1);
 }

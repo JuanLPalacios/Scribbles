@@ -99,10 +99,14 @@ export const TextureC = (({ brush, children }: BrushFunctions<SerializedTextureB
                 ctx.globalAlpha = alpha;
                 dWidth = sWidth * width / textureWith;
                 dHeight = sHeight * width / textureWith;
+                if(!brush.antiAliasing){
+                    bufferCtx.filter = 'url(#no-anti-aliasing)';
+                    previewCtx.filter = 'url(#no-anti-aliasing)';
+                }
                 bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
             }
         };
-    }, [_brushTipImage, spacing, textureWith]);
+    }, [_brushTipImage, brush.antiAliasing, spacing, textureWith]);
     return <AbstractSmoothSpacing brush={brush} renderer={r}>
         {children}
     </AbstractSmoothSpacing>;

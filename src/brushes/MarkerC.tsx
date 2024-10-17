@@ -1,94 +1,109 @@
-import { BrushFunctions, BrushRenderer } from '../contexts/BrushRendererContext';
+import { BrushFunctions, Renderer } from '../contexts/BrushRendererContext';
 import { createDrawable } from '../generators/createDrawable';
 import { DrawableState } from '../types/DrawableState';
-import { Point } from '../lib/Vectors2d';
-import { BrushRendererContext } from '../contexts/BrushRendererContext';
+import { Bezier, Line } from '../lib/Vectors2d';
 import { BrushList } from '../lib/BrushList';
 import { useMemo } from 'react';
+import { AbstractSmoothSpacing } from '../abstracts/AbstractSmoothSpacing';
 
 export type SerializedMarkerBrush ={
     scribbleBrushType: BrushList.Marker
-    name:string;
+    name:string
+    hardness: number
+    spacing: number
 }
 
-export const MarkerC = (({ children }: BrushFunctions<SerializedMarkerBrush>) => {
-    const thatbuffer: DrawableState = createDrawable({ size: [1, 1] });
-
-    const r = useMemo<BrushRenderer>(() => {
-        let thatprevToLastPoint: Point = [0, 0];
-        let thatlastPoint: Point = [0, 0];
-        const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
-            thatlastPoint = point;
-            thatprevToLastPoint = point;
-            const { ctx, canvas } = drawable;
-            const { ctx: bufferCtx, canvas: buffer } = thatbuffer;
-            buffer.width = canvas.width;
-            buffer.height = canvas.height;
-            if (!ctx || !bufferCtx) return;
-            bufferCtx.lineCap = 'round';
-            bufferCtx.lineJoin = 'round';
-            bufferCtx.strokeStyle = color;
-            bufferCtx.lineWidth = width;
-            bufferCtx.imageSmoothingEnabled = false;
-            bufferCtx.filter = 'url(#no-anti-aliasing)';
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.strokeStyle = color;
-            ctx.lineWidth = width;
-            ctx.fillStyle = color;
-            ctx.globalAlpha = alpha;
-            canvas.style.filter = 'blur(1px)';
-            bufferCtx.globalCompositeOperation = 'copy';
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(...point);
-            bufferCtx.lineTo(...point);
-            bufferCtx.stroke();
-            ctx.drawImage(buffer, 0, 0);
+export const MarkerC = (({ brush, children }: BrushFunctions<SerializedMarkerBrush>) => {
+    const strokeBuffer: DrawableState = createDrawable({ size: [1, 1] });
+    const aliasedStroke: DrawableState = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
+    const r = useMemo<Renderer>(() => {
+        let aliasedStrokeData:ImageData;
+        let lastSegment: Line|Bezier =[[0, 0], [0, 0]];
+        function drawSegment(ctx: CanvasRenderingContext2D, segment:Line|Bezier){
+            if(segment.length==4){
+                const [[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]] = segment;
+                ctx.beginPath();
+                ctx.moveTo(p0x, p0y);
+                ctx.bezierCurveTo(p1x, p1y, p2x, p2y, x, y);
+                ctx.stroke();
+            }
+            else{
+                const [p0, pf] = segment;
+                ctx.beginPath();
+                ctx.moveTo(...p0);
+                ctx.lineTo(...pf);
+                ctx.stroke();
+            }
+        }
+        return {
+            drawBezier(bufferCtx, bezier, width, offset, preview){
+                const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
+                const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
+                aliasedStrokeCtx.putImageData(aliasedStrokeData, 0, 0);
+                strokeBufferCtx.globalCompositeOperation = 'copy';
+                drawSegment(strokeBufferCtx, lastSegment);
+                strokeBufferCtx.globalCompositeOperation = 'source-out';
+                drawSegment(strokeBufferCtx, bezier);
+                aliasedStrokeCtx.drawImage(strokeBufferCanvas, 0, 0);
+                bufferCtx.filter = `blur(${~~((1-brush.hardness)*width/2)}px)`;
+                bufferCtx.globalCompositeOperation = 'copy';
+                bufferCtx.drawImage(aliasedStrokeCanvas, 0, 0);
+                //bufferCtx.drawImage(strokeBufferCanvas, 0, 0);
+                if(!preview){
+                    aliasedStrokeData = aliasedStrokeCtx.getImageData(0, 0, aliasedStrokeCanvas.width, aliasedStrokeCanvas.height);
+                    lastSegment = bezier;
+                }
+            },
+            drawLine(bufferCtx, line, width, offset, preview){
+                const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
+                const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
+                aliasedStrokeCtx.putImageData(aliasedStrokeData, 0, 0);
+                strokeBufferCtx.globalCompositeOperation = 'copy';
+                drawSegment(strokeBufferCtx, lastSegment);
+                strokeBufferCtx.globalCompositeOperation = 'source-out';
+                drawSegment(strokeBufferCtx, line);
+                aliasedStrokeCtx.drawImage(strokeBufferCanvas, 0, 0);
+                bufferCtx.filter = `blur(${~~((1-brush.hardness)*width/2)}px)`;
+                bufferCtx.globalCompositeOperation = 'copy';
+                bufferCtx.drawImage(aliasedStrokeCanvas, 0, 0);
+                //bufferCtx.drawImage(strokeBufferCanvas, 0, 0);
+                if(!preview){
+                    aliasedStrokeData = aliasedStrokeCtx.getImageData(0, 0, aliasedStrokeCanvas.width, aliasedStrokeCanvas.height);
+                    lastSegment = line;
+                }
+            },
+            setup(drawable, buffer, previewBuffer, point, color, alpha, width){
+                const { ctx, canvas } = drawable;
+                const { ctx: bufferCtx } = buffer;
+                const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
+                const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
+                strokeBufferCanvas.width = canvas.width;
+                strokeBufferCanvas.height = canvas.height;
+                aliasedStrokeCanvas.width = canvas.width;
+                aliasedStrokeCanvas.height = canvas.height;
+                strokeBufferCtx.lineCap = 'round';
+                strokeBufferCtx.lineJoin = 'round';
+                strokeBufferCtx.strokeStyle = color;
+                strokeBufferCtx.lineWidth = width;
+                strokeBufferCtx.imageSmoothingEnabled = false;
+                strokeBufferCtx.filter = 'url(#no-anti-aliasing)';
+                aliasedStrokeCtx.globalAlpha = alpha;
+                strokeBufferCtx.globalCompositeOperation = 'copy';
+                strokeBufferCtx.beginPath();
+                strokeBufferCtx.moveTo(...point);
+                strokeBufferCtx.lineTo(...point);
+                strokeBufferCtx.stroke();
+                aliasedStrokeCtx.drawImage(strokeBufferCanvas, 0, 0);
+                bufferCtx.filter = `blur(${~~((1-brush.hardness)*width/2)}px)`;
+                bufferCtx.globalCompositeOperation = 'copy';
+                bufferCtx.drawImage(aliasedStrokeCanvas, 0, 0);
+                aliasedStrokeData = aliasedStrokeCtx.getImageData(0, 0, aliasedStrokeCanvas.width, aliasedStrokeCanvas.height);
+                lastSegment = [point, point];
+                ctx.drawImage(aliasedStrokeCanvas, 0, 0);
+            }
         };
-
-        const drawStroke = (drawable: DrawableState, point: Point) => {
-            const ctx = drawable.ctx;
-            const { ctx: bufferCtx, canvas } = thatbuffer;
-            if (!ctx || !bufferCtx) return;
-            bufferCtx.globalCompositeOperation = 'copy';
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(...thatprevToLastPoint);
-            bufferCtx.lineTo(...thatlastPoint);
-            bufferCtx.stroke();
-            bufferCtx.globalCompositeOperation = 'source-out';
-            bufferCtx.beginPath();
-            bufferCtx.moveTo(...thatlastPoint);
-            bufferCtx.lineTo(...point);
-            bufferCtx.stroke();
-            ctx.drawImage(canvas, 0, 0);
-            thatprevToLastPoint = thatlastPoint;
-            thatlastPoint = point;
-        };
-
-        const endStroke = (drawable: DrawableState) => {
-            const { ctx, canvas } = drawable;
-            const { ctx: bufferCtx, canvas: canvas2 } = thatbuffer;
-            if (!ctx || !bufferCtx) return;
-            ctx?.restore();
-            bufferCtx.globalCompositeOperation = 'copy';
-            bufferCtx.filter = 'blur(1px)';
-            bufferCtx.drawImage(canvas, 0, 0);
-            canvas.width = 0;
-            canvas.height = 0;
-            canvas.width = canvas2.width;
-            canvas.height = canvas2.height;
-            ctx.globalCompositeOperation = 'copy';
-            ctx.drawImage(canvas2, 0, 0);
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.filter = 'none';
-            canvas2.width = 0;
-            canvas2.height = 0;
-            canvas.style.filter = 'none';
-        };
-        return { drawStroke, endStroke, startStroke };
-    }, [thatbuffer]);
-    return <BrushRendererContext.Provider value={r}>
+    }, [aliasedStroke, brush.hardness, strokeBuffer]);
+    return <AbstractSmoothSpacing brush={brush} renderer={r}>
         {children}
-    </BrushRendererContext.Provider>;
+    </AbstractSmoothSpacing>;
 });

@@ -37,7 +37,9 @@ export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
     }],
     [MarkerC, {
         scribbleBrushType: BrushList.Marker,
-        name: 'Marker'
+        name: 'Marker',
+        spacing: 5,
+        hardness: 1
     }],
     [StiffC, {
         scribbleBrushType: BrushList.Stiff,

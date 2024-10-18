@@ -5,8 +5,8 @@ import { difference, dotProduct2D, length, createBezier, bezierArcLength, Point 
 import { DrawableState } from '../types/DrawableState';
 
 export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacing: number; name: string; scribbleBrushType: number; }>>({ brush, children, renderer: { drawBezier, drawLine, setup } }: S) {
-    const buffer = createDrawable({ size: [1, 1] });
-    const previewBuffer = createDrawable({ size: [1, 1] });
+    const buffer = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
+    const previewBuffer = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
     const r = useMemo<BrushRenderer>(() => {
         let lastPoint: Point = [0, 0];
         let lastVector: Point = [0, 0];

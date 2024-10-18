@@ -83,7 +83,7 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
                 prev: [],
                 handles: [],
                 selectedLayer: 0,
-                buffer: createDrawable({ size: [action.payload.width, action.payload.height] }),
+                buffer: createDrawable({ size: [action.payload.width, action.payload.height], options: { willReadFrequently: true } }),
                 transform: new DOMMatrix()
             }
 

@@ -4,7 +4,7 @@ import { createDrawable } from './createDrawable';
 
 export const createEditorLayer = ({ imageData }: LayerState2): EditorLayerState => {
     const { width, height } = imageData;
-    const canvas = createDrawable({ size: [width, height] });
+    const canvas = createDrawable({ size: [width, height], options: { willReadFrequently: true } });
     const thumbnail = createDrawable({ size: [40, 40 * (height / width)] });
 
     // dummy context and canvas for creating initial imageData state

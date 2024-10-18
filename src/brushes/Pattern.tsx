@@ -16,14 +16,14 @@ export type SerializedPatternBrush = {
 }
 
 export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBrush>) => {
-    const _brushPatternImage: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
+    const _brushPatternImage = useMemo(() => createDrawable({ size: [1, 1] }), []);
     useMemo(() => {
         const { ctx, canvas } = _brushPatternImage;
         if (!ctx) return;
         ctx.putImageData(deserializeImageData(brush.brushPatternImage, canvas, ctx), 0, 0);
         return ctx.getImageData(0, 0, canvas.width, canvas.height);
     }, [brush.brushPatternImage, _brushPatternImage]);
-    const brushPatternBuffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1] }), []);
+    const brushPatternBuffer: DrawableState = useMemo(() => createDrawable({ size: [1, 1], options: { willReadFrequently: true } }), []);
     const r = useMemo<Renderer>(() => {
         let pattern = _brushPatternImage.ctx.createPattern(_brushPatternImage.canvas, 'repeat');
         let patternData:ImageData;

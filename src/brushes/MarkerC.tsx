@@ -1,6 +1,5 @@
 import { BrushFunctions, Renderer } from '../contexts/BrushRendererContext';
 import { createDrawable } from '../generators/createDrawable';
-import { DrawableState } from '../types/DrawableState';
 import { Bezier, Line } from '../lib/Vectors2d';
 import { BrushList } from '../lib/BrushList';
 import { useMemo } from 'react';
@@ -14,8 +13,8 @@ export type SerializedMarkerBrush ={
 }
 
 export const MarkerC = (({ brush, children }: BrushFunctions<SerializedMarkerBrush>) => {
-    const strokeBuffer: DrawableState = createDrawable({ size: [1, 1] });
-    const aliasedStroke: DrawableState = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
+    const strokeBuffer= createDrawable({ size: [1, 1] });
+    const aliasedStroke = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
     const r = useMemo<Renderer>(() => {
         let aliasedStrokeData:ImageData;
         let lastSegment: Line|Bezier =[[0, 0], [0, 0]];

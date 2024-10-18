@@ -23,6 +23,11 @@
           <feFuncA type="discrete" tableValues="0,1"></feFuncA>
         </feComponentTransfer>
       </filter>
+      <filter id="no-alpha">
+        <feComponentTransfer>
+          <feFuncA type="discrete" tableValues="1"></feFuncA>
+        </feComponentTransfer>
+      </filter>
     </defs>
   </svg>
   <script type="module" src="/src/main.tsx"></script>

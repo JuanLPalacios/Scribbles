@@ -15,6 +15,7 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
         let offset = 0;
         let currentLength = 0;
         let lastStrokeLength = 0;
+        let { spacing } = brush;
 
         const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
             const { ctx, canvas } = drawable;
@@ -47,7 +48,7 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             finished = false;
             const dotProduct = dotProduct2D(v2, lastVector);
             const strokeLength = length(v2);
-            if (dotProduct < -(((strokeLength==0)||(brush.spacing==0))?0:(strokeLength+lastStrokeLength)/(brush.spacing))) {
+            if (dotProduct < -(((strokeLength==0)||(spacing==0))?0:(strokeLength+lastStrokeLength)/(spacing))) {
                 if (lastSegments.length > 2) {
                     const bezier = createBezier(lastSegments);
                     lastVector = difference(bezier[3], bezier[2]);
@@ -67,7 +68,7 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             }
             currentLength += strokeLength;
             lastSegments.push(point);
-            if ((currentLength < brush.spacing)) {
+            if ((currentLength < spacing)) {
                 previewCtx.clearRect(0, 0, canvas.width, canvas.height);
                 previewCtx.drawImage(bufferCanvas, 0, 0);
                 if (lastSegments.length > 2) {
@@ -87,20 +88,20 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
                 lastPoint = point;
                 return;
             }
-            currentLength = currentLength % brush.spacing;
+            currentLength = currentLength % spacing;
             if (lastSegments.length > 2) {
                 const bezier = createBezier(lastSegments);
                 lastVector = difference(bezier[3], bezier[2]);
                 lastStrokeLength = length(lastVector);
                 drawBezier(bufferCtx, bezier, width, offset);
-                offset = (offset+bezierArcLength(bezier)) % brush.spacing;
+                offset = (spacing==0)?0:(offset+bezierArcLength(bezier)) % spacing;
             }
             else {
                 lastVector = v2;
                 lastStrokeLength = strokeLength;
                 const [p1, p2] = lastSegments;
                 drawLine(bufferCtx, [p1, p2], width, offset);
-                offset = (offset+strokeLength) % brush.spacing;
+                offset = (spacing==0)?0:(offset+strokeLength) % spacing;
             }
             finished = true;
             lastPoint = point;
@@ -112,10 +113,10 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
         const endStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
             const { ctx, } = drawable;
             if (!finished) {
-                const temp = brush.spacing;
-                brush.spacing = 0;
+                const temp = spacing;
+                spacing = 0;
                 drawStroke(drawable, point, color, alpha, width);
-                brush.spacing = temp;
+                spacing = temp;
             }
             // FIXME: draw tip shape to create the illusion of the more complex brush
             ctx?.restore();

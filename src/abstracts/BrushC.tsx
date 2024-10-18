@@ -15,21 +15,27 @@ export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
         angle: 0,
         hardness: 1,
         roundness: 1,
-        spacing: 300
+        spacing: 30
     },],
     [TextureC, {
         scribbleBrushType: BrushList.Texture,
         name: 'TextureBrush',
         brushTipImage: {
             colorSpace: 'srgb',
-            height: 5,
-            width: 5,
+            height: 11,
+            width: 11,
             data: [
-                0, 1, 1, 1, 0,
-                1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1,
-                1, 1, 1, 1, 1,
-                0, 1, 1, 1, 0,
+                0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+                0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
+                0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+                0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
             ].map((x)=>[0, 0, 0, x*255]).flat()
         },
         spacing: 0,

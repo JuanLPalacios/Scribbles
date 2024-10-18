@@ -1,13 +1,13 @@
 import '../../css/inputs/BrushSelectInput.css';
 import { useState, CSSProperties, useMemo, useEffect } from 'react';
 import { uid } from '../../lib/uid';
-import { LeftMenuPortal } from '../portals/LeftMenu';
 import { TopMenuPortal } from '../portals/TopMenu';
 import { BrushPreview } from './BrushPreview';
 import { DrawableState } from '../../types/DrawableState';
 import { BrushC } from '../../abstracts/BrushC';
 import { useBrushesOptions } from '../../hooks/useBrushesOptions';
 import { SerializedBrush } from '../../lib/Serialization';
+import { BrushWidthInput } from './BrushWidthInput';
 
 const style:CSSProperties = {
     display: 'flex',
@@ -48,13 +48,6 @@ export const BrushSelectInput = () => {
                 </ul>
             </div>
         </TopMenuPortal>
-        <LeftMenuPortal>
-            <label>
-                <div>
-                    brush width
-                </div>
-                <input {...{ orient: 'vertical' }} type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="16" onChange={(e) => onChange({ brushesPacks, selectedBrush, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} />
-            </label>
-        </LeftMenuPortal>
+        <BrushWidthInput/>
     </>;
 };

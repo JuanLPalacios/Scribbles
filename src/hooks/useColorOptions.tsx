@@ -1,4 +1,4 @@
-import { useContext } from 'react';
-import { ColorOptionsContext } from '../contexts/ColorOptionsContext';
+import { createStorageHook } from '../generators/createStorageHook';
+import { ColorOptions } from '../contexts/MenuOptions';
 
-export const useColorOptions = () => useContext(ColorOptionsContext);
+export const useColorOptions = createStorageHook<ColorOptions>('color', 'local', { color: '#000000' });

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
-import { ToleranceOptionsContext } from '../contexts/ToleranceOptionsContext';
+import { createStorageHook } from '../generators/createStorageHook';
+import { ToleranceOptions } from '../contexts/MenuOptions';
 
-export const useToleranceOptions = () => useContext(ToleranceOptionsContext);
+export const useToleranceOptions = createStorageHook<ToleranceOptions>('tolerance', 'local', { tolerance: .3 });

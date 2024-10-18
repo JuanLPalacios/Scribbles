@@ -1,9 +1,6 @@
 import { ReactNode } from 'react';
 import { ToolButton } from '../types/ToolButton';
 import { BrushesOptionsContextProvider, BrushOptions } from './BrushesOptionsContext';
-import { ColorOptionsContextProvider } from './ColorOptionsContext';
-import { AlphaOptionsContextProvider } from './AlphaOptionsContext';
-import { ToleranceOptionsContextProvider } from './ToleranceOptionsContext';
 import { ToolOptionsContextProvider } from './ToolOptionsContext';
 
 export type ToolOptions = {
@@ -28,9 +25,6 @@ export type MenuOptions = ToolOptions & BrushOptions & ColorOptions & AlphaOptio
 export const MenuContextProvider = (props: { children: ReactNode }) => {
     const providers = [
         BrushesOptionsContextProvider,
-        ColorOptionsContextProvider,
-        AlphaOptionsContextProvider,
-        ToleranceOptionsContextProvider,
         ToolOptionsContextProvider
     ];
     return providers.reverse().reduce((children, Provider)=><Provider>{children}</Provider>, props.children);

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
-import { AlphaOptionsContext } from '../contexts/AlphaOptionsContext';
+import { createStorageHook } from '../generators/createStorageHook';
+import { AlphaOptions } from '../contexts/MenuOptions';
 
-export const useAlphaOptions = () => useContext(AlphaOptionsContext);
+export const useAlphaOptions = createStorageHook<AlphaOptions>('alpha', 'local', { alpha: 1 });

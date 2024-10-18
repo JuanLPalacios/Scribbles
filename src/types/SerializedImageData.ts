@@ -1,7 +1,7 @@
 
 export type SerializedImageData = {
-    readonly colorSpace: PredefinedColorSpace;
-    readonly data: number[];
-    readonly height: number;
-    readonly width: number;
+    colorSpace: PredefinedColorSpace;
+    data: number[];
+    height: number;
+    width: number;
 };

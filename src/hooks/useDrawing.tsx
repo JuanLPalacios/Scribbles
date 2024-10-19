@@ -4,8 +4,13 @@ import { LayerState2 } from '../types/LayerState';
 import { DrawingState } from '../contexts/DrawingContext';
 import { useEditor } from './useEditor';
 import { EditorDrawingState } from '../contexts/EditorDrawingContext';
+import { getBlobFromLayer, mergeLayers } from '../lib/Graphics';
+import { saveAs } from 'file-saver';
+import { SDRW } from '../lib/sdrw';
+import { useResentScribbles } from './useResentScribbles';
 
 export const useDrawing = () => {
+    const [, { saveDrawingState }] = useResentScribbles();
     const [editorState, { editDrawing }] = useEditor();
     const { drawing } = editorState;
     if (!drawing) throw new Error('useDrawing should only be used inside components or hook where a drawing presence is guaranteed');
@@ -121,7 +126,31 @@ export const useDrawing = () => {
                     payload
                 });
             },
+            async downloadFile(){
+                const { data: { name } } = drawing;
+                saveDrawingState(data, name);
+                const blob = await SDRW.binary(data);
+                saveAs(blob, `${name}.scribble`);
+            },
+            exportPNG(){
+                const { data: { layers, width, height, name } } = drawing;
+                saveDrawingState(data, name);
+                let merged = createLayer2('', [width, height]);
+                layers.forEach((layer) => {
+                    merged = mergeLayers(layer, merged);
+                });
+                getBlobFromLayer(
+                    merged,
+                    blob=>{
+                        if(blob)
+                            saveAs(blob, (name.endsWith('.png')||name.endsWith('.PNG'))?name:`${name}.png`);
+                    });
+            },
+            localSave(){
+                const { data: { name } } = drawing;
+                saveDrawingState(data, name);
+            },
         };
-    }, [editDrawing, drawing]);
+    }, [drawing, editDrawing, saveDrawingState]);
     return [drawing, drawingActions] as const;
 };

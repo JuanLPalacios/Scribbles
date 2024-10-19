@@ -1,56 +1,31 @@
 import { useCallback, useEffect, useState } from 'react';
 import '../../css/Menu.css';
 import exportIcon from '../../icons/external-svgrepo-com.svg';
-import { createLayer } from '../../generators/createLayer';
-import { mergeLayers } from '../../lib/Graphics';
-import { useEditor } from '../../hooks/useEditor';
-import { SDRW } from '../../lib/sdrw';
-import { saveAs } from 'file-saver';
 import ReactModal from 'react-modal';
+import { useDrawing } from '../../hooks/useDrawing';
+import { DrawingRequired } from '../../hoc/DrawingRequired';
 
-export const SaveFile = () => {
-    const [editor] = useEditor();
+export const SaveFile = DrawingRequired(() => {
+    const [drawing, { exportPNG, downloadFile, localSave }] = useDrawing();
     const [isOpen, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [extension, setExtension] = useState('png');
-    const exportPng = useCallback(async () => {
-        if(!editor.drawing) return false;
-        const { data: { layers, width, height, name } } = editor.drawing;
-        const merged = createLayer('', { position: [0, 0], size: [width, height] });
-        layers.forEach((layer) => mergeLayers(layer, merged));
-        const url = merged.canvas.canvas.toDataURL();
-        const a = document.createElement('a');
-        a.download = name+'.png';
-        a.href = url;
-        a.click();
-    }, [editor]);
-    const exportScribble = useCallback(async () => {
-        if(!editor.drawing) return false;
-        const { data: { name } } = editor.drawing;
-        const blob = await SDRW.binary(editor.drawing.data);
-        saveAs(blob, `${name}.scribble`);
-    }, [editor]);
-    const downloadFile = useCallback(async () => {
+    const download = useCallback(async () => {
         switch (extension) {
         case 'png':
-            exportPng();
+            exportPNG();
             break;
         case 'scribble':
-            exportScribble();
+            downloadFile();
             break;
         }
-        // saveto local
-    }, [exportPng, exportScribble, extension]);
-    const saveFile = useCallback(async () => {
-        if(!editor.drawing) return false;
-        // saveto local
-    }, [editor]);
+    }, [downloadFile, exportPNG, extension]);
     useEffect(()=>{
-        if(editor.drawing) setName(editor.drawing.data.name);
-    }, [editor.drawing]);
+        if(drawing) setName(drawing.data.name.split('.')[0]);
+    }, [drawing]);
     return <>
         <li>
-            <button className='round-btn' onClick={()=>setOpen(true)} disabled={!editor.drawing}>
+            <button className='round-btn' onClick={()=>setOpen(true)}>
                 <img src={exportIcon} alt="Export to PNG" />
             </button>
             <div className="text">Export to PNG</div>
@@ -66,12 +41,12 @@ export const SaveFile = () => {
                     </select>
                 </div>
                 <div className='actions'>
-                    <button onClick={downloadFile}>download</button>
-                    <button onClick={saveFile}>save locally</button>
+                    <button onClick={download}>download</button>
+                    <button onClick={localSave}>save locally</button>
                     <button onClick={()=>setOpen(false)}>cancel</button>
                 </div>
             </div>
         </ReactModal>
     </>;
-};
+});
 

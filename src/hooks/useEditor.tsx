@@ -1,20 +1,16 @@
 import { useContext, useMemo } from 'react';
-import { createLayer } from '../generators/createLayer';
 import { EditorContext } from '../contexts/EditorContext';
 import { EditorDrawingAction } from '../contexts/EditorDrawingContext';
 import { StoredFile, useResentScribbles } from './useResentScribbles';
-import { uid } from '../lib/uid';
 import { SDRW } from '../lib/sdrw';
-import { DrawingState } from '../contexts/DrawingContext';
+import { loadImageAsDrawingState } from '../generators/loadImageAsDrawingState';
+import { createLayer2 } from '../generators/createLayer2';
 
 export const useEditor = () => {
-    const [, { addFile }] = useResentScribbles();
+    const [, { loadDrawingState, saveDrawingState }] = useResentScribbles();
     const [editor, dispatch] = useContext(EditorContext);
     return [editor, useMemo(()=>({
         openFile(file:File){
-            const fileRef = { key: uid(), name: file.name, path: 'file:'+file.name };
-            const { name } = fileRef;
-            addFile(fileRef);
             const extension = file.name.split('.').pop();
             switch (extension) {
             case 'jpeg':
@@ -22,6 +18,7 @@ export const useEditor = () => {
             case 'png':
                 loadImageAsDrawingState(file)
                     .then(payload=>{
+                        saveDrawingState(payload, payload.name);
                         dispatch({
                             type: 'editor/load',
                             payload
@@ -31,10 +28,11 @@ export const useEditor = () => {
                 break;
             case 'scribble':
                 SDRW.jsonObj(file)
-                    .then(drawingData=>{
+                    .then(payload=>{
+                        saveDrawingState(payload, payload.name);
                         dispatch({
                             type: 'editor/load',
-                            payload: { ...drawingData, name }
+                            payload
                         });
                     })
                     .catch(e=>console.error(e));
@@ -42,29 +40,12 @@ export const useEditor = () => {
             }
         },
         loadFile(fileRef:StoredFile){
-            const { path, name } = fileRef;
-            const [width, height] = [1200, 800];
-            addFile(fileRef);
-            dispatch({
-                type: 'editor/load',
-                payload: JSON.parse(localStorage.getItem(path)||'')||{
-                    name,
-                    width,
-                    height,
-                    layers: [
-                        createLayer(
-                            'layer 1',
-                            {
-                                position: [0, 0],
-                                size: [width, height]
-                            }
-                        )
-                    ]
-                }
+            loadDrawingState(fileRef).then(payload=>{
+                dispatch({
+                    type: 'editor/load',
+                    payload
+                });
             });
-        },
-        downloadFile(){
-            // TODO: refactor download be here
         },
         newFile({ name, width, height }:{name:string, width:number, height:number}){
             dispatch({
@@ -74,12 +55,9 @@ export const useEditor = () => {
                     width,
                     height,
                     layers: [
-                        createLayer(
+                        createLayer2(
                             'layer 1',
-                            {
-                                position: [0, 0],
-                                size: [width, height]
-                            }
+                            [width, height]
                         )
                     ]
                 }
@@ -91,10 +69,6 @@ export const useEditor = () => {
                 payload
             });
         },
-    }), [addFile, dispatch])] as const;
+    }), [dispatch, loadDrawingState, saveDrawingState])] as const;
 };
-
-async function loadImageAsDrawingState(file: File):Promise<DrawingState> {
-    throw new Error('Function not implemented.');
-}
 

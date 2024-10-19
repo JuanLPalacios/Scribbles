@@ -21,9 +21,9 @@ const CTX = CANVAS.getContext('2d');
 if(!CTX)throw new Error('2d context could not be created');
 
 export const SDRW = {
-    jsonObj(file: File) {
+    jsonObj(file: File|string) {
         const zip = new JSZip();
-        return zip.loadAsync(file)
+        return ((typeof file == 'string')? zip.loadAsync(file, { base64: true }):zip.loadAsync(file))
             .then((zip)=>
                 zip.files['version.json'].async('string')
                     .then(JSON.parse)

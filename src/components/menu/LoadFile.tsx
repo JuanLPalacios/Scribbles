@@ -1,24 +1,28 @@
-import { useCallback, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import '../../css/Menu.css';
+import '../../css/menu/LoadFile.css';
 import exportIcon from '../../icons/external-svgrepo-com.svg';
 import { useEditor } from '../../hooks/useEditor';
 import ReactModal from 'react-modal';
 import { useOpenFile } from '../../hooks/useOpenFile';
+import { useResentScribbles } from '../../hooks/useResentScribbles';
+import { uid } from '../../lib/uid';
 
 export const LoadFile = () => {
-    const [editor, { openFile }] = useEditor();
+    const [editor, { openFile, loadFile }] = useEditor();
     const [isOpen, setOpen] = useState(false);
-    const loadFile = useOpenFile((files)=>{
+    const [resentScribbles] = useResentScribbles();
+    const id = useMemo(()=>uid(), []);
+    const openFileL = useOpenFile((files)=>{
         if(files.length==0)return;
         const file = files[0];
         openFile(file);
     }, [openFile],
     { accept: '.jpg, .jpeg, .png, .scribble' }
     );
-    const loadLocal = useCallback(async () => {
-        if(!editor.drawing) return false;
-        // saveto local
-    }, [editor]);
+    useEffect(()=>{
+        setOpen(false);
+    }, [editor.drawing]);
     return <>
         <li>
             <button className='round-btn' onClick={()=>setOpen(true)}>
@@ -27,13 +31,18 @@ export const LoadFile = () => {
             <div className="text">Load Scribble</div>
         </li>
         <ReactModal isOpen={isOpen} onRequestClose={()=>setOpen(false)} style={{ content: { width: '20rem' } }}>
-            <div className="fields import-brush">
+            <div className="LoadFile fields import-brush">
                 <h2>Load Scribble</h2>
-                <div>
+                <div className='table'>
+                    {resentScribbles.map((resentScribble, i)=><>
+                        <div key={`${id}-name-${i}`}>{resentScribble.name}</div>
+                        <button key={`${id}-button-${i}`} onClick={()=>loadFile(resentScribble)}>Load</button>
+
+                    </>
+                    )}
                 </div>
                 <div className='actions'>
-                    <button onClick={loadFile}>Open File</button>
-                    <button onClick={loadLocal}>Load Local Scribble</button>
+                    <button onClick={openFileL}>Open File</button>
                     <button onClick={()=>setOpen(false)}>cancel</button>
                 </div>
             </div>

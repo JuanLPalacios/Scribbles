@@ -22,7 +22,7 @@ export const QuickStart = () => {
                 <h1>Quick Start</h1>
                 <button onClick={quickNewFile}>Open blank scribble</button>
                 <button onClick={quickNewFile}>Recover last session</button>
-                {resentScribbles.map((resentScribble, i)=>
+                {resentScribbles.slice(0, 5).map((resentScribble, i)=>
                     <button key={`${id}-${i}`} onClick={()=>loadFile(resentScribble)}>{resentScribble.name}</button>
                 )}
             </div>

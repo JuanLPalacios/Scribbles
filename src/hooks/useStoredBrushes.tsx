@@ -1,7 +1,7 @@
 //import round from '../brushes/stiff/round.json';
 //import oldRound from '../brushes/stiff/oldRound.json';
 //import diagonal from '../brushes/stiff/flat.json';
-import { BRUSH_TYPE_LIST } from '../abstracts/BrushC';
+import { BRUSH_TYPE_LIST } from '../abstracts/Brush';
 import { createStorageHook } from '../generators/createStorageHook';
 import { SerializedBrush } from '../lib/Serialization';
 

@@ -1,5 +1,5 @@
 import { ReactNode, useMemo } from 'react';
-import { BrushC } from '../abstracts/BrushC';
+import { Brush } from '../abstracts/Brush';
 import { useToolOptions } from '../hooks/useToolOptions';
 import { useBrushesOptions } from '../hooks/useBrushesOptions';
 import { useEditor } from '../hooks/useEditor';
@@ -11,10 +11,10 @@ export const ToolContextProvider = (props: { children: ReactNode; }) => {
     const { ToolC } = tools[selectedTool];
     const { brush } = useMemo(() => brushesPacks[selectedBrush], [brushesPacks, selectedBrush]);
     return drawing?
-        <BrushC brush={brush}>
+        <Brush brush={brush}>
             <ToolC>
                 {props.children}
             </ToolC>
-        </BrushC>
+        </Brush>
         :props.children;
 };

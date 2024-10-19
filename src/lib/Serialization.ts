@@ -2,12 +2,12 @@ import { BrushList } from './BrushList';
 import { SerializedImageData } from '../types/SerializedImageData';
 import { CompressedImage, CompressedJSON, CompressedOject } from '../types/CompressedOject';
 import { serializeImageData } from './serializeJSON';
-import { SerializedSolidBrush } from '../brushes/SolidC';
-import { SerializedTextureBrush } from '../brushes/TextureC';
-import { SerializedStiffBrush } from '../brushes/StiffC';
-import { SerializedMarkerBrush } from '../brushes/MarkerC';
+import { SerializedSolidBrush } from '../brushes/Solid';
+import { SerializedTextureBrush } from '../brushes/Texture';
+import { SerializedStiffBrush } from '../brushes/Stiff';
+import { SerializedMarkerBrush } from '../brushes/Marker';
 import { SerializedPatternBrush } from '../brushes/Pattern';
-import { BRUSH_TYPE_LIST } from '../abstracts/BrushC';
+import { BRUSH_TYPE_LIST } from '../abstracts/Brush';
 
 export type SerializedBrush =
 | SerializedSolidBrush

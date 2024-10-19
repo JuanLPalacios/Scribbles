@@ -4,7 +4,7 @@ import { uid } from '../../lib/uid';
 import { TopMenuPortal } from '../portals/TopMenu';
 import { BrushPreview } from './BrushPreview';
 import { DrawableState } from '../../types/DrawableState';
-import { BrushC } from '../../abstracts/BrushC';
+import { Brush } from '../../abstracts/Brush';
 import { useBrushesOptions } from '../../hooks/useBrushesOptions';
 import { SerializedBrush } from '../../lib/Serialization';
 import { BrushWidthInput } from './BrushWidthInput';
@@ -35,15 +35,15 @@ export const BrushSelectInput = () => {
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
                 <button>
-                    <BrushC brush={currentSelectedBrush.brush}>
+                    <Brush brush={currentSelectedBrush.brush}>
                         <BrushPreview brush={currentSelectedBrush} />Brush
-                    </BrushC>
+                    </Brush>
                 </button>
                 <ul>
                     {memoBrushes.map(({ brush, key, onMouseDown, selected }) => <li key={key}>
-                        <BrushC brush={brush.brush}>
+                        <Brush brush={brush.brush}>
                             <BrushPreview brush={brush} selected={selected} onMouseDown={onMouseDown} />
-                        </BrushC>
+                        </Brush>
                     </li>)}
                 </ul>
             </div>

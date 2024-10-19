@@ -20,7 +20,7 @@ import { SBR } from '../../lib/sbr';
 import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
 import { BrushList } from '../../lib/BrushList';
-import { BRUSH_TYPE_LIST, BrushC } from '../../abstracts/BrushC';
+import { BRUSH_TYPE_LIST, Brush } from '../../abstracts/Brush';
 import { BrushPreview } from '../inputs/BrushPreview';
 import { useBrushesOptions } from '../../hooks/useBrushesOptions';
 import { useStoredBrushes } from '../../hooks/useStoredBrushes';
@@ -182,9 +182,9 @@ export const EditBrushes = () => {
                     <div className='brush-list' style={{ width: '10rem', flex: '1 1 auto' }}>
                         <ul className='brushes'>
                             {tempBrushes.map((brush, i) => <li key={id+'-'+i}>
-                                <BrushC brush={brush.brush}>
+                                <Brush brush={brush.brush}>
                                     <BrushPreview brush={brush} selected={i==selectedBrushIndex} onMouseDown={()=>setSelectedBrushIndex(i)} />
-                                </BrushC>
+                                </Brush>
                             </li>)}
                         </ul>
                     </div>

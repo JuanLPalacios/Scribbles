@@ -8,13 +8,13 @@ export const ToolContextProvider = (props: { children: ReactNode; }) => {
     const [{ drawing }] = useEditor();
     const [{ selectedTool, tools }] = useToolOptions();
     const [{ brushesPacks, selectedBrush }] = useBrushesOptions();
-    const { ToolC } = tools[selectedTool];
+    const { Tool } = tools[selectedTool];
     const { brush } = useMemo(() => brushesPacks[selectedBrush], [brushesPacks, selectedBrush]);
     return drawing?
         <Brush brush={brush}>
-            <ToolC>
+            <Tool>
                 {props.children}
-            </ToolC>
+            </Tool>
         </Brush>
         :props.children;
 };

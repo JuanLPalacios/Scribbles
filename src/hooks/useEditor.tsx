@@ -7,7 +7,7 @@ import { loadImageAsDrawingState } from '../generators/loadImageAsDrawingState';
 import { createLayer2 } from '../generators/createLayer2';
 
 export const useEditor = () => {
-    const [, { loadDrawingState, saveDrawingState }] = useResentScribbles();
+    const [, { loadDrawingState, saveDrawingState, loadLastSession }] = useResentScribbles();
     const [editor, dispatch] = useContext(EditorContext);
     return [editor, useMemo(()=>({
         openFile(file:File){
@@ -69,6 +69,14 @@ export const useEditor = () => {
                 payload
             });
         },
-    }), [dispatch, loadDrawingState, saveDrawingState])] as const;
+        loadSession(){
+            loadLastSession().then(payload=>{
+                if(payload)dispatch({
+                    type: 'editor/load',
+                    payload
+                });
+            });
+        },
+    }), [dispatch, loadDrawingState, loadLastSession, saveDrawingState])] as const;
 };
 

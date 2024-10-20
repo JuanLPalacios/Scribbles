@@ -2,11 +2,15 @@ import { useMemo } from 'react';
 import '../css/QuickStart.css';
 import { useEditor } from '../hooks/useEditor';
 import { uid } from '../lib/uid';
-import { useResentScribbles } from '../hooks/useResentScribbles';
+import { useLastSession, useResentScribbles } from '../hooks/useResentScribbles';
+import { useConfig } from '../hooks/useConfig';
 
 export const QuickStart = () => {
     const [resentScribbles] = useResentScribbles();
-    const [, { newFile, loadFile }] = useEditor();
+    const [lastSession] = useLastSession();
+
+    const [{ autoSave }] = useConfig();
+    const [, { newFile, loadFile, loadSession }] = useEditor();
     const id = useMemo(()=>uid(), []);
     const quickNewFile = () => {
         newFile({
@@ -21,7 +25,7 @@ export const QuickStart = () => {
             <div className='QuickStart-modal'>
                 <h1>Quick Start</h1>
                 <button onClick={quickNewFile}>Open blank scribble</button>
-                <button onClick={quickNewFile}>Recover last session</button>
+                {(autoSave!==0)&&(lastSession)&&<button onClick={loadSession}>Recover last session</button>}
                 {resentScribbles.slice(0, 5).map((resentScribble, i)=>
                     <button key={`${id}-${i}`} onClick={()=>loadFile(resentScribble)}>{resentScribble.name}</button>
                 )}

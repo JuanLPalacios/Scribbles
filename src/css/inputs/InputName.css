@@ -1,8 +1,24 @@
 .InputName {
-  padding: 5px;
   position: relative;
+  min-width: 1em;
 }
 
 .InputName > input {
   position: absolute;
+  background: none;
+  font: inherit;
+  padding: 0;
+  width: 100%;
+}
+
+[data-tip]::after {
+  display: block;
+  content: attr(data-tip);
+  position: absolute;
+  color: var(--main-color);
+  background: var(--background2-color);
+  font-size: 0.8rem;
+  z-index: 2;
+  padding: .2rem .4rem;
+  border-radius: .2rem;
 }

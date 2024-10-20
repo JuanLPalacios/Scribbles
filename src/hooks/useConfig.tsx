@@ -3,9 +3,10 @@ import { createStorageHook } from '../generators/createStorageHook';
 import { useVersion } from './useVersion';
 type Config = {
     autoSave: number
+    doubleClickTimeOut: number
 }
 
-export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000 });
+export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000 });
 
 export const useConfig = ()=>{
     const [config, setConfig] = useStoredConfig();

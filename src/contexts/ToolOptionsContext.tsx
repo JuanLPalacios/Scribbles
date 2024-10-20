@@ -1,9 +1,9 @@
 import { createContext, ReactNode, useState } from 'react';
 import { uid } from '../lib/uid';
-import { DrawC } from '../tools/DrawC';
-import { EraseC } from '../tools/EraseC';
-import { FillC } from '../tools/FillC';
-import { TransformC } from '../tools/TransformC';
+import { Draw } from '../tools/Draw';
+import { Erase } from '../tools/Erase';
+import { Fill } from '../tools/Fill';
+import { Transform } from '../tools/Transform';
 import { StatePair } from '../types/StatePair';
 import { ToolOptions } from './MenuOptions';
 import drawIcon from '../icons/brush-f-svgrepo-com.svg';
@@ -21,11 +21,11 @@ export const ToolOptionsContext = createContext<StatePair<ToolOptions>>([
 export const ToolOptionsContextProvider = (props: { children: ReactNode; }) => {
     const value = useState<ToolOptions>({
         tools: [
-            { key: uid(), Tool: DrawC, name: 'draw', icon: drawIcon },
-            { key: uid(), Tool: EraseC, name: 'erase', icon: eraseIcon },
-            { key: uid(), Tool: FillC, name: 'fill', icon: fillIcon },
+            { key: uid(), Tool: Draw, name: 'draw', icon: drawIcon },
+            { key: uid(), Tool: Erase, name: 'erase', icon: eraseIcon },
+            { key: uid(), Tool: Fill, name: 'fill', icon: fillIcon },
             { key: uid(), Tool: Smear, name: 'smear', icon: fillIcon },
-            { key: uid(), Tool: TransformC, name: 'transform', icon: transformIcon }
+            { key: uid(), Tool: Transform, name: 'transform', icon: transformIcon }
         ],
         selectedTool: 0
     });

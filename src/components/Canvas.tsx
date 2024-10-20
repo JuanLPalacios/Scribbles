@@ -7,6 +7,8 @@ import { useDrawing } from '../hooks/useDrawing';
 import { useTool } from '../hooks/useTool';
 import { TopMenuPortal } from './portals/TopMenu';
 import { InputName } from './inputs/InputName';
+import { validateFileName } from '../lib/Validations';
+import { uid } from '../lib/uid';
 
 export function Canvas() {
     const [drawing, { setTransform, rename }] = useDrawing();
@@ -182,7 +184,7 @@ export function Canvas() {
     };
 
     const updateName = useCallback((e:React.ChangeEvent<HTMLInputElement>)=>{
-        rename(e.target.value);
+        rename(e.target.value.trim()||`Nameless Scribble ${uid()}`);
     }, [rename]);
 
     const horizontalScroll = useCallback((e:React.MouseEvent<HTMLDivElement>)=>{
@@ -253,7 +255,7 @@ export function Canvas() {
     return (
         <div className='Canvas' >
             <TopMenuPortal>
-                <h1 className='filename'> <InputName value={drawing.data.name} onChange={updateName} /></h1>
+                <h1 className='filename'> <InputName value={drawing.data.name} onChange={updateName} validate={validateFileName}/></h1>
             </TopMenuPortal>
             <div className='h-bar'>
                 <div className='handle' style={{ left: `${xScroll}px`, width: `${barWidth}px` }} onMouseDown={horizontalScroll}></div>

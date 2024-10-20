@@ -3,6 +3,7 @@ import '../../css/Menu.css';
 import addFileIcon from '../../icons/file-add-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { useEditor } from '../../hooks/useEditor';
+import { validateFileName } from '../../lib/Validations';
 
 export const NewFile = () => {
     const [editor, { newFile }] = useEditor();
@@ -32,11 +33,7 @@ export const NewFile = () => {
         close();
     }, [newFile, name, width, height, close]);
     useEffect(() => {
-        const errors = { name: new Array<string>(), width: new Array<string>(), height: new Array<string>() };
-        if(name.length<1)
-            errors.name.push('Must have at least 1 character');
-        if(name.match(/[.,#%&{}\\<>*?/$!'":@+`|=]/gi))
-            errors.name.push('Should not contain forbidden characters');
+        const errors = { name: validateFileName(name), width: new Array<string>(), height: new Array<string>() };
         setState({ ...state, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [height, name, width]);

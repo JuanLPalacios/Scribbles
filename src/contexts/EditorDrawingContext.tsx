@@ -26,6 +26,7 @@ export type EditorDrawingAction =
     ForceUpdate |
     Load|
     Transform|
+    Rename|
     Edit;
 type Do = {
     type: 'editor-drawing/do';
@@ -52,6 +53,10 @@ type Load = {
 type Edit = {
     type: 'editor-drawing/edit';
     payload?: DrawingAction;
+};
+type Rename = {
+    type: 'editor-drawing/rename';
+    payload: string;
 };
 type Transform = {
     type: 'editor-drawing/transform';
@@ -143,6 +148,14 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
                 transform: action.payload
             }
         };
+    case 'editor-drawing/rename':
+        return updateLayers({
+            ...state,
+            data: {
+                ...data,
+                name: action.payload
+            },
+        });
     case 'editor-drawing/forceUpdate':
         return updateLayers({
             ...state,

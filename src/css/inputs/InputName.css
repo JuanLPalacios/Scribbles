@@ -1,0 +1,8 @@
+.InputName {
+  padding: 5px;
+  position: relative;
+}
+
+.InputName > input {
+  position: absolute;
+}

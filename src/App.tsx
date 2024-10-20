@@ -18,7 +18,6 @@ function App() {
             <div className="App">
                 <TopMenu>
                     <Menu />
-                    <h1 className='filename'>{editor.drawing?.data.name}</h1>
                 </TopMenu>
                 <LeftMenu></LeftMenu>
                 <ToolContextProvider>

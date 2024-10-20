@@ -126,6 +126,12 @@ export const useDrawing = () => {
                     payload
                 });
             },
+            rename(name: string) {
+                editDrawing({
+                    type: 'editor-drawing/rename',
+                    payload: name
+                });
+            },
             async downloadFile(){
                 const { data: { name } } = drawing;
                 saveDrawingState(data, name);

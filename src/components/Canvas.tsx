@@ -5,9 +5,11 @@ import { CanvasEvent } from '../types/CanvasEvent';
 import Layer from './Layer';
 import { useDrawing } from '../hooks/useDrawing';
 import { useTool } from '../hooks/useTool';
+import { TopMenuPortal } from './portals/TopMenu';
+import { InputName } from './inputs/InputName';
 
 export function Canvas() {
-    const [drawing, { setTransform }] = useDrawing();
+    const [drawing, { setTransform, rename }] = useDrawing();
     const { width, height, layers } = drawing.data;
     const { selectedLayer, layers: editorLayers, handles, buffer, transform } = drawing.editorState;
     const ref = useRef<HTMLDivElement>(null);
@@ -179,6 +181,10 @@ export function Canvas() {
         }
     };
 
+    const updateName = useCallback((e:React.ChangeEvent<HTMLInputElement>)=>{
+        rename(e.target.value);
+    }, [rename]);
+
     const horizontalScroll = useCallback((e:React.MouseEvent<HTMLDivElement>)=>{
         const
             scaleX = viewWidth/barWidth;
@@ -246,6 +252,9 @@ export function Canvas() {
 
     return (
         <div className='Canvas' >
+            <TopMenuPortal>
+                <h1 className='filename'> <InputName value={drawing.data.name} onChange={updateName} /></h1>
+            </TopMenuPortal>
             <div className='h-bar'>
                 <div className='handle' style={{ left: `${xScroll}px`, width: `${barWidth}px` }} onMouseDown={horizontalScroll}></div>
             </div>

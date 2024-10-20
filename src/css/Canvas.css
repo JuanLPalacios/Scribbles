@@ -1,12 +1,20 @@
 .Canvas {
   overflow: hidden;
   height: calc(100vh - var(--button-diameter) * 2 - 21px);
-  width: calc(100% - var(--button-diameter) * 2);
-  background: var(--background-color);
+  width: calc(100vw - var(--button-diameter) * 2);
+  background: var(--background2-color);
   position: relative;
 }
 
-.Canvas > * {
+.Canvas > .viewport {
+  overflow: hidden;
+  height: calc(100vh - var(--button-diameter) * 2 - 21px - var(--scroll-width));
+  width: calc(100vw - var(--button-diameter) * 2 - var(--scroll-width));
+  background: var(--background2-color);
+  position: relative;
+}
+
+.Canvas > .viewport > * {
   width: var(--doc-width);
 }
 
@@ -20,17 +28,19 @@
 .Canvas > .v-bar > .handle,
 .Canvas > .h-bar > .handle {
     background: var(--secondary-color);
+    position: absolute;
 }
 
 .Canvas > .v-bar {
     right: 0;
-    height: 100%;
     width: var(--scroll-width);
+    height: 100%;
 }
 
 .Canvas > .h-bar {
     bottom: 0;
     width: 100%;
+    height: var(--scroll-width);
 }
 
 .Canvas > .v-bar > .handle {
@@ -43,15 +53,15 @@
     height: var(--scroll-width);
 }
 
-.Canvas > * > * {
+.Canvas > .viewport > * > * {
   background: url(Transparency10.png);
   position: relative;
 }
 
-.Canvas > * > * > * {
+.Canvas > .viewport > * > * > * {
   position: absolute;
 }
 
-.Canvas > * > * > * > * {
+.Canvas > .viewport > * > * > * > * {
   position: absolute;
 }

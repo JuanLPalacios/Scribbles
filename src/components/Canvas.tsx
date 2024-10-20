@@ -36,9 +36,23 @@ export function Canvas() {
     }, [tool]);
 
     useEffect(()=>{
-        document.documentElement.style.setProperty('--doc-width', `${width}px`);
-        document.documentElement.style.setProperty('--doc-height', `${height}px`);
-    }, [height, width]);
+        const
+            viewportWidth = parseInt(document.documentElement.style.getPropertyValue('--doc-width').split('px')[0]),
+            viewportHeight = parseInt(document.documentElement.style.getPropertyValue('--doc-height').split('px')[0]);
+        if(
+            (viewportWidth !== width)
+            &&(viewportHeight !== height)
+        ){
+            const { width: viewWidth=0, height: viewHeight=0 } = containerRef.current?.getBoundingClientRect()||{};
+
+            setTransform(
+                transform
+                    .translate(viewWidth/2, viewHeight/2)
+                    .translate(-drawing.data.width/2, -drawing.data.height/2));
+            document.documentElement.style.setProperty('--doc-width', `${width}px`);
+            document.documentElement.style.setProperty('--doc-height', `${height}px`);
+        }
+    }, [drawing.data.height, drawing.data.width, height, setTransform, transform, width]);
 
     useEffect(()=>{
         if(containerRef.current){
@@ -165,6 +179,54 @@ export function Canvas() {
         }
     };
 
+    const horizontalScroll = useCallback((e:React.MouseEvent<HTMLDivElement>)=>{
+        const
+            scaleX = viewWidth/barWidth;
+        const mouseMoveHandler = (ev:MouseEvent) => {
+            const deltaX = (ev.pageX - e.pageX);
+            if(
+                (0 <= xScroll+deltaX)
+                &&(xScroll+barWidth+deltaX <= viewWidth)
+            ){
+                setTransform(new DOMMatrix()
+                    .translate(-deltaX*scaleX, 0)
+                    .multiply(transform)
+                );
+            }
+        };
+        const mouseUpHandler = () => {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        };
+
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+    }, [barHeight, barWidth, setTransform, transform, viewHeight, viewWidth, xScroll, yScroll]);
+
+    const verticalScroll = useCallback((e:React.MouseEvent<HTMLDivElement>)=>{
+        const
+            scaleY = viewHeight/barHeight;
+        const mouseMoveHandler = (ev:MouseEvent) => {
+            const deltaY = (ev.pageY - e.pageY);
+            if(
+                (0 <= yScroll+deltaY)
+                &&(yScroll+barHeight+deltaY <= viewHeight)
+            ){
+                setTransform(new DOMMatrix()
+                    .translate(0, -deltaY*scaleY)
+                    .multiply(transform)
+                );
+            }
+        };
+        const mouseUpHandler = () => {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+        };
+
+        document.addEventListener('mousemove', mouseMoveHandler);
+        document.addEventListener('mouseup', mouseUpHandler);
+    }, [barHeight, barWidth, setTransform, transform, viewHeight, viewWidth, xScroll, yScroll]);
+
     useEffect(() => {
         const keyDownHandler = (event:KeyboardEvent) => {
             setKeys({ ...keys, CTRL: event.ctrlKey, SHIFT: event.shiftKey, ALT: event.altKey, [event.key]: true });
@@ -183,37 +245,39 @@ export function Canvas() {
     }, [keys]);
 
     return (
-        <div className="Canvas"
-            ref={containerRef}
-            onPointerDown={pointerdownHandler}
-            onPointerMove={pointermoveHandler}
-            onPointerUp={pointerupHandler}
-            onPointerCancel={pointerupHandler}
-            onPointerLeave={pointermoveHandler}
-            onWheel={wheelHandler}
-        >
+        <div className='Canvas' >
             <div className='h-bar'>
-                <div className='handle' style={{ left: `${xScroll}px`, width: `${barWidth}px` }}></div>
+                <div className='handle' style={{ left: `${xScroll}px`, width: `${barWidth}px` }} onMouseDown={horizontalScroll}></div>
             </div>
             <div className='v-bar'>
-                <div className='handle' style={{ top: `${yScroll}px`, height: `${barHeight}px` }}></div>
+                <div className='handle' style={{ top: `${yScroll}px`, height: `${barHeight}px` }} onMouseDown={verticalScroll}></div>
             </div>
-            <div style={{ transform: `${transform}`, transformOrigin: 'top left' }}>
-                <div ref={ref} style={{ width: `${width}px`, height: `${height}px` }}>
-                    {layers.map((layer, i)=>({ layer, editorLayer: editorLayers[i] })).map(({ layer, editorLayer }, i) => <Layer key={editorLayer.key} values={layer} buffer={(selectedLayer==i)?buffer:undefined} editor={editorLayer} />)}
-                    {handles.map(({ key, icon, position, rotation, onMouseDown }) => <img
-                        key={key}
-                        src={icon}
-                        style={{
-                            left: `${position.x}px`,
-                            top: `${position.y}px`,
-                            width: '24px',
-                            height: '24px',
-                            transform: `translate(${-12}px, ${-12}px) ${rotation}`
-                        }}
-                        alt=""
-                        draggable="false"
-                        onPointerDown={e => onMouseDown(getPointer(e))} />)}
+            <div className="viewport"
+                ref={containerRef}
+                onPointerDown={pointerdownHandler}
+                onPointerMove={pointermoveHandler}
+                onPointerUp={pointerupHandler}
+                onPointerCancel={pointerupHandler}
+                onPointerLeave={pointermoveHandler}
+                onWheel={wheelHandler}
+            >
+                <div style={{ transform: `${transform}`, transformOrigin: 'top left' }}>
+                    <div ref={ref} style={{ width: `${width}px`, height: `${height}px` }}>
+                        {layers.map((layer, i)=>({ layer, editorLayer: editorLayers[i] })).map(({ layer, editorLayer }, i) => <Layer key={editorLayer.key} values={layer} buffer={(selectedLayer==i)?buffer:undefined} editor={editorLayer} />)}
+                        {handles.map(({ key, icon, position, rotation, onMouseDown }) => <img
+                            key={key}
+                            src={icon}
+                            style={{
+                                left: `${position.x}px`,
+                                top: `${position.y}px`,
+                                width: '24px',
+                                height: '24px',
+                                transform: `translate(${-12}px, ${-12}px) ${rotation}`
+                            }}
+                            alt=""
+                            draggable="false"
+                            onPointerDown={e => onMouseDown(getPointer(e))} />)}
+                    </div>
                 </div>
             </div>
         </div>);

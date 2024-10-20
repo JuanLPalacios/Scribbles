@@ -16,10 +16,12 @@ root.render(
     <AppStateProvider>
         <App />
     </AppStateProvider>);
-// TODO: re implement pinch event on the drawing viewport
 window.addEventListener('wheel', e=>{
     if (e.ctrlKey||e.deltaX !== 0)
         e.preventDefault();
+}, { passive: false });
+window.addEventListener('keyup', e=>{
+    e.preventDefault();
 }, { passive: false });
 
 serviceWorkerRegistration.register();

@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - var(--button-diameter) * 2 - 21px);
+  height: calc(100vh - var(--button-diameter) * 2);
   width: calc(100% - var(--button-diameter) * 2);
 }
 .QuickStart > .QuickStart-modal {

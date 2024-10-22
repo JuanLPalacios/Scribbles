@@ -12,7 +12,7 @@ const style:CSSProperties = {
     display: 'flex',
     flexDirection: 'column',
     position: 'absolute',
-    height: 'calc(100% - 2 * var(--button-diameter))',
+    height: 'calc(100vh - 2 * var(--button-diameter))',
     top: 'var(--button-diameter)',
     left: 0,
     zIndex: 5

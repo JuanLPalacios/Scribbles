@@ -16,6 +16,8 @@
 
 html, body {
   overscroll-behavior-x: none;
+  overflow: hidden;
+  height: 100vh;
 }
 
 body {

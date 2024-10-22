@@ -1,6 +1,6 @@
 .Canvas {
   overflow: hidden;
-  height: calc(100vh - var(--button-diameter) * 2 - 21px);
+  height: calc(100vh - var(--button-diameter) * 2);
   width: calc(100vw - var(--button-diameter) * 2);
   background: var(--background2-color);
   position: relative;
@@ -8,7 +8,7 @@
 
 .Canvas > .viewport {
   overflow: hidden;
-  height: calc(100vh - var(--button-diameter) * 2 - 21px - var(--scroll-width));
+  height: calc(100vh - var(--button-diameter) * 2 - var(--scroll-width));
   width: calc(100vw - var(--button-diameter) * 2 - var(--scroll-width));
   background: var(--background2-color);
   position: relative;

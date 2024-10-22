@@ -32,11 +32,12 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
             drawBezier(bufferCtx, bezier, brushWidth, offset, preview){
                 const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 const [[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]] = bezier;
+                const blur = ~~(brushWidth * (1 - brush.hardness) / 2);
                 bufferPatternCtx.putImageData(bufferPatternData, 0, 0);
-                bufferPatternCtx.filter = `blur(${~~(brushWidth * (1 - brush.hardness) / 2)}px)`;
+                bufferPatternCtx.filter = `blur(${blur}px)`;
                 bufferPatternCtx.lineCap = 'round';
                 bufferPatternCtx.lineJoin = 'round';
-                bufferPatternCtx.lineWidth = brushWidth;
+                bufferPatternCtx.lineWidth = brushWidth - blur*2;
                 bufferPatternCtx.beginPath();
                 bufferPatternCtx.moveTo(p0x, p0y);
                 bufferPatternCtx.bezierCurveTo(p1x, p1y, p2x, p2y, x, y);
@@ -52,11 +53,12 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
             drawLine(bufferCtx, line, brushWidth, offset, preview){
                 const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 const [lastPoint, point] = line;
+                const blur = ~~(brushWidth * (1 - brush.hardness) / 2);
                 bufferPatternCtx.putImageData(bufferPatternData, 0, 0);
-                bufferPatternCtx.filter = `blur(${~~(brushWidth * (1 - brush.hardness) / 2)}px)`;
+                bufferPatternCtx.filter = `blur(${blur}px)`;
                 bufferPatternCtx.lineCap = 'round';
                 bufferPatternCtx.lineJoin = 'round';
-                bufferPatternCtx.lineWidth = brushWidth;
+                bufferPatternCtx.lineWidth = brushWidth - blur*2;
                 bufferPatternCtx.beginPath();
                 bufferPatternCtx.moveTo(...lastPoint);
                 bufferPatternCtx.lineTo(...point);
@@ -75,13 +77,14 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
                 const { ctx: previewCtx } = previewBuffer;
                 const { ctx: brushPatternCtx, canvas: brushPatternCanvas } = _brushPatternImage;
                 const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
+                const blur = ~~(brushWidth * (1 - brush.hardness) / 2);
                 ctx?.restore();
                 bufferPatternCtx.lineCap = 'round';
                 bufferPatternCtx.lineJoin = 'round';
-                bufferPatternCtx.lineWidth = brushWidth;
+                bufferPatternCtx.lineWidth = brushWidth - blur*2;
                 previewCtx.lineCap = 'round';
                 previewCtx.lineJoin = 'round';
-                previewCtx.lineWidth = brushWidth;
+                previewCtx.lineWidth = brushWidth - blur*2;
                 bufferPatternCanvas.width = canvas.width;
                 bufferPatternCanvas.height = canvas.height;
                 brushPatternCtx.globalCompositeOperation = 'source-in';
@@ -97,7 +100,7 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
                 previewCtx.fillStyle = pattern||'';
                 //previewCtx.strokeStyle = pattern||'';
                 ctx.globalAlpha = alpha;
-                bufferPatternCtx.filter = `blur(${~~(brushWidth*(1-brush.hardness)/2)}px)`;
+                bufferPatternCtx.filter = `blur(${blur}px)`;
                 bufferPatternCtx.beginPath();
                 bufferPatternCtx.moveTo(...point);
                 bufferPatternCtx.lineTo(...point);

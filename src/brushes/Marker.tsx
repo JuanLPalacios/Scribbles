@@ -38,13 +38,14 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
             drawBezier(bufferCtx, bezier, width, offset, preview){
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
+                const blur = ~~((1-brush.hardness)*width/4);
                 aliasedStrokeCtx.putImageData(aliasedStrokeData, 0, 0);
                 strokeBufferCtx.globalCompositeOperation = 'copy';
                 drawSegment(strokeBufferCtx, lastSegment);
                 strokeBufferCtx.globalCompositeOperation = 'source-out';
                 drawSegment(strokeBufferCtx, bezier);
                 aliasedStrokeCtx.drawImage(strokeBufferCanvas, 0, 0);
-                bufferCtx.filter = `blur(${~~((1-brush.hardness)*width/2)}px)`;
+                bufferCtx.filter = `blur(${blur}px)`;
                 bufferCtx.globalCompositeOperation = 'copy';
                 bufferCtx.drawImage(aliasedStrokeCanvas, 0, 0);
                 //bufferCtx.drawImage(strokeBufferCanvas, 0, 0);
@@ -56,13 +57,14 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
             drawLine(bufferCtx, line, width, offset, preview){
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
+                const blur = ~~((1-brush.hardness)*width/4);
                 aliasedStrokeCtx.putImageData(aliasedStrokeData, 0, 0);
                 strokeBufferCtx.globalCompositeOperation = 'copy';
                 drawSegment(strokeBufferCtx, lastSegment);
                 strokeBufferCtx.globalCompositeOperation = 'source-out';
                 drawSegment(strokeBufferCtx, line);
                 aliasedStrokeCtx.drawImage(strokeBufferCanvas, 0, 0);
-                bufferCtx.filter = `blur(${~~((1-brush.hardness)*width/2)}px)`;
+                bufferCtx.filter = `blur(${blur}px)`;
                 bufferCtx.globalCompositeOperation = 'copy';
                 bufferCtx.drawImage(aliasedStrokeCanvas, 0, 0);
                 //bufferCtx.drawImage(strokeBufferCanvas, 0, 0);
@@ -76,6 +78,7 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
                 const { ctx: bufferCtx } = buffer;
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
+                const blur = ~~((1-brush.hardness)*width/4);
                 strokeBufferCanvas.width = canvas.width;
                 strokeBufferCanvas.height = canvas.height;
                 aliasedStrokeCanvas.width = canvas.width;
@@ -83,7 +86,7 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
                 strokeBufferCtx.lineCap = 'round';
                 strokeBufferCtx.lineJoin = 'round';
                 strokeBufferCtx.strokeStyle = color;
-                strokeBufferCtx.lineWidth = width;
+                strokeBufferCtx.lineWidth = (width - blur*2);
                 strokeBufferCtx.imageSmoothingEnabled = false;
                 strokeBufferCtx.filter = 'url(#no-anti-aliasing)';
                 aliasedStrokeCtx.globalAlpha = alpha;
@@ -93,7 +96,7 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
                 strokeBufferCtx.lineTo(...point);
                 strokeBufferCtx.stroke();
                 aliasedStrokeCtx.drawImage(strokeBufferCanvas, 0, 0);
-                bufferCtx.filter = `blur(${~~((1-brush.hardness)*width/2)}px)`;
+                bufferCtx.filter = `blur(${blur}px)`;
                 bufferCtx.globalCompositeOperation = 'copy';
                 bufferCtx.drawImage(aliasedStrokeCanvas, 0, 0);
                 aliasedStrokeData = aliasedStrokeCtx.getImageData(0, 0, aliasedStrokeCanvas.width, aliasedStrokeCanvas.height);

@@ -3,7 +3,6 @@ import { SerializedBrush } from '../lib/Serialization';
 import { Marker } from '../brushes/Marker';
 import { Solid } from '../brushes/Solid';
 import { BrushMapper } from '../contexts/BrushMapper';
-import { Stiff } from '../brushes/Stiff';
 import { Texture } from '../brushes/Texture';
 import { BrushPair } from '../contexts/BrushRendererContext';
 import { Pattern } from '../brushes/Pattern';
@@ -46,11 +45,6 @@ export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
         name: 'Marker',
         spacing: 5,
         hardness: 1
-    }],
-    [Stiff, {
-        scribbleBrushType: BrushList.Stiff,
-        name: 'Stiff',
-        fibers: []
     }],
     [Pattern, {
         scribbleBrushType: BrushList.Pattern,

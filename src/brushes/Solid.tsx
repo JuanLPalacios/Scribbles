@@ -24,9 +24,10 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 const [,, p3, p4] = bezier;
                 const [[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]] = bezier;
                 const v2 = difference(p4, p3);
-                const finalWidth = width * (1 - (1 - brush.roundness) * vectorProjection(strokeAngle, v2));
+                const blur = ~~(width*(1-brush.hardness)/4);
+                const finalWidth = (width - blur*2) * (1 - (1 - brush.roundness) * vectorProjection(strokeAngle, v2));
                 bufferCtx.lineWidth = finalWidth;
-                bufferCtx.filter = `blur(${~~(width * (1 - brush.hardness) / 2)}px)`;
+                bufferCtx.filter = `blur(${blur}px)`;
                 if(brush.roundness!=1){
                     bufferCtx.beginPath();
                     bufferCtx.moveTo(p0x, p0y);
@@ -49,6 +50,7 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 bufferCtx.moveTo(p0x, p0y);
                 bufferCtx.bezierCurveTo(p1x, p1y, p2x, p2y, x, y);
                 bufferCtx.stroke();
+                bufferCtx.filter = 'blur(0px)';
                 if(!preview){
                     previousWidth = finalWidth;
                 }
@@ -56,8 +58,10 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
             drawLine(bufferCtx, line, width, offset, preview){
                 const [lastPoint, point] = line;
                 const v2 = difference(...line);
-                const finalWidth = width * (1 - (1 - brush.roundness) * vectorProjection(strokeAngle, v2));
+                const blur = ~~(width*(1-brush.hardness)/4);
+                const finalWidth = (width - blur*2) * (1 - (1 - brush.roundness) * vectorProjection(strokeAngle, v2));
                 bufferCtx.lineWidth = Math.min(finalWidth, previousWidth);
+                bufferCtx.filter = `blur(${blur}px)`;
                 if(brush.roundness!=1){
                     const [p0x, p0y] = lastPoint;
                     const [x, y] = point;
@@ -79,9 +83,9 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 }
                 bufferCtx.beginPath();
                 bufferCtx.moveTo(...lastPoint);
-                bufferCtx.filter = `blur(${~~(width * (1 - brush.hardness) / 2)}px)`;
                 bufferCtx.lineTo(...point);
                 bufferCtx.stroke();
+                bufferCtx.filter = 'blur(0px)';
                 if(!preview){
                     previousWidth = finalWidth;
                 }
@@ -90,29 +94,32 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 const { ctx } = drawable;
                 const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
                 const { ctx: previewCtx } = previewBuffer;
+                const blur = ~~(width*(1-brush.hardness)/4);
                 ctx?.restore();
                 bufferCtx.lineCap = 'round';
                 bufferCtx.lineJoin = 'round';
                 bufferCtx.strokeStyle = color;
                 bufferCtx.fillStyle = color;
-                bufferCtx.lineWidth = width*brush.roundness;
+                bufferCtx.lineWidth = (width - blur*2)*brush.roundness;
                 previewCtx.lineCap = 'round';
                 previewCtx.lineJoin = 'round';
                 previewCtx.strokeStyle = color;
                 previewCtx.fillStyle = color;
-                previewCtx.lineWidth = width*brush.roundness;
+                previewCtx.lineWidth = (width - blur*2)*brush.roundness;
                 ctx.globalAlpha = alpha;
-                bufferCtx.filter = `blur(${~~(width*(1-brush.hardness)/2)}px)`;
+                bufferCtx.filter = `blur(${blur}px)`;
                 bufferCtx.beginPath();
                 bufferCtx.moveTo(...point);
                 bufferCtx.lineTo(...point);
-                previewCtx.filter = `blur(${~~(width*(1-brush.hardness)/2)}px)`;
+                previewCtx.filter = `blur(${blur}px)`;
                 previewCtx.beginPath();
                 previewCtx.moveTo(...point);
                 previewCtx.lineTo(...point);
                 bufferCtx.stroke();
                 previewCtx.stroke();
-                previousWidth = width*brush.roundness;
+                bufferCtx.filter = 'blur(0px)';
+                previewCtx.filter = 'blur(0px)';
+                previousWidth = (width - blur*2)*brush.roundness;
                 // FIXME: draw tip shape to create the illusion of the more complex brush
                 ctx.drawImage(bufferCanvas, 0, 0);
             }

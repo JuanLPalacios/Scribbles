@@ -10,7 +10,7 @@ import { useColorOptions } from '../hooks/useColorOptions';
 import { useToleranceOptions } from '../hooks/useToleranceOptions';
 import { useAlphaOptions } from '../hooks/useAlphaOptions';
 import { useDrawing } from '../hooks/useDrawing';
-import { parseColor, renderThumbnail } from '../lib/Graphics';
+import { parseColor } from '../lib/Graphics';
 
 export type FillOptions = ColorOptions & AlphaOptions & ToleranceOptions;
 
@@ -126,7 +126,7 @@ export const Fill = ({ children }: ToolFunctions) => {
             click({ point }): void {
                 const { width, height } = drawing.data;
                 const { buffer, selectedLayer, layers } = drawing.editorState;
-                const { canvas, thumbnail } = layers[selectedLayer];
+                const { canvas } = layers[selectedLayer];
                 const { x, y } = point;
                 buffer.ctx.fillStyle = color;
                 buffer.ctx.globalAlpha = alpha;
@@ -145,7 +145,6 @@ export const Fill = ({ children }: ToolFunctions) => {
                 buffer.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
                 const imageData = canvas.ctx.getImageData(0, 0, width, height);
                 updateLayer({ imageData });
-                renderThumbnail(imageData, thumbnail);
             },
             mouseDown(){},
             mouseMove(){},

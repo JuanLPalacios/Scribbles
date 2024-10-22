@@ -8,7 +8,6 @@ import { useColorOptions } from '../hooks/useColorOptions';
 import { useAlphaOptions } from '../hooks/useAlphaOptions';
 import { useBrushesOptions } from '../hooks/useBrushesOptions';
 import { useDrawing } from '../hooks/useDrawing';
-import { renderThumbnail } from '../lib/Graphics';
 
 export const Draw = ({ children }: ToolFunctions) => {
     const brush = useBrush();
@@ -40,7 +39,7 @@ export const Draw = ({ children }: ToolFunctions) => {
                 if (!down) return;
                 const { width, height } = drawing.data;
                 const { buffer, selectedLayer, layers } = drawing.editorState;
-                const { canvas, thumbnail } = layers[selectedLayer];
+                const { canvas } = layers[selectedLayer];
                 const { x, y } = point;
                 brush.endStroke(buffer, [x, y], color, alpha, brushWidth);
                 canvas.ctx.drawImage(buffer.canvas, 0, 0);
@@ -48,7 +47,6 @@ export const Draw = ({ children }: ToolFunctions) => {
                 down = false;
                 const imageData = canvas.ctx.getImageData(0, 0, width, height);
                 updateLayer({ imageData });
-                renderThumbnail(imageData, thumbnail);
             },
         };
     }, [alpha, brush, brushWidth, color, drawing.data, drawing.editorState, updateLayer]);

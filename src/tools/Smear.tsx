@@ -7,7 +7,6 @@ import { Tool, ToolContext, ToolFunctions } from '../contexts/ToolContext';
 import { useBrushesOptions } from '../hooks/useBrushesOptions';
 import { useAlphaOptions } from '../hooks/useAlphaOptions';
 import { useDrawing } from '../hooks/useDrawing';
-import { renderThumbnail } from '../lib/Graphics';
 import { difference, Point } from '../lib/Vectors2d';
 import { HardnessInput } from '../components/inputs/HardnessInput';
 import { BrushWidthInput } from '../components/inputs/BrushWidthInput';
@@ -115,12 +114,11 @@ export const Smear = ({ children }: ToolFunctions) => {
                 if (!down) return;
                 const { width, height } = drawing.data;
                 const { selectedLayer, layers } = drawing.editorState;
-                const { canvas, thumbnail } = layers[selectedLayer];
+                const { canvas } = layers[selectedLayer];
                 const { x, y } = point;
                 const currentPoint:Point = [x, y];
                 const imageData = canvas.ctx.getImageData(0, 0, width, height);
                 updateLayer({ imageData });
-                renderThumbnail(imageData, thumbnail);
                 lastPoint = currentPoint;
                 down = false;
             },

@@ -14,7 +14,6 @@ import { createDrawable } from '../generators/createDrawable';
 import { useEffect, useMemo } from 'react';
 import { Tool, ToolContext, ToolFunctions } from '../contexts/ToolContext';
 import { useDrawing } from '../hooks/useDrawing';
-import { renderThumbnail } from '../lib/Graphics';
 import { EditorDrawingState } from '../contexts/EditorDrawingContext';
 import { DrawingState } from '../contexts/DrawingContext';
 import { useConfig } from '../hooks/useConfig';
@@ -315,7 +314,7 @@ export const Transform = ({ children }: ToolFunctions) => {
         const endTransform = function(_e: CanvasEvent, layer: LayerState2&EditorLayerState) {
             const { width, height } = drawing.data;
             const { buffer } = drawing.editorState;
-            const { canvas, thumbnail } = layer;
+            const { canvas } = layer;
             canvas.ctx.globalCompositeOperation = 'source-over';
             canvas.ctx.globalAlpha = 1;
             canvas.ctx.setTransform(matrix);
@@ -331,7 +330,6 @@ export const Transform = ({ children }: ToolFunctions) => {
             action = 'none';
             const imageData = canvas.ctx.getImageData(0, 0, width, height);
             updateLayer({ imageData });
-            renderThumbnail(imageData, thumbnail);
         };
 
         const render = function(_layer: LayerState2) {

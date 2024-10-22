@@ -10,7 +10,6 @@ import { useBrush } from '../hooks/useBrush';
 import { useBrushesOptions } from '../hooks/useBrushesOptions';
 import { useAlphaOptions } from '../hooks/useAlphaOptions';
 import { useDrawing } from '../hooks/useDrawing';
-import { renderThumbnail } from '../lib/Graphics';
 
 export type EraseOptions = BrushOptions & AlphaOptions;
 
@@ -62,7 +61,7 @@ export const Erase = ({ children }: ToolFunctions) => {
                 if (!down) return;
                 const { width, height } = drawing.data;
                 const { buffer, selectedLayer, layers } = drawing.editorState;
-                const { canvas, thumbnail } = layers[selectedLayer];
+                const { canvas } = layers[selectedLayer];
                 const { x, y } = point;
                 brush.endStroke(mask, [x, y], '#000000', alpha, brushWidth);
                 renderMask(canvas, buffer);
@@ -75,7 +74,6 @@ export const Erase = ({ children }: ToolFunctions) => {
                 canvas.canvas.style.display = 'inline';
                 const imageData = canvas.ctx.getImageData(0, 0, width, height);
                 updateLayer({ imageData });
-                renderThumbnail(imageData, thumbnail);
                 down = false;
             },
         };

@@ -11,6 +11,7 @@ import { BlendMode, blendModes } from '../types/BlendMode';
 import ReactModal from 'react-modal';
 import { useDrawing } from '../hooks/useDrawing';
 import { DrawingRequired } from '../hoc/DrawingRequired';
+import { InputName } from './inputs/InputName';
 
 const LayerMenu = DrawingRequired(()=>{
     const [sideMenu, setSideMenu] = useState({
@@ -35,7 +36,7 @@ const LayerMenu = DrawingRequired(()=>{
     const { moveLayerDown, moveLayerUp } = drawingActions||{};
     const { data, editorState: { layers: editorLayers, selectedLayer } } = drawing;
     const { layers } = data;
-    const { onAddLayer, onModeChange, onOpacityChange, onOpacityChangePrev, onRemoveLayer, onSelect, onVisibilityChange } = useMemo(()=>{
+    const { onAddLayer, onModeChange, onOpacityChange, onOpacityChangePrev, onRemoveLayer, onSelect, onVisibilityChange, onNameChange } = useMemo(()=>{
         const { editorState: { selectedLayer } } = drawing;
         const { addLayer, removeLayer, updateLayer, forceUpdate, selectLayer } = drawingActions;
         return{
@@ -59,6 +60,10 @@ const LayerMenu = DrawingRequired(()=>{
             },
             onVisibilityChange(index:number, visible:boolean){
                 updateLayer(index, { visible });
+            },
+            onNameChange(index:number, name:string){
+                name = name.trim()||`Layer ${index}`;
+                updateLayer(index, { name });
             },
             onModeChange(mixBlendMode:BlendMode){
                 updateLayer({ mixBlendMode });
@@ -110,8 +115,7 @@ const LayerMenu = DrawingRequired(()=>{
                                         <div
                                             key={`${editorLayer.key}-item`}
                                             className={`layer ${selectedLayer === i ? 'selected' : ''}`}
-                                            onClick={() => { if(onSelect)onSelect(i);
-                                            }}>
+                                            onClick={() => { if(selectedLayer!==i)onSelect(i); }}>
                                             <label>
                                                 <input
                                                     type="checkbox"
@@ -128,7 +132,7 @@ const LayerMenu = DrawingRequired(()=>{
                                                 key={`${editorLayer.key}-thumb`}
                                             />
                                             <div>
-                                                {layer.name}
+                                                <InputName value={layer.name} onChange={e=>onNameChange(i, e.target.value)} />
                                             </div>
                                         </div>
                                     ))}

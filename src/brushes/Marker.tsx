@@ -74,15 +74,16 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
                 }
             },
             setup(drawable, buffer, previewBuffer, point, color, alpha, width){
-                const { ctx, canvas } = drawable;
-                const { ctx: bufferCtx } = buffer;
+                const { ctx } = drawable;
+                const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
                 const blur = ~~((1-brush.hardness)*width/4);
-                strokeBufferCanvas.width = canvas.width;
-                strokeBufferCanvas.height = canvas.height;
-                aliasedStrokeCanvas.width = canvas.width;
-                aliasedStrokeCanvas.height = canvas.height;
+                ctx.globalAlpha = 1;
+                strokeBufferCanvas.width = bufferCanvas.width;
+                strokeBufferCanvas.height = bufferCanvas.height;
+                aliasedStrokeCanvas.width = bufferCanvas.width;
+                aliasedStrokeCanvas.height = bufferCanvas.height;
                 strokeBufferCtx.lineCap = 'round';
                 strokeBufferCtx.lineJoin = 'round';
                 strokeBufferCtx.strokeStyle = color;
@@ -101,7 +102,6 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
                 bufferCtx.drawImage(aliasedStrokeCanvas, 0, 0);
                 aliasedStrokeData = aliasedStrokeCtx.getImageData(0, 0, aliasedStrokeCanvas.width, aliasedStrokeCanvas.height);
                 lastSegment = [point, point];
-                ctx.drawImage(aliasedStrokeCanvas, 0, 0);
             }
         };
     }, [aliasedStroke, brush.hardness, strokeBuffer]);

@@ -89,7 +89,6 @@ export const Texture = (({ brush, children }: BrushFunctions<SerializedTextureBr
                 const { ctx: bufferCtx } = buffer;
                 const { ctx: previewCtx } = previewBuffer;
                 const { ctx: brushTipCtx, canvas: brushTipCanvas } = _brushTipImage;
-                if (!ctx || !bufferCtx || !previewCtx || !brushTipCtx) return;
                 brushTipCtx.fillStyle = color;
                 ctx.globalCompositeOperation = 'source-over';
                 bufferCtx.globalCompositeOperation = 'source-over';

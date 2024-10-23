@@ -6,7 +6,7 @@ import { DrawableState } from '../types/DrawableState';
 
 export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacing: number; name: string; scribbleBrushType: number; }>>({ brush, children, renderer: { drawBezier, drawLine, setup } }: S) {
     const buffer = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
-    const previewBuffer = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
+    useMemo(()=>console.log(buffer), [buffer]);
     const r = useMemo<BrushRenderer>(() => {
         let lastPoint: Point = [0, 0];
         let lastVector: Point = [0, 0];
@@ -16,18 +16,15 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
         let currentLength = 0;
         let lastStrokeLength = 0;
         let { spacing } = brush;
+        let previewData:ImageData;
 
         const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
             const { ctx, canvas } = drawable;
             const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
-            const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
             bufferCanvas.width = canvas.width;
             bufferCanvas.height = canvas.height;
-            previewCanvas.width = canvas.width;
-            previewCanvas.height = canvas.height;
             ctx.globalCompositeOperation = 'source-over';
             bufferCtx.globalCompositeOperation = 'source-over';
-            previewCtx.globalCompositeOperation = 'source-over';
             finished = true;
             offset = 0;
             currentLength = 0;
@@ -35,15 +32,15 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             lastPoint = point;
             lastVector = [0, 0];
             lastSegments = [point];
-            setup(drawable, buffer, previewBuffer, point, color, alpha, width);
+            setup(drawable, buffer, buffer, point, color, alpha, width);
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(bufferCanvas, 0, 0);
+            previewData = bufferCtx.getImageData(0, 0, canvas.width, canvas.height);
         };
 
         const drawStroke = (drawable: DrawableState, point: Point, _color: string, _alpha: number, width: number) => {
             const { ctx, canvas } = drawable;
             const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
-            const { ctx: previewCtx, canvas: previewCanvas } = previewBuffer;
             const v2 = difference(point, lastPoint);
             finished = false;
             const dotProduct = dotProduct2D(v2, lastVector);
@@ -69,21 +66,21 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             currentLength += strokeLength;
             lastSegments.push(point);
             if ((currentLength < spacing)) {
-                previewCtx.clearRect(0, 0, canvas.width, canvas.height);
-                previewCtx.drawImage(bufferCanvas, 0, 0);
+                //preview
                 if (lastSegments.length > 2) {
                     const bezier = createBezier(lastSegments);
                     currentLength = bezierArcLength(bezier);
                     lastVector = difference(bezier[3], bezier[2]);
-                    drawBezier(previewCtx, bezier, width, offset, true);
+                    drawBezier(bufferCtx, bezier, width, offset, true);
                 }
                 else {
                     lastVector = v2;
                     const [p1, p2] = lastSegments;
-                    drawLine(previewCtx, [p1, p2], width, offset, true);
+                    drawLine(bufferCtx, [p1, p2], width, offset, true);
                 }
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(previewCanvas, 0, 0);
+                ctx.drawImage(bufferCanvas, 0, 0);
+                bufferCtx.putImageData(previewData, 0, 0);
                 finished = true;
                 lastPoint = point;
                 return;
@@ -108,10 +105,10 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             lastSegments = [point];
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(bufferCanvas, 0, 0);
+            previewData = bufferCtx.getImageData(0, 0, canvas.width, canvas.height);
         };
 
         const endStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
-            const { ctx, } = drawable;
             if (!finished) {
                 const temp = spacing;
                 spacing = 0;
@@ -119,10 +116,9 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
                 spacing = temp;
             }
             // FIXME: draw tip shape to create the illusion of the more complex brush
-            ctx?.restore();
         };
         return { drawStroke, endStroke, startStroke };
-    }, [brush, buffer, drawBezier, drawLine, previewBuffer, setup]);
+    }, [brush, buffer, drawBezier, drawLine, setup]);
     return <BrushRendererContext.Provider value={r}>
         {children}
     </BrushRendererContext.Provider>;

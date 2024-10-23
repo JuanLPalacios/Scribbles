@@ -6,6 +6,7 @@ import { DrawableState } from '../types/DrawableState';
 import { BrushList } from '../lib/BrushList';
 import { SerializedImageData } from '../types/SerializedImageData';
 import { AbstractSmoothSpacing } from '../abstracts/AbstractSmoothSpacing';
+import { canvasConsole } from '../lib/canvasConsole';
 
 export type SerializedPatternBrush = {
     scribbleBrushType: BrushList.Pattern,
@@ -72,45 +73,44 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
                 }
             },
             setup(drawable, buffer, previewBuffer, point, color, alpha, brushWidth){
-                const { ctx, canvas } = drawable;
+                const { ctx } = drawable;
                 const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
                 const { ctx: previewCtx } = previewBuffer;
                 const { ctx: brushPatternCtx, canvas: brushPatternCanvas } = _brushPatternImage;
                 const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 const blur = ~~(brushWidth * (1 - brush.hardness) / 2);
-                ctx?.restore();
-                bufferPatternCtx.lineCap = 'round';
-                bufferPatternCtx.lineJoin = 'round';
-                bufferPatternCtx.lineWidth = brushWidth - blur*2;
-                previewCtx.lineCap = 'round';
                 previewCtx.lineJoin = 'round';
+                previewCtx.lineCap = 'round';
                 previewCtx.lineWidth = brushWidth - blur*2;
-                bufferPatternCanvas.width = canvas.width;
-                bufferPatternCanvas.height = canvas.height;
+                bufferPatternCanvas.width = bufferCanvas.width;
+                bufferPatternCanvas.height = bufferCanvas.height;
                 brushPatternCtx.globalCompositeOperation = 'source-in';
                 brushPatternCtx.fillStyle = color;
                 brushPatternCtx.fillRect(0, 0, brushPatternCanvas.width, brushPatternCanvas.height);
                 pattern = brushPatternCtx.createPattern(brushPatternCanvas, 'repeat');
-                bufferPatternCtx.clearRect(0, 0, canvas.width, canvas.height);
+                bufferPatternCtx.lineCap = 'round';
+                bufferPatternCtx.lineJoin = 'round';
+                bufferPatternCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
                 bufferPatternCtx.fillStyle = pattern||'';
-                bufferPatternCtx.fillRect(0, 0, canvas.width, canvas.height);
-                patternData = bufferPatternCtx.getImageData(0, 0, canvas.width, canvas.height);
-                bufferPatternCtx.clearRect(0, 0, canvas.width, canvas.height);
+                bufferPatternCtx.fillRect(0, 0, bufferCanvas.width, bufferCanvas.height);
+                patternData = bufferPatternCtx.getImageData(0, 0, bufferCanvas.width, bufferCanvas.height);
+                bufferPatternCtx.clearRect(0, 0, bufferCanvas.width, bufferCanvas.height);
                 //bufferCtx.strokeStyle = pattern||'';
-                previewCtx.fillStyle = pattern||'';
                 //previewCtx.strokeStyle = pattern||'';
-                ctx.globalAlpha = alpha;
+                bufferPatternCtx.lineWidth = brushWidth - blur*2;
                 bufferPatternCtx.filter = `blur(${blur}px)`;
+                bufferPatternCtx.globalAlpha = 1;
                 bufferPatternCtx.beginPath();
                 bufferPatternCtx.moveTo(...point);
                 bufferPatternCtx.lineTo(...point);
                 bufferPatternCtx.stroke();
+                previewCtx.fillStyle = pattern||'';
+                ctx.globalAlpha = alpha;
+                bufferCtx.globalAlpha = 1;
                 bufferCtx.putImageData(patternData, 0, 0);
                 bufferCtx.globalCompositeOperation = 'destination-in';
                 bufferCtx.drawImage(bufferPatternCanvas, 0, 0);
                 bufferCtx.globalCompositeOperation = 'source-over';
-                ctx.drawImage(bufferCanvas, 0, 0);
-                //bufferCtx.drawImage(brushPatternCanvas, 0, 0);
                 bufferPatternData = bufferPatternCtx.getImageData(0, 0, bufferPatternCanvas.width, bufferPatternCanvas.height);
             }
         };

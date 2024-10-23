@@ -111,7 +111,6 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 const { ctx: previewCtx } = previewBuffer;
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const blur = ~~(brushWidth*(1-brush.hardness)/4);
-                ctx?.restore();
                 const { width, height } = bufferCanvas;
                 ctx.globalAlpha = alpha;
                 strokeBufferCanvas.width = width;
@@ -135,7 +134,6 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 strokeBufferData = strokeBufferCtx.getImageData(0, 0, strokeBufferCanvas.width, strokeBufferCanvas.height);
                 previousWidth = (brushWidth - blur*2)*brush.roundness;
                 // FIXME: draw tip shape to create the illusion of the more complex brush
-                ctx.drawImage(bufferCanvas, 0, 0);
             }
         };
     }, [strokeBuffer, brush.hardness, brush.roundness, strokeAngle]);

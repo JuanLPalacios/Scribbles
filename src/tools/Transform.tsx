@@ -10,13 +10,14 @@ import rotateBottomRight from '../icons/corner-double-bottom-right-svgrepo-com.s
 import rotateTopLeft from '../icons/corner-double-top-left-svgrepo-com.svg';
 import rotateTopRight from '../icons/corner-double-top-right-svgrepo-com.svg';
 import { CanvasEvent } from '../types/CanvasEvent';
-import { createDrawable } from '../generators/createDrawable';
 import { useEffect, useMemo } from 'react';
 import { Tool, ToolContext, ToolFunctions } from '../contexts/ToolContext';
 import { useDrawing } from '../hooks/useDrawing';
 import { EditorDrawingState } from '../contexts/EditorDrawingContext';
 import { DrawingState } from '../contexts/DrawingContext';
 import { useConfig } from '../hooks/useConfig';
+import { RectCut } from './cut/RectCut';
+import { LasoCut } from './cut/LasoCut';
 
 const SKEW_ICONS = [
     rotateTopLeft,
@@ -29,6 +30,12 @@ const SKEW_ICONS = [
     hSkew
 ];
 
+export type CutActions = {
+    startCut: ({ point }: CanvasEvent, _layer: LayerState2 & EditorLayerState) => void;
+    endCut: (e: CanvasEvent, layer: LayerState2 & EditorLayerState) => boolean;
+    cut: ({ point }: CanvasEvent, layer: LayerState2 & EditorLayerState) => void;
+}
+
 export const Transform = ({ children }: ToolFunctions) => {
     const drawingController = useDrawing();
     const [{ doubleClickTimeOut }] = useConfig();
@@ -36,9 +43,10 @@ export const Transform = ({ children }: ToolFunctions) => {
         let drawing: EditorDrawingState,
             updateLayer: (...[index, layer]: [number, Partial<LayerState2>] | [Partial<LayerState2>]) => void,
             forceUpdate: ({ data, editorState }: {
-                data?: Partial<DrawingState>;
-                editorState?: Partial<EditorDrawingState['editorState']>;
-            })=>void;
+            data?: Partial<DrawingState>;
+            editorState?: Partial<EditorDrawingState['editorState']>;
+        })=>void;
+        let cutActions:CutActions;
         let lastClickTime = 0;
         let center = new DOMPoint();
         let handleH: Handle[] = [];
@@ -175,71 +183,34 @@ export const Transform = ({ children }: ToolFunctions) => {
             render(layer);
         };
 
-        const startRectCut = function({ point }: CanvasEvent, _layer:LayerState2&EditorLayerState){
-            center = point;
+        const startRectCut = function(e: CanvasEvent, layer:LayerState2&EditorLayerState){
             action = 'rect-cut';
-            const { buffer } = drawing.editorState;
-            if(!buffer.ctx) return;
-            const tile = document.createElement('canvas');
-            const square = 5;
-            tile.width = tile.height = 2*square;
-            const ctx = tile.getContext('2d');
-            if(!ctx) return;
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, tile.width, tile.height);
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, square, square);
-            ctx.fillRect(square, square, square, square);
-            buffer.ctx.strokeStyle = buffer.ctx.createPattern(tile, 'repeat') || '';
-            buffer.ctx.lineWidth = 1;
-            buffer.ctx.fillStyle = '#000000';
+            cutActions = RectCut({
+                callback([x, y]){
+                    action = 'transform';
+                    startTransform(e, layer, x, y);
+                },
+                drawing
+            });
+            cutActions = LasoCut({
+                callback([x, y]){
+                    action = 'transform';
+                    startTransform(e, layer, x, y);
+                },
+                drawing
+            });
+            cutActions.startCut(e, layer);
         };
 
         const endRectCut = function(e: CanvasEvent, layer:LayerState2&EditorLayerState){
-            const { x: cx, y: cy } = center;
-            const { point: { x: px, y: py } } = e;
-            const { height, width } = drawing.data;
-            const
-                x = Math.min(px, cx),
-                y = Math.min(py, cy),
-                w = Math.abs(px-cx),
-                h = Math.abs(py-cy);
-            if((w==0)||(h==0)){
+            if(!cutActions.endCut(e, layer)){
                 action = 'none';
                 return;
             }
-            const { canvas } = layer;
-            const { buffer } = drawing.editorState;
-            const mask = createDrawable({ size: [buffer.canvas.width, buffer.canvas.height] });
-            if(!buffer.ctx || !mask.ctx || !canvas.ctx) return;
-            buffer.ctx.clearRect(0, 0, width, height);
-            //this is unnecesary but is ment to be a reference, once the other selection are bing implemented
-            buffer.ctx.fillRect(x, y, w, h);
-            mask.ctx.drawImage(buffer.canvas, 0, 0);
-            buffer.ctx.globalCompositeOperation = 'source-in';
-            buffer.ctx.drawImage(canvas.canvas, 0, 0);
-            canvas.ctx.globalCompositeOperation = 'destination-out';
-            canvas.ctx.drawImage(mask.canvas, 0, 0);
-            mask.canvas.width = w;
-            mask.canvas.height = h;
-            mask.ctx.drawImage(buffer.canvas, x, y, w, h, 0, 0, w, h);
-            buffer.canvas.width = w;
-            buffer.canvas.height = h;
-            buffer.ctx.globalCompositeOperation = 'source-over';
-            buffer.ctx.drawImage(mask.canvas, 0, 0);
-            canvas.ctx.globalCompositeOperation = 'source-over';
-            action = 'transform';
-            startTransform(e, layer, x, y);
         };
 
-        const rectCut = function({ point }: CanvasEvent, layer:LayerState2&EditorLayerState){
-            const { x: cx, y: cy } = center;
-            const { x, y } = point;
-            const { imageData: { width, height } } = layer;
-            const { buffer } = drawing.editorState;
-            if(!buffer.ctx) return;
-            buffer.ctx.clearRect(0, 0, width, height);
-            buffer.ctx.strokeRect(Math.min(x, cx), Math.min(y, cy), Math.abs(x-cx), Math.abs(y-cy));
+        const rectCut = function(e: CanvasEvent, layer:LayerState2&EditorLayerState){
+            cutActions.cut(e, layer);
         };
 
         const startTransform = function(_e: CanvasEvent, layer:LayerState2&EditorLayerState, dx = 0, dy = 0){
@@ -438,7 +409,7 @@ export const Transform = ({ children }: ToolFunctions) => {
                 //setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
             }
         };
-    }, []);
+    }, [doubleClickTimeOut]);
     useEffect(()=>{
         // FIXME this should use a reference instead
         r.setup(...([drawingController] as unknown as []));

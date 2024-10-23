@@ -29,11 +29,11 @@ export function Canvas() {
         barWidth = Math.min(viewWidth/2, viewWidth**2/drawingWidth/2),
         barHeight = Math.min(viewHeight/2, viewHeight**2/drawingHeight/2);
     const
-        posX = viewLeft-drawingLeft,
-        posY = viewTop-drawingTop;
+        posX = (viewLeft+viewWidth/2)-(drawingLeft+drawingWidth/2),
+        posY = (viewTop+viewHeight/2)-(drawingTop+drawingHeight/2);
     const
-        xScroll = Math.min(viewWidth-barWidth, Math.max(0, posX*barWidth/viewWidth+(viewWidth-barWidth*3/4)/2)),
-        yScroll = Math.min(viewHeight-barHeight, Math.max(0, posY*barHeight/viewHeight+(viewHeight-barHeight*3/4)/2));
+        xScroll = Math.min(viewWidth-barWidth, Math.max(0, posX*barWidth/viewWidth+(viewWidth-barWidth)/2)),
+        yScroll = Math.min(viewHeight-barHeight, Math.max(0, posY*barHeight/viewHeight+(viewHeight-barHeight)/2));
     useEffect(()=>{
         //editorDispatch({ type: 'editor/forceUpdate', payload: temp2 });
 

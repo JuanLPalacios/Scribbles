@@ -1,4 +1,4 @@
-import { useState, useEffect, CSSProperties } from 'react';
+import { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { uid } from '../../lib/uid';
 
@@ -8,17 +8,8 @@ type MenuProps = {
     children?: React.ReactNode;
   };
 
-const style:CSSProperties = {
-    display: 'flex',
-    position: 'absolute',
-    width: 'calc(100% - 2 * var(--button-diameter))',
-    left: 'var(--button-diameter)',
-    bottom: 0,
-    zIndex: 5
-};
-
 export const BottomMenu = ({ children }:MenuProps) => {
-    return <div id={id} className="menu" style={style} >
+    return <div id={id} className="menu BottomMenu" >
         {children}
     </div>;
 };

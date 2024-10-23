@@ -10,6 +10,7 @@ import { ToolContextProvider } from './contexts/ToolContextProvider';
 import { useEditor } from './hooks/useEditor';
 import { QuickStart } from './components/QuickStart';
 import { Canvas } from './components/Canvas';
+import { FullScreenToggle } from './components/FullScreenToggle';
 
 function App() {
     const [editor] = useEditor();
@@ -26,6 +27,7 @@ function App() {
                         :<QuickStart/>}
                 </ToolContextProvider>
                 <RightMenu>
+                    <FullScreenToggle/>
                     <Toolbar />
                     <LayerMenu />
                 </RightMenu>

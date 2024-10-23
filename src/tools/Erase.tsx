@@ -21,11 +21,11 @@ export const Erase = ({ children }: ToolFunctions) => {
     const mask = useMemo(()=>createDrawable({ size: [1, 1] }), []);
     const r = useMemo<Tool>(()=>{
         let down = false;
+        let canvasData:ImageData;
 
         const renderMask = function(canvas:DrawableState, buffer:DrawableState){
             if(buffer.ctx){
-                buffer.ctx.globalCompositeOperation = 'copy';
-                buffer.ctx.drawImage(canvas.canvas, 0, 0);
+                buffer.ctx.putImageData(canvasData, 0, 0);
                 buffer.ctx.globalCompositeOperation = 'destination-out';
                 buffer.ctx.drawImage(mask.canvas, 0, 0);
             }
@@ -43,8 +43,11 @@ export const Erase = ({ children }: ToolFunctions) => {
                 const { buffer, selectedLayer, layers } = drawing.editorState;
                 const { x, y } = point;
                 const { canvas } = layers[selectedLayer];
-                canvas.canvas.style.display = 'none';
+                const { width, height } = canvas.canvas;
+                canvasData = canvas.ctx.getImageData(0, 0, width, height);
+                canvas.ctx.clearRect(0, 0, width, height);
                 mask.ctx.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
+                buffer.ctx.globalAlpha = 1;
                 brush.startStroke(mask, [x, y], '#000000', alpha, brushWidth);
                 renderMask(canvas, buffer);
                 down = true;
@@ -65,14 +68,9 @@ export const Erase = ({ children }: ToolFunctions) => {
                 const { x, y } = point;
                 brush.endStroke(mask, [x, y], '#000000', alpha, brushWidth);
                 renderMask(canvas, buffer);
-                if(canvas.ctx){
-                    canvas.ctx.globalCompositeOperation = 'copy';
-                    canvas.ctx?.drawImage(buffer.canvas, 0, 0);
-                    canvas.ctx.globalCompositeOperation = 'source-over';
-                }
+                const imageData = buffer.ctx.getImageData(0, 0, width, height);
+                canvas.ctx.putImageData(imageData, 0, 0);
                 buffer.ctx?.clearRect(0, 0, buffer.canvas.width, buffer.canvas.height);
-                canvas.canvas.style.display = 'inline';
-                const imageData = canvas.ctx.getImageData(0, 0, width, height);
                 updateLayer({ imageData });
                 down = false;
             },

@@ -8,7 +8,7 @@
 .brush.dropdown:focus-within ul {
   position: absolute;
   overflow-y: scroll;
-  height: 50vh;
+  height: 50svh;
   opacity: .8;
 }
 
@@ -16,4 +16,12 @@
   display: flex;
   justify-content: center;
   padding: 2px 0;
+}
+
+@media screen and (orientation:portrait) { 
+
+  .brush.dropdown:focus-within ul {
+    height: 50vw;
+  }  
+
 }

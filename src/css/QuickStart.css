@@ -2,7 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - var(--button-diameter) * 2);
+  height: calc(100svh - var(--button-diameter) * 2);
   width: calc(100% - var(--button-diameter) * 2);
 }
 .QuickStart > .QuickStart-modal {
@@ -17,4 +17,13 @@
 
 .QuickStart > .QuickStart-modal button {
   color: var(--main-color);
+}
+
+@media screen and (orientation:portrait) { 
+
+  .QuickStart {
+    height: calc(100% - var(--button-diameter) * 2);
+    width: calc(100svh - var(--button-diameter) * 2);
+  }
+
 }

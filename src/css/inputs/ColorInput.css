@@ -22,7 +22,7 @@
 .ColorInput.dropdown > ul {
   height: auto;
   max-width: 25vw;
-  max-height: 25vh;
+  max-height: 25svh;
   flex-wrap: wrap;
   left: var(--button-diameter);
 }
@@ -35,4 +35,13 @@
 .ColorInput.dropdown:focus-within > ul {
   overflow-y: scroll;
   position: absolute;
+}
+
+@media screen and (orientation:portrait) { 
+
+  .ColorInput.dropdown > ul {
+    max-width: 25svh;
+    max-height: 25lvw;
+  }
+
 }

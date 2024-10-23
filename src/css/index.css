@@ -17,7 +17,7 @@
 html, body {
   overscroll-behavior-x: none;
   overflow: hidden;
-  height: 100vh;
+  height: 100svh;
 }
 
 body {
@@ -137,7 +137,7 @@ button:focus {
 .dropdown > ul {
   display: flex;
   max-width: vw;
-  max-height: vh;
+  max-height: svh;
   flex-direction: column;
   background: var(--background2-color);
   list-style: none;
@@ -158,4 +158,30 @@ button:focus {
 
 .ReactModal__Overlay {
   z-index: 10;
+}
+
+@media screen and (orientation:portrait) { 
+
+  html, body {
+    height: 100vw;
+    width: 100svh;
+  }
+  
+  html {
+    position: absolute;
+  }
+
+  body {
+    position: relative;
+    transform-origin: top left;
+    transform: rotate(-90deg);
+    left: 0;
+    top: 100svh;
+  }
+  
+  .dropdown > ul {
+    max-width: svh;
+    max-height: vw;
+  }
+
 }

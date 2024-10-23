@@ -34,7 +34,7 @@ export default defineConfig({
         registerType: 'autoUpdate'
     })],
     server: {
-        host: '127.0.0.1',
+        host: true,
         port: 3000,
     },
 });

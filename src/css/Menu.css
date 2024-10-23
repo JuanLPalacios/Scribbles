@@ -51,7 +51,7 @@
 }
 
 .brush-list {
-  height: calc(100vh - 15rem);
+  height: calc(100svh - 15rem);
   overflow-y: auto;
 }
 
@@ -71,4 +71,12 @@ ul.brushes li > div {
   display: flex;
   justify-content: center;
   padding: 2px 0;
+}
+
+@media screen and (orientation:portrait) { 
+
+  .brush-list {
+    height: calc(100vw - 15rem);
+  }
+
 }

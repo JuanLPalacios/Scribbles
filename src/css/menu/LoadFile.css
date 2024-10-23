@@ -3,6 +3,14 @@
     grid-template-columns: auto auto;
     gap: 2px;
     overflow-y: auto;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100svh - 200px);
     padding-right: 5px;
+}
+
+@media screen and (orientation:portrait) { 
+
+    .LoadFile .table {
+        max-height: calc(100vw - 200px);
+    }
+
 }

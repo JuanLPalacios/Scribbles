@@ -17,8 +17,9 @@ export function Canvas() {
     const ref = useRef<HTMLDivElement>(null);
     const [keys, setKeys] = useState<{[key:string]:boolean}>({});
     // FIXME: touches oldTouches and oldTransform cause unnecessary rerenders on tool actions
-    const [touches, setTouches] = useState<{[key:string]:React.PointerEvent<HTMLDivElement>}>({});
-    const [oldTouches, setOldTouches] = useState<{[key:string]:React.PointerEvent<HTMLDivElement>}>({});
+    const touchesRef = useRef<{[key:string]:React.PointerEvent<HTMLDivElement>}>({});
+    const oldTouchesRef = useRef<{[key:string]:React.PointerEvent<HTMLDivElement>}>({});
+    const toolStatedRef = useRef(false);
     const [oldTransform, setOldTransform] = useState<DOMMatrix>(new DOMMatrix());
     const tool = useTool();
     const containerRef = useRef<HTMLDivElement>(null);
@@ -80,34 +81,41 @@ export function Canvas() {
     function pointerdownHandler(ev:React.PointerEvent<HTMLDivElement>) {
         if(ev.buttons!==1)return;
         (document.activeElement as HTMLElement).blur();
-        const keys = Object.keys(touches);
-        if (keys.length === 0) {
-            const pointer = getPointer(ev);
-            tool.mouseDown(pointer);
-        }
-        setTouches({ ...touches, [ev.pointerId]: ev });
-        setOldTouches({ ...oldTouches, [ev.pointerId]: ev });
+        touchesRef.current[ev.pointerId] = ev;
+        oldTouchesRef.current[ev.pointerId] = ev;
+        setTimeout(()=>{
+            const keys = Object.keys(touchesRef.current);
+            if (keys.length === 1) {
+                const pointer = getPointer(ev);
+                tool.mouseDown(pointer);
+                toolStatedRef.current = true;
+            }
+        });
         setOldTransform(new DOMMatrix(transform.toString()));
     }
 
     const pointermoveHandler = function(ev:React.PointerEvent<HTMLDivElement>) {
         if(ev.buttons!==1)return;
-        setTouches({ ...touches, [ev.pointerId]: ev });
-        touches[ev.pointerId]= ev;
-        const keys = Object.keys(touches);
+        touchesRef.current[ev.pointerId] = ev;
+        const keys = Object.keys(touchesRef.current);
         if (keys.length === 2) {
             ev.preventDefault();
             ev.stopPropagation();
-            const prev = oldTouches[keys[0]];
-            const newPoint = touches[keys[0]];
+            if(toolStatedRef.current){
+                const pointer = getPointer(ev);
+                tool.mouseUp(pointer);
+                toolStatedRef.current = false;
+            }
+            const prev = oldTouchesRef.current[keys[0]];
+            const newPoint = touchesRef.current[keys[0]];
             const x = newPoint.clientX - viewLeft;
             const y = newPoint.clientY - viewTop;
             const px = newPoint.clientX - prev.clientX;
             const py = newPoint.clientY - prev.clientY;
-            const vx = touches[keys[1]].screenX -touches[keys[0]].screenX,
-                vy = touches[keys[1]].clientY -touches[keys[0]].clientY,
-                vox = oldTouches[keys[1]].screenX -oldTouches[keys[0]].screenX,
-                voy = oldTouches[keys[1]].clientY -oldTouches[keys[0]].clientY;
+            const vx = touchesRef.current[keys[1]].screenX -touchesRef.current[keys[0]].screenX,
+                vy = touchesRef.current[keys[1]].clientY -touchesRef.current[keys[0]].clientY,
+                vox = oldTouchesRef.current[keys[1]].screenX -oldTouchesRef.current[keys[0]].screenX,
+                voy = oldTouchesRef.current[keys[1]].clientY -oldTouchesRef.current[keys[0]].clientY;
             const scale = Math.sqrt((vx**2+vy**2))/Math.sqrt((vox**2+voy**2));
             const angle = Math.atan2(vy, vx) - Math.atan2(voy, vox);
 
@@ -129,17 +137,15 @@ export function Canvas() {
     };
 
     const pointerupHandler = function(ev:React.PointerEvent<HTMLDivElement>) {
-        if(!touches[ev.pointerId])return;
-        delete touches[ev.pointerId];
-        delete oldTouches[ev.pointerId];
-        const keys = Object.keys(touches);
+        if(!touchesRef.current[ev.pointerId])return;
+        delete touchesRef.current[ev.pointerId];
+        delete oldTouchesRef.current[ev.pointerId];
+        const keys = Object.keys(touchesRef.current);
         if(keys.length == 0){
             const pointer = getPointer(ev);
             tool.mouseUp(pointer);
             tool.click(pointer);
         }
-        setTouches({ ...touches });
-        setOldTouches({ ...oldTouches });
     };
 
     const wheelHandler = function(ev:React.WheelEvent<HTMLDivElement>) {
@@ -209,7 +215,7 @@ export function Canvas() {
 
         document.addEventListener('mousemove', mouseMoveHandler);
         document.addEventListener('mouseup', mouseUpHandler);
-    }, [barHeight, barWidth, setTransform, transform, viewHeight, viewWidth, xScroll, yScroll]);
+    }, [barWidth, setTransform, transform, viewWidth, xScroll]);
 
     const verticalScroll = useCallback((e:React.MouseEvent<HTMLDivElement>)=>{
         const
@@ -233,7 +239,7 @@ export function Canvas() {
 
         document.addEventListener('mousemove', mouseMoveHandler);
         document.addEventListener('mouseup', mouseUpHandler);
-    }, [barHeight, barWidth, setTransform, transform, viewHeight, viewWidth, xScroll, yScroll]);
+    }, [barHeight, setTransform, transform, viewHeight, yScroll]);
 
     useEffect(() => {
         const keyDownHandler = (event:KeyboardEvent) => {

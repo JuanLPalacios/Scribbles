@@ -6,7 +6,6 @@ import { DrawableState } from '../types/DrawableState';
 
 export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacing: number; name: string; scribbleBrushType: number; }>>({ brush, children, renderer: { drawBezier, drawLine, setup } }: S) {
     const buffer = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
-    useMemo(()=>console.log(buffer), [buffer]);
     const r = useMemo<BrushRenderer>(() => {
         let lastPoint: Point = [0, 0];
         let lastVector: Point = [0, 0];

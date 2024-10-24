@@ -95,7 +95,15 @@ export function Canvas() {
     }
 
     const pointermoveHandler = function(ev:React.PointerEvent<HTMLDivElement>) {
-        if(ev.buttons!==1)return;
+        if(ev.buttons!==1){
+            if(toolStatedRef.current){
+                const pointer = getPointer(ev);
+                tool.mouseUp(pointer);
+                tool.click(pointer);
+                toolStatedRef.current = false;
+            }
+            return;
+        }
         touchesRef.current[ev.pointerId] = ev;
         const keys = Object.keys(touchesRef.current);
         if (keys.length === 2) {
@@ -104,6 +112,7 @@ export function Canvas() {
             if(toolStatedRef.current){
                 const pointer = getPointer(ev);
                 tool.mouseUp(pointer);
+                tool.click(pointer);
                 toolStatedRef.current = false;
             }
             const prev = oldTouchesRef.current[keys[0]];
@@ -145,6 +154,7 @@ export function Canvas() {
             const pointer = getPointer(ev);
             tool.mouseUp(pointer);
             tool.click(pointer);
+            toolStatedRef.current = false;
         }
     };
 
@@ -275,7 +285,8 @@ export function Canvas() {
                 onPointerMove={pointermoveHandler}
                 onPointerUp={pointerupHandler}
                 onPointerCancel={pointerupHandler}
-                onPointerLeave={pointermoveHandler}
+                onPointerLeave={pointerupHandler}
+                onPointerEnter={pointerdownHandler}
                 onWheel={wheelHandler}
             >
                 <div style={{ transform: `${transform}`, transformOrigin: 'top left' }}>

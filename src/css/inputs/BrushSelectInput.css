@@ -18,6 +18,35 @@
   padding: 2px 0;
 }
 
+.App .side-menu > .BrushWidthInput {
+  align-items: center;
+}
+
+.BrushWidthInput > .brush-reference {
+  position: absolute;
+  border: 1px dashed #fff;
+  opacity: 1;
+}
+
+.BrushWidthInput > .brush-reference.vanishing {
+  position: absolute;
+  transition: 1s;
+  opacity: 0;
+}
+
+.BrushWidthInput > .brush-reference.hidden {
+  display: none;
+}
+
+.BrushWidthInput > .brush-reference::after {
+  display: block;
+  content: ' ';
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: 50%;
+  border: 1px dashed #000;
+}
+
 @media screen and (orientation:portrait) { 
 
   .brush.dropdown:focus-within ul {

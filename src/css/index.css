@@ -3,8 +3,10 @@
   --doc-height: 200px;
   --button-diameter: 50px;
   --scroll-width: 10px;
-  --quick-start-width: 250px;
-  --quick-start-height: 200px;
+  --quick-start-width: 440px;
+  --quick-start-height: 260px;
+  --quick-start-padding: 20px;
+  --quick-start-gap: 10px;
   --main-color: #eb840f;
   --secondary-color: #636363;
   --background-color: #353535;

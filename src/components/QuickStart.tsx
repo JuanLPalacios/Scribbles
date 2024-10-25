@@ -1,16 +1,20 @@
 import { useMemo, useState } from 'react';
 import '../css/QuickStart.css';
+import fileIcon from '../icons/file-add-svgrepo-com.svg';
+import folderIcon from '../icons/folder-open-svgrepo-com.svg';
+import syncIcon from '../icons/sync-svgrepo-com.svg';
 import { useEditor } from '../hooks/useEditor';
 import { uid } from '../lib/uid';
 import { useLastSession, useResentScribbles } from '../hooks/useResentScribbles';
 import { useConfig } from '../hooks/useConfig';
+import { useOpenFile } from '../hooks/useOpenFile';
 
 export const QuickStart = () => {
     const [resentScribbles] = useResentScribbles();
     const [lastSession] = useLastSession();
 
     const [{ autoSave }] = useConfig();
-    const [, { newFile, loadFile, loadSession }] = useEditor();
+    const [, { newFile, loadFile, loadSession, openFile }] = useEditor();
     const id = useMemo(()=>uid(), []);
     const [install, setReadyToInstall] = useState();
     const quickNewFile = () => {
@@ -20,6 +24,13 @@ export const QuickStart = () => {
             height: 800
         });
     };
+    const openFileL = useOpenFile((files)=>{
+        if(files.length==0)return;
+        const file = files[0];
+        openFile(file);
+    }, [openFile],
+    { accept: '.jpg, .jpeg, .png, .scribble' }
+    );
     const isInstalledPWA = window.matchMedia('(display-mode: window-controls-overlay)').matches || window.matchMedia('(display-mode: standalone)').matches;
 
     if(!isInstalledPWA){
@@ -34,13 +45,13 @@ export const QuickStart = () => {
             <div className='QuickStart-modal'>
                 <div>
                     <div>
-                        <h1>Quick Start</h1>
-                        <button onClick={quickNewFile}>Open blank scribble</button>
-                        loadFile
-                        {(autoSave!==0)&&(lastSession)&&<button onClick={loadSession}>Recover last session</button>}
+                        <h2>Quick Start</h2>
+                        <button onClick={quickNewFile}><img src={fileIcon} alt="" />Open blank scribble</button>
+                        <button onClick={openFileL}><img src={folderIcon} alt="" />Open File</button>
+                        {(autoSave!==0)&&(lastSession)&&<button onClick={loadSession}><img src={syncIcon} alt="" />Recover last session</button>}
                     </div>
                     <div>
-                        <h1>Recent Files</h1>
+                        <h2>Recent Files</h2>
                         {resentScribbles.slice(0, 5).map((resentScribble, i)=>
                             <button key={`${id}-${i}`} onClick={()=>loadFile(resentScribble)}>{resentScribble.name}</button>
                         )}
@@ -48,12 +59,10 @@ export const QuickStart = () => {
 
                 </div>
                 <div>
-                    <h1>More Resources</h1>
-                    {
-                    //(!isInstalledPWA)&&install&&
-                        <button onClick={install}>Install App</button>
-                    }
+                    <h2>More Resources</h2>
+                    {(!isInstalledPWA)&&install&&<button onClick={install}><b>Install App</b></button>}
                     <a href="http://">User Manual</a>
+                    <a href="http://">Community Brushes</a>
                 </div>
             </div>
         </div>);

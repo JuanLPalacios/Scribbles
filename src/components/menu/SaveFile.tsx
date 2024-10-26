@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import '../../css/Menu.css';
-import exportIcon from '../../icons/external-svgrepo-com.svg';
+import saveIcon from '../../icons/save-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { useDrawing } from '../../hooks/useDrawing';
 import { DrawingRequired } from '../../hoc/DrawingRequired';
@@ -26,9 +26,9 @@ export const SaveFile = DrawingRequired(() => {
     return <>
         <li>
             <button className='round-btn' onClick={()=>setOpen(true)}>
-                <img src={exportIcon} alt="Export to PNG" />
+                <img src={saveIcon} alt="Save/Export" />
             </button>
-            <div className="text">Export to PNG</div>
+            <div className="text">Save/Export</div>
         </li>
         <ReactModal isOpen={isOpen} onRequestClose={()=>setOpen(false)} style={{ content: { width: '20rem' } }}>
             <div className="fields import-brush">
@@ -39,9 +39,9 @@ export const SaveFile = DrawingRequired(() => {
                         <option value="scribble">.scribble</option>
                         <option value="png">.png</option>
                     </select>
+                    <button onClick={download}>download</button>
                 </div>
                 <div className='actions'>
-                    <button onClick={download}>download</button>
                     <button onClick={localSave}>save locally</button>
                     <button onClick={()=>setOpen(false)}>cancel</button>
                 </div>

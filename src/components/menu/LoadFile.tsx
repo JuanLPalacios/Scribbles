@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import '../../css/Menu.css';
 import '../../css/menu/LoadFile.css';
-import exportIcon from '../../icons/external-svgrepo-com.svg';
+import folderIcon from '../../icons/folder-open-svgrepo-com.svg';
 import { useEditor } from '../../hooks/useEditor';
 import ReactModal from 'react-modal';
 import { useOpenFile } from '../../hooks/useOpenFile';
@@ -26,13 +26,17 @@ export const LoadFile = () => {
     return <>
         <li>
             <button className='round-btn' onClick={()=>setOpen(true)}>
-                <img src={exportIcon} alt="Export to PNG" />
+                <img src={folderIcon} alt="Export to PNG" />
             </button>
             <div className="text">Load Scribble</div>
         </li>
         <ReactModal isOpen={isOpen} onRequestClose={()=>setOpen(false)} style={{ content: { width: '20rem' } }}>
             <div className="LoadFile fields import-brush">
                 <h2>Load Scribble</h2>
+                <div className='actions right'>
+                    <button onClick={openFileL}>Open File</button>
+                </div>
+                <h4>Local saves</h4>
                 <div className='table'>
                     {resentScribbles.map((resentScribble, i)=><>
                         <div key={`${id}-name-${i}`}>{resentScribble.name}</div>
@@ -42,7 +46,6 @@ export const LoadFile = () => {
                     )}
                 </div>
                 <div className='actions'>
-                    <button onClick={openFileL}>Open File</button>
                     <button onClick={()=>setOpen(false)}>cancel</button>
                 </div>
             </div>

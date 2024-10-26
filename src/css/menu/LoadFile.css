@@ -1,6 +1,6 @@
 .LoadFile .table {
     display: grid;
-    grid-template-columns: auto auto;
+    grid-template-columns: auto min-content;
     gap: 2px;
     overflow-y: auto;
     max-height: calc(100svh - 200px);

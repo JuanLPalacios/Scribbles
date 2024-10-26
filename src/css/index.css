@@ -54,6 +54,14 @@ body {
   background-color: transparent;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin-block: .2em;
+}
+
 input,
 select {
   background: var(--background2-color);
@@ -84,6 +92,7 @@ button[disabled] {
 
 button > img {
   filter: invert(1);
+  width: 24px;
 }
 
 button:focus {
@@ -122,6 +131,10 @@ button:focus {
   display: flex;
   justify-content: center;
   gap: 10px;
+}
+
+.fields .actions.right {
+  justify-content: right;
 }
 
 .dropdown {

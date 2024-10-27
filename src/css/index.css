@@ -175,6 +175,26 @@ button:focus {
   z-index: 10;
 }
 
+.select-list > ul {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.select-list .selected {
+  background: var(--overlay-color);
+}
+
+.color {
+  width: calc(var(--button-diameter) / 2);
+  height: calc(var(--button-diameter) / 2);
+  border-radius: calc(var(--button-diameter) / 4);
+}
+
 @media screen and (orientation:portrait) { 
 
   html, body {

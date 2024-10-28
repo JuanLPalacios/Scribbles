@@ -1,0 +1,47 @@
+.import-palette {
+  margin: 0;
+  padding: 0;
+}
+
+.import-palette .palette-props label {
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+}
+
+.import-palette .palette-props {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-inline: 0.5rem;
+}
+
+.palette-props label > div {
+  flex: 1 1 100%;
+}
+
+.palette-props label > input {
+  flex: 0 0 auto;
+}
+
+.palette-list {
+  height: calc(100svh - 15rem);
+  overflow-y: auto;
+}
+
+.palette-list ul.palettes {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  list-style: none;
+  padding: 2px 0;
+}
+
+@media screen and (orientation:portrait) { 
+
+  .palette-list {
+    height: calc(100vw - 15rem);
+  }
+
+}

@@ -1,0 +1,27 @@
+.InputPaletteColors {
+    display: flex;
+    flex-direction: column;
+}
+
+.InputPaletteColors > .InputColor {
+    width: 100%;
+}
+
+.InputPaletteColors > .InputColor > .InputColor {
+    width: 100%;
+    opacity: 0;
+}
+
+.InputPaletteColors > ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    flex-wrap: wrap;
+    align-content: start;
+    overflow-y: scroll;
+}
+
+
+.InputPaletteColors > .color-list {
+    height: 100px;
+}

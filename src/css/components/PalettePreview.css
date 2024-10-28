@@ -1,0 +1,17 @@
+.PalettePreview {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 2px 0;
+}
+
+.PalettePreview > ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    flex-wrap: wrap;
+}
+
+.PalettePreview .color {
+}
+

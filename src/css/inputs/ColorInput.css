@@ -5,9 +5,6 @@
 
 .ColorInput .color {
   display: flex;
-  width: calc(var(--button-diameter) / 2);
-  height: calc(var(--button-diameter) / 2);
-  border-radius: calc(var(--button-diameter) / 4);
   position: relative;
   justify-content: center;
   align-items: center;

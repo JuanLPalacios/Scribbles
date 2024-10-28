@@ -21,7 +21,7 @@ import { saveAs } from 'file-saver';
 import { CustomInput } from '../../types/CustomInput';
 import { BrushList } from '../../lib/BrushList';
 import { BRUSH_TYPE_LIST, Brush } from '../../abstracts/Brush';
-import { BrushPreview } from '../inputs/BrushPreview';
+import { BrushPreview } from '../components/BrushPreview';
 import { useBrushesOptions } from '../../hooks/useBrushesOptions';
 import { useStoredBrushes } from '../../hooks/useStoredBrushes';
 
@@ -159,12 +159,10 @@ export const EditBrushes = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [currentBrush]);
     return <>
-        <li>
-            <button className='round-btn' onClick={openModal}>
-                <img src={brushIcon} alt="Import Brushes" />
-            </button>
-            <div className="text">Import Brushes</div>
-        </li>
+        <button onClick={openModal}>
+            <img src={brushIcon} alt="" />
+            Edit brushes
+        </button>
         <ReactModal isOpen={isOpen} onRequestClose={close} style={{ content: { width: '20rem' } }}>
             <div className="fields import-brush">
                 <h2>Brushes</h2>
@@ -179,7 +177,7 @@ export const EditBrushes = () => {
                     {errors.name.map((error, i) => <div key={'error.name-'+i} className='error'>Name: {error}</div>)}
                 </div>
                 <div style={{ display: 'flex' }}>
-                    <div className='brush-list' style={{ width: '10rem', flex: '1 1 auto' }}>
+                    <div className='brush-list select-list' style={{ width: '10rem', flex: '1 1 auto' }}>
                         <ul className='brushes'>
                             {tempBrushes.map((brush, i) => <li key={id+'-'+i}>
                                 <Brush brush={brush.brush}>

@@ -2,7 +2,7 @@ import '../../css/inputs/BrushSelectInput.css';
 import { useState, CSSProperties, useMemo, useEffect } from 'react';
 import { uid } from '../../lib/uid';
 import { TopMenuPortal } from '../portals/TopMenu';
-import { BrushPreview } from './BrushPreview';
+import { BrushPreview } from '../components/BrushPreview';
 import { DrawableState } from '../../types/DrawableState';
 import { Brush } from '../../abstracts/Brush';
 import { useBrushesOptions } from '../../hooks/useBrushesOptions';

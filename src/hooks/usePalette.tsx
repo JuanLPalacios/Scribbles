@@ -13,7 +13,8 @@ export function usePalette() {
         return {
             addColor(color:string){
                 setPalette([...palette.filter(x=>x!=color), color]);
-            }
+            },
+            setPalette
         };
     }, [setPalette, palette]);
     return [palette, actions] as const;

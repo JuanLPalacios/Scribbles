@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import '../../css/Menu.css';
+import '../../css/Config.css';
 import optionsIcon from '../../icons/options-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { useConfig } from '../../hooks/useConfig';
@@ -9,8 +9,9 @@ import { EditBrushes } from './EditBrushes';
 
 export const Config = () => {
     const [config, setConfig] = useConfig();
+    const [configCopy, setConfigCopy] = useState(config);
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600 });
-    const { autoSave, doubleClickTimeOut } = config;
+    const { autoSave, doubleClickTimeOut } = configCopy;
     const { isOpen, name } = state;
     const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
         let value;
@@ -23,17 +24,18 @@ export const Config = () => {
             value = e.target.value;
             break;
         }
-        setConfig({ ...config, [e.target?.name]: value });
-    }, [config, setConfig]);
+        setConfigCopy({ ...configCopy, [e.target?.name]: value });
+    }, [configCopy, setConfigCopy]);
     const close = useCallback(() => {
         setState({ ...state, isOpen: false });
     }, [state]);
     const openModal = useCallback(() => {
         setState({ ...state, isOpen: true, name });
     }, [name, state]);
-    const updateFile = useCallback(() => {
+    const save = useCallback(() => {
+        setConfig(configCopy);
         close();
-    }, [close]);
+    }, [close, configCopy, setConfig]);
     return <>
         <li>
             <button className='round-btn' onClick={openModal}>
@@ -42,8 +44,8 @@ export const Config = () => {
             <div className="text">Configuration</div>
         </li>
         <ReactModal isOpen={isOpen} onRequestClose={close}>
-            <div className="Config fields" style={{ width: '400px' }}>
-                <h2>Scribble Config</h2>
+            <div className="Config fields" >
+                <h2>Scribbles Configuration</h2>
                 <label htmlFor='autoSave' className={(autoSave==0)?'disabled':''}>
                     Auto-save session after
                     (<TimeDisplay value={autoSave}/>{(autoSave==0)?'disabled':''})
@@ -55,13 +57,11 @@ export const Config = () => {
                 </label>
                 <input id='doubleClickTimeOut' type="range" name='doubleClickTimeOut' min='100' max='10000' step='100' value={doubleClickTimeOut} onChange={update} />
                 <div className='actions'>
-                    {
-                        <EditBrushes />
-                    }
+                    <EditBrushes />
                     <EditPalettes />
                 </div>
                 <div className='actions'>
-                    <button onClick={updateFile}>update</button>
+                    <button onClick={save}>save</button>
                     <button onClick={close}>cancel</button>
                 </div>
             </div>

@@ -8,7 +8,6 @@ import trashIcon from '../../icons/trash-svgrepo-com.svg';
 import clipboardIcon from '../../icons/duplicate-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { uid } from '../../lib/uid';
-//import { abrPalettes } from 'abr-js';
 import { SerializedValue } from '../../lib/Serialization';
 import { CustomInput } from '../../types/CustomInput';
 import { usePalette } from '../../hooks/usePalette';
@@ -33,7 +32,7 @@ export const EditPalettes = () => {
             name: string;
         }[]
     }>({ currentPalette: { colors: [], name: '' }, selectedPaletteIndex: 0, tempPalette: [{ colors: [], name: '' }] });
-    const { setCurrentPalette, setSelectedPaletteIndex, setTempPalette } = useMemo(()=>({
+    const { setCurrentPalette, setSelectedPaletteIndex, setTempPalette, deletePalette } = useMemo(()=>({
         setCurrentPalette(currentPalette:{
             colors: string[];
             name: string;
@@ -60,6 +59,15 @@ export const EditPalettes = () => {
                 selectedPaletteIndex,
                 tempPalette
             });
+        },
+        deletePalette(){
+            if(tempPalette.length<2)return;
+            const newSelectedPaletteIndex = Math.min(selectedPaletteIndex, tempPalette.length-2);
+            setCurrentPaletteState({
+                currentPalette: tempPalette[newSelectedPaletteIndex],
+                selectedPaletteIndex: newSelectedPaletteIndex,
+                tempPalette: tempPalette.filter((_x, i)=>i!=selectedPaletteIndex)
+            });
         }
     }), [selectedPaletteIndex, tempPalette]);
     const [state, setState] = useState({ isOpen: false });
@@ -80,15 +88,12 @@ export const EditPalettes = () => {
             { name: newName('palette'), colors: [] }
         ]);
     }, [newName, setTempPalette, tempPalette]);
-    const deletePalette = useCallback(() => {
-        setTempPalette(tempPalette.filter((_x, i)=>i!=selectedPaletteIndex));
-    }, [selectedPaletteIndex, setTempPalette, tempPalette]);
     const duplicatePalette = useCallback(() => {
         setTempPalette([...tempPalette, { ...currentPalette, name: newName(currentPalette.name) }]);
     }, [currentPalette, newName, setTempPalette, tempPalette]);
     const update = useCallback((e:React.ChangeEvent<CustomInput<SerializedValue>|HTMLSelectElement>) => {
         let value;
-        console.log(value);
+        //console.log(value);
         if(e.target.name!='scribblePaletteType')
             switch (e.target.type){
             case('number'):
@@ -104,11 +109,10 @@ export const EditPalettes = () => {
         else
             value = +e.target.value;
         setCurrentPalette({ ...currentPalette, [e.target?.name]: value });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [state]);
+    }, [currentPalette, setCurrentPalette]);
     const save = useCallback(() => {
         setState({ ...state, isOpen: false });
-        setColor({ color: currentPalette.colors[0] });
+        setColor({ color: currentPalette.colors[0] || '#000000' });
         setPalette(
             currentPalette.colors
         );
@@ -128,34 +132,30 @@ export const EditPalettes = () => {
             <img src={paletteIcon} alt="" />
                 Change palette
         </button>
-        <ReactModal isOpen={isOpen} onRequestClose={close} style={{ content: { width: '20rem' } }}>
-            <div className="fields import-palette">
+        <ReactModal isOpen={isOpen} onRequestClose={close}>
+            <div className="EditPalettes fields import-palette">
                 <h2>Palettes</h2>
                 <div>
                     <button onClick={addPalette}><img src={plusIcon} alt="Add Palette" /></button>
                     <button onClick={duplicatePalette}><img src={clipboardIcon} alt="Duplicate Palette" /></button>
-                    <button onClick={deletePalette}><img src={trashIcon} alt="Delete Palette" /></button>
+                    <button onClick={deletePalette} disabled={(tempPalette.length<2)}><img src={trashIcon} alt="Delete Palette" /></button>
                 </div>
-                <div style={{ display: 'flex' }}>
-                    <div className='palette-list select-list' style={{ width: '10rem', flex: '1 1 auto' }}>
+                <div className='cols'>
+                    <div className='palette-list select-list'>
                         <ul className='palettes'>
                             {tempPalette.map((palette, i) => <li key={id+'-'+i}>
                                 <PalettePreview palette={palette} className={i==selectedPaletteIndex?'selected':''} onMouseDown={()=>setSelectedPaletteIndex(i)}/>
                             </li>)}
                         </ul>
                     </div>
-                    <div style={{ width: '8rem' }} className='palette-props'>
+                    <div className='palette-props'>
                         <label>
                             <div>
                             Name
                             </div>
                             <input type="text" name='name' autoComplete="off" value={currentPalette.name} onChange={update} />
                         </label>
-                        <div>
-                            {
-                                <InputPaletteColors name='colors' value={currentPalette.colors} onChange={update} />
-                            }
-                        </div>
+                        <InputPaletteColors name='colors' value={currentPalette.colors} onChange={update} />
                     </div>
                 </div>
                 <div className='actions'>

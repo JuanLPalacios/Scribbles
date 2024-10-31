@@ -1,32 +1,16 @@
-.import-palette {
-  margin: 0;
-  padding: 0;
+.EditPalettes {
+  width: 400px;
 }
 
-.import-palette .palette-props label {
-  font-size: 12px;
+.EditPalettes > .cols {
   display: flex;
-  flex-direction: row;
-}
-
-.import-palette .palette-props {
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding-inline: 0.5rem;
-}
-
-.palette-props label > div {
-  flex: 1 1 100%;
-}
-
-.palette-props label > input {
-  flex: 0 0 auto;
+  gap: 10px;
+  align-content: stretch;
 }
 
 .palette-list {
-  height: calc(100svh - 15rem);
+  width: 225px;
+  height: calc(100svh - 12rem);
   overflow-y: auto;
 }
 
@@ -37,6 +21,42 @@
   list-style: none;
   padding: 2px 0;
 }
+
+
+.EditPalettes .import-palette .palette-props label {
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+}
+
+.EditPalettes .import-palette .palette-props {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-inline: 0.5rem;
+}
+
+.palette-props {
+  width: 165px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.palette-props label > div {
+  flex: 1 1 auto;
+}
+
+.palette-props label > input {
+  flex: 0 0 auto;
+  min-width: 80px;
+}
+
+.palette-props .InputPaletteColors {
+  flex: 1 1 auto;
+}
+
 
 @media screen and (orientation:portrait) { 
 

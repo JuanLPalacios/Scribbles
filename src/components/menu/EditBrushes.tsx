@@ -44,6 +44,7 @@ export const EditBrushes = () => {
     }, [tempBrushes]);
     const deleteBrush = useCallback(() => {
         setTempBrushes(tempBrushes.filter((_x, i)=>i!=selectedBrushIndex));
+        setSelectedBrushIndex(Math.min(selectedBrushIndex, tempBrushes.length -2));
     }, [selectedBrushIndex, tempBrushes]);
     const duplicateBrush = useCallback(() => {
         setTempBrushes([...tempBrushes, { brush: editorSelectedBrush.brush }]);
@@ -132,6 +133,7 @@ export const EditBrushes = () => {
             (brushes||[])
                 .map(brush=>({ brush }))
         );
+        setSelectedBrushIndex(0);
     }, [brushes, state]);
     useEffect(() => {
         setBrush(editorSelectedBrush.brush);
@@ -169,7 +171,7 @@ export const EditBrushes = () => {
                 <div>
                     <button onClick={addBrush}><img src={plusIcon} alt="Add Brush" /></button>
                     <button onClick={duplicateBrush}><img src={clipboardIcon} alt="Duplicate Brush" /></button>
-                    <button onClick={deleteBrush}><img src={trashIcon} alt="Delete Brush" /></button>
+                    <button onClick={deleteBrush} disabled={tempBrushes.length<2}><img src={trashIcon} alt="Delete Brush" /></button>
                     <button onClick={importBrush}><img src={importIcon} alt="Import Brushes" /></button>
                     <button onClick={exportBrush}><img src={exportIcon} alt="Export Brushes" /></button>
                 </div>
@@ -262,7 +264,7 @@ export const EditBrushes = () => {
                             <div>
                             Spacing
                             </div>
-                            <input type="number" name='spacing' value={currentBrushProxy.spacing} min={0} max={30} step={0.1} onChange={update} style={{ width: '5rem' }} />
+                            <input type="number" name='spacing' value={currentBrushProxy.spacing} min={0} max={30} step={1} onChange={update} style={{ width: '5rem' }} />
                         </label>
                         }
                         {('antiAliasing' in currentBrushProxy)&&(typeof currentBrushProxy.antiAliasing == 'boolean') &&

@@ -1,6 +1,8 @@
 .InputPaletteColors {
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    gap: .5rem;
 }
 
 .InputPaletteColors > .InputColor {
@@ -24,4 +26,6 @@
 
 .InputPaletteColors > .color-list {
     height: 100px;
+    flex: 1 1 auto;
+    margin: 0;
 }

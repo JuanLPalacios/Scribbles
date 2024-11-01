@@ -1,3 +1,4 @@
+import '../css/tools/Transform.css';
 import { uid } from '../lib/uid';
 import { scalePoint, sub } from '../lib/DOMMath';
 import { Handle } from '../types/Handle';
@@ -5,12 +6,14 @@ import { EditorLayerState, LayerState2 } from '../types/LayerState';
 import square from '../icons/square-svgrepo-com.svg';
 import hSkew from '../icons/arrows-h-alt-svgrepo-com.svg';
 import vSkew from '../icons/arrows-v-alt-svgrepo-com.svg';
+import laso from '../icons/laso-cut.svg';
+import rect from '../icons/rect-cut.svg';
 import rotateBottomLeft from '../icons/corner-double-bottom-left-svgrepo-com.svg';
 import rotateBottomRight from '../icons/corner-double-bottom-right-svgrepo-com.svg';
 import rotateTopLeft from '../icons/corner-double-top-left-svgrepo-com.svg';
 import rotateTopRight from '../icons/corner-double-top-right-svgrepo-com.svg';
 import { CanvasEvent } from '../types/CanvasEvent';
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Tool, ToolContext, ToolFunctions } from '../contexts/ToolContext';
 import { useDrawing } from '../hooks/useDrawing';
 import { EditorDrawingState } from '../contexts/EditorDrawingContext';
@@ -18,6 +21,8 @@ import { DrawingState } from '../contexts/DrawingContext';
 import { useConfig } from '../hooks/useConfig';
 import { RectCut } from './cut/RectCut';
 import { LasoCut } from './cut/LasoCut';
+import { BottomMenuPortal } from '../components/portals/BottomMenu';
+import { createStorageHook } from '../generators/createStorageHook';
 
 const SKEW_ICONS = [
     rotateTopLeft,
@@ -36,10 +41,27 @@ export type CutActions = {
     cut: ({ point }: CanvasEvent, layer: LayerState2 & EditorLayerState) => void;
 }
 
+export const useTranformOptions = createStorageHook<{ selectedCut: number }>('selected-cut', 'local', { selectedCut: 0 });
+
+const cutOptions = [
+    { icon: rect, alt: 'rectangle cut', cut: RectCut },
+    { icon: laso, alt: 'laso cut', cut: LasoCut }
+];
+
+enum TransformAction {
+    Cut,
+    Paste
+}
+
 export const Transform = ({ children }: ToolFunctions) => {
     const drawingController = useDrawing();
     const [{ doubleClickTimeOut }] = useConfig();
+    const [id] = useState(uid());
+    const [action, setAction] = useState(TransformAction.Cut);
+    const [{ selectedCut }, setTransformOptions] = useTranformOptions();
+    const setSelectedCut = useCallback((selectedCut: number)=>setTransformOptions({ selectedCut }), []);
     const r = useMemo<Tool>(() => {
+        console.log('?');
         let drawing: EditorDrawingState,
             updateLayer: (...[index, layer]: [number, Partial<LayerState2>] | [Partial<LayerState2>]) => void,
             forceUpdate: ({ data, editorState }: {
@@ -185,17 +207,11 @@ export const Transform = ({ children }: ToolFunctions) => {
 
         const startRectCut = function(e: CanvasEvent, layer:LayerState2&EditorLayerState){
             action = 'rect-cut';
-            cutActions = RectCut({
+            cutActions = cutOptions[selectedCut].cut({
                 callback([x, y]){
                     action = 'transform';
                     startTransform(e, layer, x, y);
-                },
-                drawing
-            });
-            cutActions = LasoCut({
-                callback([x, y]){
-                    action = 'transform';
-                    startTransform(e, layer, x, y);
+                    setAction(TransformAction.Paste);
                 },
                 drawing
             });
@@ -301,6 +317,7 @@ export const Transform = ({ children }: ToolFunctions) => {
             action = 'none';
             const imageData = canvas.ctx.getImageData(0, 0, width, height);
             updateLayer({ imageData });
+            setAction(TransformAction.Cut);
         };
 
         const render = function(_layer: LayerState2) {
@@ -409,7 +426,7 @@ export const Transform = ({ children }: ToolFunctions) => {
                 //setDrawing({ type: 'editor/forceUpdate', payload: { ...drawing } });
             }
         };
-    }, [doubleClickTimeOut]);
+    }, [doubleClickTimeOut, selectedCut]);
     useEffect(()=>{
         // FIXME this should use a reference instead
         r.setup(...([drawingController] as unknown as []));
@@ -422,5 +439,19 @@ export const Transform = ({ children }: ToolFunctions) => {
     }, [r]);
     return <ToolContext.Provider value={r}>
         {children}
+        <BottomMenuPortal>
+            <div className='h-center'>
+                {(action==TransformAction.Cut)&&
+                cutOptions.map((option, i)=>
+                    <span key={`${id}-${i}`} className='Toolbar'>
+                        <button className={'tool round-btn '+((i==selectedCut)?'selected':'')} onClick={()=>setSelectedCut(i)} >
+                            <img src={option.icon} alt={option.alt} />
+                        </button>
+                    </span>
+                )
+                }
+            </div>
+
+        </BottomMenuPortal>
     </ToolContext.Provider>;
 };

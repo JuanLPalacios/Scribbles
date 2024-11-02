@@ -285,8 +285,8 @@ export function Canvas() {
                 onPointerMove={pointermoveHandler}
                 onPointerUp={pointerupHandler}
                 onPointerCancel={pointerupHandler}
-                onPointerLeave={pointerupHandler}
-                onPointerEnter={pointerdownHandler}
+                onMouseLeave={pointerupHandler}
+                onMouseEnter={pointerdownHandler}
                 onWheel={wheelHandler}
             >
                 <div style={{ transform: `${transform}`, transformOrigin: 'top left' }}>

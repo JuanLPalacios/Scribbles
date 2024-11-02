@@ -1,8 +1,10 @@
+import maximizeIcon from '../icons/maximize-svgrepo-com.svg';
+import exitFullscreenIcon from '../icons/exit-fullscreen-svgrepo-com.svg';
 import { useState } from 'react';
 
 export function FullScreenToggle() {
     const [locked, setLocked] = useState(false);
-    const canChangeOrientation = typeof screen.orientation !== 'undefined';
+    const canChangeOrientation = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const unlock = ()=>{
         if (!(
             ('unlockOrientation' in screen)&&(typeof screen.unlockOrientation == 'function')&&screen.unlockOrientation()
@@ -52,10 +54,14 @@ export function FullScreenToggle() {
     };
     return (
         <>
-            {canChangeOrientation&&<div style={{ position: 'absolute', top: 0, right: 0 }}>
+            {canChangeOrientation&&<div className='Toolbar' style={{ position: 'absolute', top: 'calc(0px - var(--button-diameter))', right: 0 }}>
                 {locked?
-                    <button onClick={unlock}>unlock screen</button>
-                    :<button onClick={lock}>lock screen</button>
+                    <button className={'tool round-btn selected'} onClick={unlock} >
+                        <img src={exitFullscreenIcon} alt='exit fullscreen' />
+                    </button>
+                    :<button className={'tool round-btn '} onClick={lock} >
+                        <img src={maximizeIcon} alt='fullscreen' />
+                    </button>
                 }
             </div>}
         </>

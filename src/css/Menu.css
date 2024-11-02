@@ -3,7 +3,7 @@
   padding: 0;
   margin: 0;
   display: flex;
-  gap: 5px;
+  gap: 3px;
 }
 
 .Menu > li {
@@ -12,8 +12,7 @@
 }
 
 .Menu > li > ul {
-  gap: 5px;
-  margin-top: 5px;
+  gap: 3px;
 }
 
 .Menu .dropdown ul > li {

@@ -1,4 +1,6 @@
 .LayerMenu {
+  position: absolute;
+  bottom: calc(0px - var(--button-diameter));
   flex: 1 1 auto;
   display: flex;
   align-items: flex-end;

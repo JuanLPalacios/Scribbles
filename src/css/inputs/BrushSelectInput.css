@@ -12,6 +12,10 @@
   opacity: .8;
 }
 
+.brush.dropdown button {
+  font-size: calc(var(--button-diameter) * 0.26);
+}
+
 .brush.dropdown li > div {
   display: flex;
   justify-content: center;

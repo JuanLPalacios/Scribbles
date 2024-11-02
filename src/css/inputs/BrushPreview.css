@@ -12,7 +12,6 @@
     font-size: .8rem;
 }
 
-.uuuuuuu {
-    background: var(--overlay-color);
-
+.BrushPreview canvas {
+    width: calc(var(--button-diameter) * 2.9);
 }

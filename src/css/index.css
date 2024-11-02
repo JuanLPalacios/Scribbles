@@ -1,7 +1,7 @@
 :root {
   --doc-width: 200px;
   --doc-height: 200px;
-  --button-diameter: 50px;
+  --button-diameter: min(50px, calc((100svh - 20px) / 7), calc((100vw - 20px) / 7));
   --scroll-width: 10px;
   --quick-start-width: 440px;
   --quick-start-height: 260px;
@@ -151,8 +151,6 @@ button:focus {
 
 .dropdown > ul {
   display: flex;
-  max-width: vw;
-  max-height: svh;
   flex-direction: column;
   background: var(--background2-color);
   list-style: none;
@@ -212,11 +210,6 @@ button:focus {
     transform: rotate(-90deg);
     left: 0;
     top: 100svh;
-  }
-  
-  .dropdown > ul {
-    max-width: svh;
-    max-height: vw;
   }
 
 }

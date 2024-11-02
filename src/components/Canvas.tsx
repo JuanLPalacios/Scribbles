@@ -16,7 +16,6 @@ export function Canvas() {
     const { selectedLayer, layers: editorLayers, handles, buffer, transform } = drawing.editorState;
     const ref = useRef<HTMLDivElement>(null);
     const [keys, setKeys] = useState<{[key:string]:boolean}>({});
-    // FIXME: touches oldTouches and oldTransform cause unnecessary rerenders on tool actions
     const touchesRef = useRef<{[key:string]:React.PointerEvent<HTMLDivElement>}>({});
     const oldTouchesRef = useRef<{[key:string]:React.PointerEvent<HTMLDivElement>}>({});
     const toolStatedRef = useRef(false);
@@ -105,44 +104,46 @@ export function Canvas() {
             return;
         }
         touchesRef.current[ev.pointerId] = ev;
-        const keys = Object.keys(touchesRef.current);
-        if (keys.length === 2) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            if(toolStatedRef.current){
-                const pointer = getPointer(ev);
-                tool.mouseUp(pointer);
-                tool.click(pointer);
-                toolStatedRef.current = false;
-            }
-            const prev = oldTouchesRef.current[keys[0]];
-            const newPoint = touchesRef.current[keys[0]];
-            const x = newPoint.clientX - viewLeft;
-            const y = newPoint.clientY - viewTop;
-            const px = newPoint.clientX - prev.clientX;
-            const py = newPoint.clientY - prev.clientY;
-            const vx = touchesRef.current[keys[1]].screenX -touchesRef.current[keys[0]].screenX,
-                vy = touchesRef.current[keys[1]].clientY -touchesRef.current[keys[0]].clientY,
-                vox = oldTouchesRef.current[keys[1]].screenX -oldTouchesRef.current[keys[0]].screenX,
-                voy = oldTouchesRef.current[keys[1]].clientY -oldTouchesRef.current[keys[0]].clientY;
-            const scale = Math.sqrt((vx**2+vy**2))/Math.sqrt((vox**2+voy**2));
-            const angle = Math.atan2(vy, vx) - Math.atan2(voy, vox);
+        setTimeout(()=>{
+            const keys = Object.keys(touchesRef.current);
+            if (keys.length === 2) {
+                ev.preventDefault();
+                ev.stopPropagation();
+                if(toolStatedRef.current){
+                    const pointer = getPointer(ev);
+                    tool.mouseUp(pointer);
+                    tool.click(pointer);
+                    toolStatedRef.current = false;
+                }
+                const prev = oldTouchesRef.current[keys[0]];
+                const newPoint = touchesRef.current[keys[0]];
+                const x = newPoint.clientX - viewLeft;
+                const y = newPoint.clientY - viewTop;
+                const px = newPoint.clientX - prev.clientX;
+                const py = newPoint.clientY - prev.clientY;
+                const vx = touchesRef.current[keys[1]].screenX -touchesRef.current[keys[0]].screenX,
+                    vy = touchesRef.current[keys[1]].clientY -touchesRef.current[keys[0]].clientY,
+                    vox = oldTouchesRef.current[keys[1]].screenX -oldTouchesRef.current[keys[0]].screenX,
+                    voy = oldTouchesRef.current[keys[1]].clientY -oldTouchesRef.current[keys[0]].clientY;
+                const scale = Math.sqrt((vx**2+vy**2))/Math.sqrt((vox**2+voy**2));
+                const angle = Math.atan2(vy, vx) - Math.atan2(voy, vox);
 
-            setTransform(new DOMMatrix()
-                .translate(x, y)
-                .rotate(
-                    angle * 180 / Math.PI
-                )
-                .scale(scale)
-                .translate(-x, -y)
-                .translate(px, py)
-                .multiply(oldTransform)
-            );
-        }
-        else{
-            const pointer = getPointer(ev);
-            tool.mouseMove(pointer);
-        }
+                setTransform(new DOMMatrix()
+                    .translate(x, y)
+                    .rotate(
+                        angle * 180 / Math.PI
+                    )
+                    .scale(scale)
+                    .translate(-x, -y)
+                    .translate(px, py)
+                    .multiply(oldTransform)
+                );
+            }
+            else{
+                const pointer = getPointer(ev);
+                tool.mouseMove(pointer);
+            }
+        });
     };
 
     const pointerupHandler = function(ev:React.PointerEvent<HTMLDivElement>) {
@@ -150,12 +151,14 @@ export function Canvas() {
         delete touchesRef.current[ev.pointerId];
         delete oldTouchesRef.current[ev.pointerId];
         const keys = Object.keys(touchesRef.current);
-        if(keys.length == 0){
-            const pointer = getPointer(ev);
-            tool.mouseUp(pointer);
-            tool.click(pointer);
-            toolStatedRef.current = false;
-        }
+        setTimeout(()=>{
+            if(keys.length == 0){
+                const pointer = getPointer(ev);
+                tool.mouseUp(pointer);
+                tool.click(pointer);
+                toolStatedRef.current = false;
+            }
+        });
     };
 
     const wheelHandler = function(ev:React.WheelEvent<HTMLDivElement>) {
@@ -196,6 +199,22 @@ export function Canvas() {
                 .translate(-ev.deltaX, -ev.deltaY)
                 .multiply(transform)
             );
+        }
+    };
+    const cleanup = ()=>{
+        document.removeEventListener('pointermove', pointermoveHandler as never);
+        document.removeEventListener('pointerup', pointermoveHandler as never);
+        document.removeEventListener('pointerup', cleanup);
+        document.removeEventListener('mouseenter', cleanup);
+    };
+
+    const onMouseLeave = function() {
+        const keys = Object.keys(touchesRef.current);
+        if(keys.length>0){
+            document.addEventListener('pointermove', pointermoveHandler as never);
+            document.addEventListener('pointerup', pointermoveHandler as never);
+            document.addEventListener('pointerup', cleanup);
+            document.addEventListener('mouseenter', cleanup);
         }
     };
 
@@ -284,9 +303,8 @@ export function Canvas() {
                 onPointerDown={pointerdownHandler}
                 onPointerMove={pointermoveHandler}
                 onPointerUp={pointerupHandler}
-                onPointerCancel={pointerupHandler}
-                onMouseLeave={pointerupHandler}
-                onMouseEnter={pointerdownHandler}
+                onMouseLeave={onMouseLeave}
+                onMouseEnter={cleanup}
                 onWheel={wheelHandler}
             >
                 <div style={{ transform: `${transform}`, transformOrigin: 'top left' }}>

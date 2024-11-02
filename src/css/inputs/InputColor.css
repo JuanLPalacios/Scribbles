@@ -1,0 +1,42 @@
+.InputColor {
+  writing-mode: initial;
+}
+.InputColor > .body {
+  height: 21px;
+}
+
+.InputColor .popup {
+  position: fixed;
+  display: none;
+  touch-action: none;
+  flex-direction: column;
+  padding: 5px;
+  gap: 5px;
+  text-align: end;
+  filter: none;
+}
+
+.InputColor:focus-within .popup {
+  position: fixed;
+  display: grid;
+  grid-template-columns: 100px auto;
+}
+
+.InputColor .popup > .dropper {
+  opacity: .5;
+}
+
+.InputColor .popup > .dropper.active {
+  opacity: 1;
+}
+
+.InputColor .hue-bar {
+  width: 100px;
+  display: flex;
+  position: relative;
+}
+
+.InputColor .hue-bar > input {
+  width: 116px;
+  opacity: 0;
+}

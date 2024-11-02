@@ -34,6 +34,10 @@ body {
   color: var(--text-color);
 }
 
+:fullscreen, ::backdrop {
+  background: var(--background-color);
+}
+
 *::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px var(--overlay-color);
   background-color: var(--background2-color);
@@ -60,6 +64,23 @@ h3,
 h4,
 h5 {
   margin-block: .2em;
+}
+
+@keyframes pulsating {
+  0% {
+    width: 150px;
+    opacity: 1;
+  }
+
+  50% {
+    width: 200px;
+    opacity: 0.5;
+  }
+
+  100% {
+    width: 150px;
+    opacity: 1;
+  }
 }
 
 input,
@@ -167,6 +188,15 @@ button:focus {
 
 .dropdown:focus-within > ul {
   overflow: visible;
+}
+
+.pulsating {
+  animation-name: pulsating;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+  filter: invert();
 }
 
 .ReactModal__Overlay {

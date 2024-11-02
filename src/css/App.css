@@ -20,6 +20,8 @@
   position: absolute;
   height: calc(100svh - 2 * var(--button-diameter));
   top: var(--button-diameter);
+  flex-wrap: wrap;
+  justify-content: space-around;
   z-index: 5;
 }
 
@@ -45,6 +47,8 @@
 
 .App .side-menu > label {
   writing-mode: vertical-lr;
+  align-items: stretch;
+  height: 37px;
 }
 
 .App .side-menu > input[type='range'],
@@ -65,8 +69,10 @@
   display: flex;
 }
 
-.LeftMenu {
+.LeftMenu.side-menu {
   left: 0;
+  height: calc(100svh - var(--button-diameter));
+  top: calc(var(--button-diameter) / 2);
 }
 
 .RightMenu {

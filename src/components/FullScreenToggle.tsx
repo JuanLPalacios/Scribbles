@@ -1,6 +1,6 @@
 import maximizeIcon from '../icons/maximize-svgrepo-com.svg';
 import exitFullscreenIcon from '../icons/exit-fullscreen-svgrepo-com.svg';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function FullScreenToggle() {
     const [locked, setLocked] = useState(false);
@@ -52,6 +52,15 @@ export function FullScreenToggle() {
                 unlock();
             });
     };
+    useEffect(()=>{
+        function fullscreenChanged() {
+            if (!document.fullscreenElement) {
+                setLocked(false);
+            }
+        }
+        document.addEventListener('fullscreenchange', fullscreenChanged);
+        return ()=>document.removeEventListener('fullscreenchange', fullscreenChanged);
+    }, []);
     return (
         <>
             {canChangeOrientation&&<div className='Toolbar' style={{ position: 'absolute', top: 'calc(0px - var(--button-diameter))', right: 0 }}>

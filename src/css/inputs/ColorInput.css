@@ -38,7 +38,7 @@
 
   .ColorInput.dropdown > ul {
     max-width: 25svh;
-    max-height: 25lvw;
+    max-height: 25vw;
   }
 
 }

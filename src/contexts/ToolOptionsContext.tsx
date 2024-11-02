@@ -9,7 +9,7 @@ import { ToolOptions } from './MenuOptions';
 import drawIcon from '../icons/brush-f-svgrepo-com.svg';
 import eraseIcon from '../icons/erase-svgrepo-com.svg';
 import fillIcon from '../icons/color-bucket-svgrepo-com.svg';
-import transformIcon from '../icons/nametag-svgrepo-com.svg';
+import transformIcon from '../icons/cut.svg';
 import smearIcon from '../icons/smear.svg';
 import { Smear } from '../tools/Smear';
 

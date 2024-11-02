@@ -22,14 +22,11 @@
   padding: 2px 0;
 }
 
-.App .side-menu > .BrushWidthInput {
-  align-items: center;
-}
-
 .BrushWidthInput > .brush-reference {
   position: absolute;
   border: 1px dashed #fff;
   opacity: 1;
+  align-self: center;
 }
 
 .BrushWidthInput > .brush-reference.vanishing {

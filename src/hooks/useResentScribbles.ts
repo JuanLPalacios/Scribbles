@@ -47,7 +47,7 @@ export function useResentScribbles() {
         return {
             addFile,
             saveDrawingState(drawing:DrawingState, name:string){
-                SDRW.binary(drawing)
+                return SDRW.binary(drawing)
                     .then(blob=>new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result as string);

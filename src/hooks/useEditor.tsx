@@ -5,12 +5,16 @@ import { StoredFile, useResentScribbles } from './useResentScribbles';
 import { SDRW } from '../lib/sdrw';
 import { loadImageAsDrawingState } from '../generators/loadImageAsDrawingState';
 import { createLayer2 } from '../generators/createLayer2';
+import { useLoadingOverlay } from './useLoadingOverlay';
+import { LoadingState } from '../contexts/LoadingOverlayContext';
 
 export const useEditor = () => {
+    const [, setLoadingState] = useLoadingOverlay();
     const [, { loadDrawingState, saveDrawingState, loadLastSession }] = useResentScribbles();
     const [editor, dispatch] = useContext(EditorContext);
     return [editor, useMemo(()=>({
         openFile(file:File){
+            setLoadingState(LoadingState.Loading);
             const extension = file.name.split('.').pop();
             switch (extension) {
             case 'jpeg':
@@ -24,8 +28,10 @@ export const useEditor = () => {
                             payload
                         });
                     })
-                    .catch(e=>console.error(e));
+                    .catch(e=>console.error(e))
+                    .finally(()=>setLoadingState(LoadingState.None));
                 break;
+            case 'zip':
             case 'scribble':
                 SDRW.jsonObj(file)
                     .then(payload=>{
@@ -35,17 +41,21 @@ export const useEditor = () => {
                             payload
                         });
                     })
-                    .catch(e=>console.error(e));
+                    .catch(e=>console.error(e))
+                    .finally(()=>setLoadingState(LoadingState.None));
                 break;
             }
         },
         loadFile(fileRef:StoredFile){
-            loadDrawingState(fileRef).then(payload=>{
-                dispatch({
-                    type: 'editor/load',
-                    payload
-                });
-            });
+            setLoadingState(LoadingState.Loading);
+            loadDrawingState(fileRef)
+                .then(payload=>{
+                    dispatch({
+                        type: 'editor/load',
+                        payload
+                    });
+                })
+                .finally(()=>setLoadingState(LoadingState.None));
         },
         newFile({ name, width, height }:{name:string, width:number, height:number}){
             dispatch({
@@ -70,12 +80,15 @@ export const useEditor = () => {
             });
         },
         loadSession(){
-            loadLastSession().then(payload=>{
-                if(payload)dispatch({
-                    type: 'editor/load',
-                    payload
-                });
-            });
+            setLoadingState(LoadingState.Loading);
+            loadLastSession()
+                .then(payload=>{
+                    if(payload)dispatch({
+                        type: 'editor/load',
+                        payload
+                    });
+                })
+                .finally(()=>setLoadingState(LoadingState.None));
         },
     }), [dispatch, loadDrawingState, loadLastSession, saveDrawingState])] as const;
 };

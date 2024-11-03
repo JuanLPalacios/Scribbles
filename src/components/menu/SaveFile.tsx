@@ -20,6 +20,7 @@ export const SaveFile = DrawingRequired(() => {
             break;
         }
     }, [downloadFile, exportPNG, extension]);
+    const close = useCallback(()=>setOpen(false), [downloadFile, exportPNG, extension]);
     useEffect(()=>{
         if(drawing) setName(drawing.data.name.split('.')[0]);
     }, [drawing]);
@@ -30,7 +31,7 @@ export const SaveFile = DrawingRequired(() => {
             </button>
             <div className="text">Save/Export</div>
         </li>
-        <ReactModal isOpen={isOpen} onRequestClose={()=>setOpen(false)} style={{ content: { width: '20rem' } }}>
+        <ReactModal isOpen={isOpen} onRequestClose={close} style={{ content: { width: '350px' } }}>
             <div className="fields import-brush">
                 <h2>Save Scribble</h2>
                 <div>
@@ -42,7 +43,7 @@ export const SaveFile = DrawingRequired(() => {
                     <button onClick={download}>download</button>
                 </div>
                 <div className='actions'>
-                    <button onClick={localSave}>save locally</button>
+                    <button onClick={()=>localSave().then(close)}>save locally</button>
                     <button onClick={()=>setOpen(false)}>cancel</button>
                 </div>
             </div>

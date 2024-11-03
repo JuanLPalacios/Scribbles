@@ -8,9 +8,12 @@
   align-content: stretch;
 }
 
+.EditPalettes > .cols > * {
+  width: 195px;
+}
+
 .palette-list {
-  width: 225px;
-  height: calc(100svh - 12rem);
+  height: calc(100svh - 11rem);
   overflow-y: auto;
 }
 
@@ -61,7 +64,7 @@
 @media screen and (orientation:portrait) { 
 
   .palette-list {
-    height: calc(100vw - 15rem);
+    height: calc(100vw - 11rem);
   }
 
 }

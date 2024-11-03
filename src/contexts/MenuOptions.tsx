@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { ToolButton } from '../types/ToolButton';
 import { BrushesOptionsContextProvider, BrushOptions } from './BrushesOptionsContext';
 import { ToolOptionsContextProvider } from './ToolOptionsContext';
+import { LoadingOverlayContextProvider } from './LoadingOverlayContext';
 
 export type ToolOptions = {
     tools:ToolButton[],
@@ -24,6 +25,7 @@ export type MenuOptions = ToolOptions & BrushOptions & ColorOptions & AlphaOptio
 
 export const MenuContextProvider = (props: { children: ReactNode }) => {
     const providers = [
+        LoadingOverlayContextProvider,
         BrushesOptionsContextProvider,
         ToolOptionsContextProvider
     ];

@@ -93,7 +93,6 @@ export const EditPalettes = () => {
     }, [currentPalette, newName, setTempPalette, tempPalette]);
     const update = useCallback((e:React.ChangeEvent<CustomInput<SerializedValue>|HTMLSelectElement>) => {
         let value;
-        //console.log(value);
         if(e.target.name!='scribblePaletteType')
             switch (e.target.type){
             case('number'):

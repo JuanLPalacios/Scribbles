@@ -44,7 +44,7 @@ export const NewFile = () => {
             </button>
             <div className="text">New scribble</div>
         </li>
-        <ReactModal isOpen={isOpen} onRequestClose={close} style={{ content: { width: '14rem' } }}>
+        <ReactModal isOpen={isOpen} onRequestClose={close} style={{ content: { width: '250px' } }}>
             <div className="fields">
                 <h2>New Scribble</h2>
                 <div className='errors'>

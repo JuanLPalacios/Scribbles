@@ -8,8 +8,11 @@ import { getBlobFromLayer, mergeLayers } from '../lib/Graphics';
 import { saveAs } from 'file-saver';
 import { SDRW } from '../lib/sdrw';
 import { useResentScribbles } from './useResentScribbles';
+import { LoadingState } from '../contexts/LoadingOverlayContext';
+import { useLoadingOverlay } from './useLoadingOverlay';
 
 export const useDrawing = () => {
+    const [, setLoadingState] = useLoadingOverlay();
     const [, { saveDrawingState }] = useResentScribbles();
     const [editorState, { editDrawing }] = useEditor();
     const { drawing } = editorState;
@@ -133,12 +136,15 @@ export const useDrawing = () => {
                 });
             },
             async downloadFile(){
+                setLoadingState(LoadingState.Saving);
                 const { data: { name } } = drawing;
                 saveDrawingState(data, name);
                 const blob = await SDRW.binary(data);
                 saveAs(blob, `${name}.scribble`);
+                setLoadingState(LoadingState.None);
             },
             exportPNG(){
+                setLoadingState(LoadingState.Saving);
                 const { data: { layers, width, height, name } } = drawing;
                 saveDrawingState(data, name);
                 let merged = createLayer2('', [width, height]);
@@ -148,15 +154,19 @@ export const useDrawing = () => {
                 getBlobFromLayer(
                     merged,
                     blob=>{
+                        setLoadingState(LoadingState.None);
                         if(blob)
                             saveAs(blob, (name.endsWith('.png')||name.endsWith('.PNG'))?name:`${name}.png`);
                     });
             },
             localSave(){
+                setLoadingState(LoadingState.Saving);
                 const { data: { name } } = drawing;
-                saveDrawingState(data, name);
+                return saveDrawingState(data, name)
+                    .catch(e=>console.error(e))
+                    .finally(()=>setLoadingState(LoadingState.None));
             },
         };
-    }, [drawing, editDrawing, saveDrawingState]);
+    }, [drawing, editDrawing, saveDrawingState, setLoadingState]);
     return [drawing, drawingActions] as const;
 };

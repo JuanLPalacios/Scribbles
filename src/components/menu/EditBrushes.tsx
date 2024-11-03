@@ -68,6 +68,7 @@ export const EditBrushes = () => {
                 .catch(e=>console.error(e));
 
             break;
+        case 'zip':
         case 'sbr':
             SBR.jsonObj(file)
                 .then(brushesData=>{

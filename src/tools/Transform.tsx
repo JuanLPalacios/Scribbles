@@ -61,7 +61,6 @@ export const Transform = ({ children }: ToolFunctions) => {
     const [{ selectedCut }, setTransformOptions] = useTranformOptions();
     const setSelectedCut = useCallback((selectedCut: number)=>setTransformOptions({ selectedCut }), []);
     const r = useMemo<Tool>(() => {
-        console.log('?');
         let drawing: EditorDrawingState,
             updateLayer: (...[index, layer]: [number, Partial<LayerState2>] | [Partial<LayerState2>]) => void,
             forceUpdate: ({ data, editorState }: {

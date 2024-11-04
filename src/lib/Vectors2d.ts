@@ -27,7 +27,7 @@ export const createBezier = (points: Point[]):Bezier => {
     let p2 = points[Math.floor(2 * points.length / 3)];
     const p3 = points[points.length - 1];
 
-    const maxIterations = 1000;
+    const maxIterations = 1000/points.length;
     const epsilon = 0.001;
     let prevError = Infinity;
 

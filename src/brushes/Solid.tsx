@@ -112,9 +112,11 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const blur = ~~(brushWidth*(1-brush.hardness)/4);
                 const { width, height } = bufferCanvas;
+                const blurMargin = blur*2;
                 ctx.globalAlpha = alpha;
-                strokeBufferCanvas.width = width;
-                strokeBufferCanvas.height = height;
+                strokeBufferCanvas.width = width+blurMargin*2;
+                strokeBufferCanvas.height = height+blurMargin*2;
+                strokeBufferCtx.setTransform(new DOMMatrix().translate(blurMargin, blurMargin));
                 strokeBufferCtx.lineCap = 'round';
                 strokeBufferCtx.lineJoin = 'round';
                 strokeBufferCtx.strokeStyle = color;
@@ -127,6 +129,7 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                 strokeBufferCtx.lineTo(...point);
                 strokeBufferCtx.stroke();
                 strokeBufferCtx.globalCompositeOperation = 'source-over';
+                bufferCtx.setTransform(new DOMMatrix().translate(-blurMargin, -blurMargin));
                 bufferCtx.filter = `blur(${blur}px)`;
                 bufferCtx.drawImage(strokeBufferCanvas, 0, 0);
                 bufferCtx.filter = 'blur(0px)';

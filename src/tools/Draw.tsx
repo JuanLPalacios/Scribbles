@@ -19,7 +19,10 @@ export const Draw = ({ children }: ToolFunctions) => {
         let down = false;
 
         return {
-            setup(){},
+            setup(){
+                const { buffer } = drawing.editorState;
+                buffer.ctx.resetTransform();
+            },
             dispose(){
             },
             click: () => { },

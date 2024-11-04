@@ -35,6 +35,8 @@ export const Erase = ({ children }: ToolFunctions) => {
             setup(){
                 mask.canvas.width = drawing.data.width;
                 mask.canvas.height = drawing.data.height;
+                const { buffer } = drawing.editorState;
+                buffer.ctx.resetTransform();
             },
             dispose(){
             },

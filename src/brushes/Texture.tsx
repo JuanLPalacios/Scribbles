@@ -92,6 +92,7 @@ export const Texture = (({ brush, children }: BrushFunctions<SerializedTextureBr
                 brushTipCtx.fillStyle = color;
                 ctx.globalCompositeOperation = 'source-over';
                 bufferCtx.globalCompositeOperation = 'source-over';
+                bufferCtx.resetTransform();
                 previewCtx.globalCompositeOperation = 'source-over';
                 brushTipCtx.globalCompositeOperation = 'source-in';
                 brushTipCtx.fillRect(0, 0, brushTipCanvas.width, brushTipCanvas.height);

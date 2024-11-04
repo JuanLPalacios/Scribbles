@@ -52,6 +52,7 @@ export const Smear = ({ children }: ToolFunctions) => {
                 const { ctx, canvas: originalLayer } = canvas;
                 const { ctx: bufferCtx } = buffer;
                 const minSpreadSafe = (brushWidth * (3 - hardness));
+                bufferCtx.resetTransform();
                 bufferCtx.globalCompositeOperation = 'copy';
                 bufferCtx.globalAlpha = 1;
                 for (let spread = Math.max(width, height); spread >= minSpreadSafe; spread = Math.sqrt(spread)) {

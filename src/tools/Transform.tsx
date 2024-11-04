@@ -334,6 +334,8 @@ export const Transform = ({ children }: ToolFunctions) => {
         };
         return {
             setup(v?:ReturnType<typeof useDrawing>){
+                const { buffer } = drawing.editorState;
+                buffer.ctx.resetTransform();
                 if(!v)return;
                 const [d, { updateLayer: u, forceUpdate: f }] = v;
                 drawing = d;

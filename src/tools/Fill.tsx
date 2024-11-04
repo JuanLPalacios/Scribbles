@@ -121,6 +121,8 @@ export const Fill = ({ children }: ToolFunctions) => {
 
         return {
             setup() {
+                const { buffer } = drawing.editorState;
+                buffer.ctx.resetTransform();
             },
             dispose(){},
             click({ point }): void {

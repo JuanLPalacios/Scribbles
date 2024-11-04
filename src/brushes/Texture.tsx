@@ -32,7 +32,7 @@ export const Texture = (({ brush, children }: BrushFunctions<SerializedTextureBr
         const { width: sWidth, height: sHeight } = texture;
         let dWidth = 1, dHeight = 1;
         return {
-            drawLine(bufferCtx, line, width, offset, preview){
+            drawLine(bufferCtx, line, _width, offset, preview){
                 if(preview){
                     const[, [x, y]] = line;
                     bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
@@ -51,7 +51,7 @@ export const Texture = (({ brush, children }: BrushFunctions<SerializedTextureBr
                     bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);
                 }
             },
-            drawBezier(bufferCtx, bezier, width, offset, preview){
+            drawBezier(bufferCtx, bezier, _width, offset, preview){
                 if(preview){
                     const[,,, [x, y]] = bezier;
                     bufferCtx.drawImage(texture, 0, 0, sWidth, sHeight, x - dWidth / 2, y - dHeight / 2, dWidth, dHeight);

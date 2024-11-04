@@ -6,7 +6,7 @@ import { SDRW } from '../lib/sdrw';
 import { loadImageAsDrawingState } from '../generators/loadImageAsDrawingState';
 import { createLayer2 } from '../generators/createLayer2';
 import { useLoadingOverlay } from './useLoadingOverlay';
-import { LoadingState } from '../contexts/LoadingOverlayContext';
+import { LoadingState } from '../types/LoadingState';
 
 export const useEditor = () => {
     const [, setLoadingState] = useLoadingOverlay();
@@ -90,6 +90,6 @@ export const useEditor = () => {
                 })
                 .finally(()=>setLoadingState(LoadingState.None));
         },
-    }), [dispatch, loadDrawingState, loadLastSession, saveDrawingState])] as const;
+    }), [dispatch, loadDrawingState, loadLastSession, saveDrawingState, setLoadingState])] as const;
 };
 

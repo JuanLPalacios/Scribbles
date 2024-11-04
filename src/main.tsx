@@ -23,5 +23,4 @@ window.addEventListener('wheel', e=>{
 window.addEventListener('keyup', e=>{
     e.preventDefault();
 }, { passive: false });
-
 serviceWorkerRegistration.register();

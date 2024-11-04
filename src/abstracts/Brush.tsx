@@ -7,6 +7,7 @@ import { Texture } from '../brushes/Texture';
 import { BrushPair } from '../contexts/BrushRendererContext';
 import { Pattern } from '../brushes/Pattern';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
     [Solid, {
         scribbleBrushType: BrushList.Solid,

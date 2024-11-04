@@ -5,6 +5,8 @@ const TARGET_VERSION_REGEX = /^([^\d]*)(\d+)\.(\d+)\.(\d+)/;
 
 const useStoredVersion = createStorageHook<{ version: string }>('version', 'local', { version: '0.3.0' });
 
+// the type of v is a previous version type so any needs to be used
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useVersion<T>(value:T, targetVersion:string, updateFunctions:{version:string, update:(v:any)=>[string, any]}[]) {
     const [ver, setVer] = useStoredVersion();
     let updated = false;

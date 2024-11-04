@@ -35,7 +35,7 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
             }
         }
         return {
-            drawBezier(bufferCtx, bezier, width, offset, preview){
+            drawBezier(bufferCtx, bezier, width, _offset, preview){
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
                 const blur = ~~((1-brush.hardness)*width/4);
@@ -54,7 +54,7 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
                     lastSegment = bezier;
                 }
             },
-            drawLine(bufferCtx, line, width, offset, preview){
+            drawLine(bufferCtx, line, width, _offset, preview){
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 const { ctx: aliasedStrokeCtx, canvas: aliasedStrokeCanvas } = aliasedStroke;
                 const blur = ~~((1-brush.hardness)*width/4);
@@ -73,7 +73,7 @@ export const Marker = (({ brush, children }: BrushFunctions<SerializedMarkerBrus
                     lastSegment = line;
                 }
             },
-            setup(drawable, buffer, previewBuffer, point, color, alpha, width){
+            setup(drawable, buffer, _previewBuffer, point, color, alpha, width){
                 const { ctx } = drawable;
                 const { ctx: bufferCtx, canvas: bufferCanvas } = buffer;
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;

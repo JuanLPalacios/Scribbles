@@ -49,16 +49,16 @@ export function InputPaletteColors({ value, name, className, onChange }: {
     const [id] = useState(uid());
     return <div className={'InputPaletteColors ' + className}>
         <div className='InputColor' style={{ background: color }}>
-            <input className='InputColor' type="color" onClick={(e)=>e.currentTarget.value = color} onChange={(e) => { setColor(e.target.value); setPalette(value.map((x,i)=>(i==selectedColor)?e.target.value:x)); }}/>
+            <input className='InputColor' type="color" onClick={(e)=>e.currentTarget.value = color} onChange={(e) => { setColor(e.target.value); setPalette(value.map((x, i)=>(i==selectedColor)?e.target.value:x)); }}/>
         </div>
         <div>
             <button onClick={()=>{ addColor(color); setSelectedColor(value.length); }}><img src={plusIcon} alt="Add Palette" /></button>
-            <button onClick={()=>{ setPalette(value.filter((e, i)=>i!=selectedColor));setSelectedColor(Math.min(selectedColor, value.length-2)); }}><img src={trashIcon} alt="Delete Palette" /></button>
+            <button onClick={()=>{ setPalette(value.filter((_e, i)=>i!=selectedColor));setSelectedColor(Math.min(selectedColor, value.length-2)); }}><img src={trashIcon} alt="Delete Palette" /></button>
         </div>
         <input type="text" value={color} ref={ref2} style={{ display: 'none' }} />
         <ul className='color-list select-list'>
             {value.map((color, i) => <li key={id + '-' + i} className={(i==selectedColor)?'selected':''}>
-                <div className='color' style={{ background: color }} onClick={(e) => { setColor(color); setSelectedColor(i); } }></div>
+                <div className='color' style={{ background: color }} onClick={(_e) => { setColor(color); setSelectedColor(i); } }></div>
             </li>)}
         </ul>
     </div>;

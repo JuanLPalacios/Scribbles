@@ -1,7 +1,7 @@
 import { Dispatch, ReactNode } from 'react';
 
 export type StorageType = 'local'|'session';
-
+// TODO: is this i still in use? delete if not
 type StorageCache = {
     local: { [key: string]: {
         Provider:(props: { children: ReactNode }) => JSX.Element
@@ -13,6 +13,7 @@ type StorageCache = {
     } }
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const storageProviders:StorageCache = { local: {}, session: {} };
 
 export const StorageContextProvider = ({ children }:{children:ReactNode})=>{

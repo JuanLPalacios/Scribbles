@@ -5,12 +5,11 @@ import { parseSerializedJSON } from '../lib/serializeJSON';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../lib/Vectors2d';
 import { BrushRendererContext } from '../contexts/BrushRendererContext';
-import { BrushList } from '../lib/BrushList';
 import { CompressedJSON } from '../types/CompressedOject';
 import { useMemo } from 'react';
 
 export type SerializedStiffBrush ={
-    scribbleBrushType: BrushList.Stiff,
+    scribbleBrushType: -1,
     name:string
     fibers: CompressedJSON[]
 }

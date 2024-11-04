@@ -23,7 +23,7 @@ export const Erase = ({ children }: ToolFunctions) => {
         let down = false;
         let canvasData:ImageData;
 
-        const renderMask = function(canvas:DrawableState, buffer:DrawableState){
+        const renderMask = function(_canvas:DrawableState, buffer:DrawableState){
             if(buffer.ctx){
                 buffer.ctx.putImageData(canvasData, 0, 0);
                 buffer.ctx.globalCompositeOperation = 'destination-out';

@@ -6,7 +6,6 @@ import { DrawableState } from '../types/DrawableState';
 import { BrushList } from '../lib/BrushList';
 import { SerializedImageData } from '../types/SerializedImageData';
 import { AbstractSmoothSpacing } from '../abstracts/AbstractSmoothSpacing';
-import { canvasConsole } from '../lib/canvasConsole';
 
 export type SerializedPatternBrush = {
     scribbleBrushType: BrushList.Pattern,
@@ -30,7 +29,7 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
         let patternData:ImageData;
         let bufferPatternData:ImageData;
         return {
-            drawBezier(bufferCtx, bezier, brushWidth, offset, preview){
+            drawBezier(bufferCtx, bezier, brushWidth, _offset, preview){
                 const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 const [[p0x, p0y], [p1x, p1y], [p2x, p2y], [x, y]] = bezier;
                 const blur = ~~(brushWidth * (1 - brush.hardness) / 2);
@@ -51,7 +50,7 @@ export const Pattern = (({ brush, children }: BrushFunctions<SerializedPatternBr
                     bufferPatternData = bufferPatternCtx.getImageData(0, 0, bufferPatternCanvas.width, bufferPatternCanvas.height);
                 }
             },
-            drawLine(bufferCtx, line, brushWidth, offset, preview){
+            drawLine(bufferCtx, line, brushWidth, _offset, preview){
                 const { ctx: bufferPatternCtx, canvas: bufferPatternCanvas } = brushPatternBuffer;
                 const [lastPoint, point] = line;
                 const blur = ~~(brushWidth * (1 - brush.hardness) / 2);

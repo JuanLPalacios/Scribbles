@@ -38,7 +38,7 @@ export function FullScreenToggle() {
                             // Orientation was locked
                             setLocked(true);
                         })
-                        .catch((error: string) => {
+                        .catch((_error: string) => {
                             // Orientation lock failed
                             unlock();
                         });
@@ -47,7 +47,7 @@ export function FullScreenToggle() {
                     unlock();
                 }
             })
-            .catch((error: string) => {
+            .catch((_error: string) => {
                 // Orientation lock failed
                 unlock();
             });

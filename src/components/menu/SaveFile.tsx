@@ -20,7 +20,7 @@ export const SaveFile = DrawingRequired(() => {
             break;
         }
     }, [downloadFile, exportPNG, extension]);
-    const close = useCallback(()=>setOpen(false), [downloadFile, exportPNG, extension]);
+    const close = useCallback(()=>setOpen(false), []);
     useEffect(()=>{
         if(drawing) setName(drawing.data.name.split('.')[0]);
     }, [drawing]);

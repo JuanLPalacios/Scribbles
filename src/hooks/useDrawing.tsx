@@ -8,7 +8,7 @@ import { getBlobFromLayer, mergeLayers } from '../lib/Graphics';
 import { saveAs } from 'file-saver';
 import { SDRW } from '../lib/sdrw';
 import { useResentScribbles } from './useResentScribbles';
-import { LoadingState } from '../contexts/LoadingOverlayContext';
+import { LoadingState } from '../types/LoadingState';
 import { useLoadingOverlay } from './useLoadingOverlay';
 
 export const useDrawing = () => {

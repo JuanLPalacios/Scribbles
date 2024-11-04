@@ -23,7 +23,7 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
         let previousWidth = 0;
         let strokeBufferData:ImageData;
         return {
-            drawBezier(bufferCtx, bezier, width, offset, preview){
+            drawBezier(bufferCtx, bezier, width, _offset, preview){
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 strokeBufferCtx.putImageData(strokeBufferData, 0, 0);
                 const [,, p3, p4] = bezier;
@@ -64,7 +64,7 @@ export const Solid = (({ brush, children }:BrushFunctions<SerializedSolidBrush>)
                     previousWidth = finalWidth;
                 }
             },
-            drawLine(bufferCtx, line, width, offset, preview){
+            drawLine(bufferCtx, line, width, _offset, preview){
                 const { ctx: strokeBufferCtx, canvas: strokeBufferCanvas } = strokeBuffer;
                 strokeBufferCtx.putImageData(strokeBufferData, 0, 0);
                 const [lastPoint, point] = line;

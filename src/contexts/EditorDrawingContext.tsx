@@ -97,8 +97,7 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
     if(!state) return state;
     const { editorState, data } = state || {};
     const { next=[], prev=[] } = editorState || {};
-    const { payload } = { payload: undefined, ...action };
-    console.log(action.type, payload);
+    //console.log(action.type, payload);
     switch (action.type) {
     case 'editor-drawing/do':
         return state ? updateLayers({

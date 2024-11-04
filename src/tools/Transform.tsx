@@ -22,7 +22,7 @@ import { useConfig } from '../hooks/useConfig';
 import { RectCut } from './cut/RectCut';
 import { LasoCut } from './cut/LasoCut';
 import { BottomMenuPortal } from '../components/portals/BottomMenu';
-import { createStorageHook } from '../generators/createStorageHook';
+import { useTransformOptions } from '../hooks/useTranformOptions';
 
 const SKEW_ICONS = [
     rotateTopLeft,
@@ -41,8 +41,6 @@ export type CutActions = {
     cut: ({ point }: CanvasEvent, layer: LayerState2 & EditorLayerState) => void;
 }
 
-export const useTranformOptions = createStorageHook<{ selectedCut: number }>('selected-cut', 'local', { selectedCut: 0 });
-
 const cutOptions = [
     { icon: rect, alt: 'rectangle cut', cut: RectCut },
     { icon: laso, alt: 'laso cut', cut: LasoCut }
@@ -58,8 +56,8 @@ export const Transform = ({ children }: ToolFunctions) => {
     const [{ doubleClickTimeOut }] = useConfig();
     const [id] = useState(uid());
     const [action, setAction] = useState(TransformAction.Cut);
-    const [{ selectedCut }, setTransformOptions] = useTranformOptions();
-    const setSelectedCut = useCallback((selectedCut: number)=>setTransformOptions({ selectedCut }), []);
+    const [{ selectedCut }, setTransformOptions] = useTransformOptions();
+    const setSelectedCut = useCallback((selectedCut: number)=>setTransformOptions({ selectedCut }), [setTransformOptions]);
     const r = useMemo<Tool>(() => {
         let drawing: EditorDrawingState,
             updateLayer: (...[index, layer]: [number, Partial<LayerState2>] | [Partial<LayerState2>]) => void,

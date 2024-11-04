@@ -22,6 +22,8 @@ export type CompressedValue = number | string | boolean | Compressed | Compresse
 export type Serialized = {[key:string]:SerializedValue};
 export type SerializedValue = number | string | boolean | Serialized | SerializedImageData | SerializedValue[];
 
+// this is a type guard any type is required
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isNumberArray(value: any[]): value is number[] {
     if (value.some(x=>typeof x !== 'number')) return false;
     return true;

@@ -28,5 +28,7 @@ export type NonRenderBrushFunctions<B extends { name: string; scribbleBrushType:
     children: ReactNode;
 };
 
+// FIXME: a better type than any should be used
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type BrushPair<B extends Serialized & { name: string; scribbleBrushType: number; }> = [(props: BrushFunctions<any>) => ReactNode, B];
 

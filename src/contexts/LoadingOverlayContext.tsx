@@ -3,12 +3,7 @@ import savingIcon from '../icons/save-svgrepo-com.svg';
 import { createContext, useState, ReactNode } from 'react';
 import { StatePair } from '../types/StatePair';
 import ReactModal from 'react-modal';
-
-export enum LoadingState {
-    None,
-    Loading,
-    Saving
-};
+import { LoadingState } from '../types/LoadingState';
 
 export const LoadingOverlayContext = createContext<StatePair<LoadingState>>([
     LoadingState.None,

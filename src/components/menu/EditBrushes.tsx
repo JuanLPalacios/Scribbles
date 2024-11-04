@@ -39,7 +39,7 @@ export const EditBrushes = () => {
     const addBrush = useCallback(() => {
         setTempBrushes([
             ...tempBrushes,
-            { brush: { scribbleBrushType: BrushList.Solid } as any }
+            { brush: { scribbleBrushType: BrushList.Solid } as never }
         ]);
     }, [tempBrushes]);
     const deleteBrush = useCallback(() => {

@@ -60,7 +60,7 @@ type UpdateLayer = {
 };
 export const invertDrawingAction = (drawing: DrawingState, action: DrawingAction): DrawingAction => {
     const { layers } = drawing;
-    console.log(action.type, action.payload);
+    //console.log(action.type, action.payload);
     switch (action.type) {
     case 'drawing/addLayer':
         return { type: 'drawing/removeLayer', payload: action.payload.at };
@@ -83,7 +83,7 @@ export const invertDrawingAction = (drawing: DrawingState, action: DrawingAction
     }
 };
 export const drawingReducer = (drawing: DrawingState, action: DrawingAction): DrawingState => {
-    console.log(action.type, action.payload);
+    //console.log(action.type, action.payload);
     switch (action.type) {
     case 'drawing/load':
         return action.payload;

@@ -1,12 +1,16 @@
 # ![Scribbles](./src/logo.svg)
 
-A simple PWA for drawing ilustrations with multilayer support
+A simple PWA sketching APP for mobile and desktop with custom brushes and multilayer support
 
 ![Scribbles](./screenshot.png)
 
 ## Live Demo
 
-[Live Demo Link](https://juanlpalacios.github.io/Scribbles/)
+[Live App Link](https://juanlpalacios.github.io/Scribbles/)
+
+### Install Scribbles
+
+You can install the app from the "Quick Start" modal under the "More Resources" section or from the URL bar.
 
 ### Features
 
@@ -14,14 +18,33 @@ A simple PWA for drawing ilustrations with multilayer support
   - draw
   - erase
   - fill
-  - transform(move/scale/rotate)
+  - smear
+  - cut(move/scale/rotate)
+    - rectangular cut
+    - laso cut
 - multilayer support
-- export to png
+  - layer opacity
+  - compositing operations
+- saving
+  - zip-based multilayer format(.scribble)
+  - local web storage saving
+  - export to png
+- custom brushes
+  - solid brushes
+  - texture brushes
+  - marker brushes
+  - pattern brushes
+  - zip-based brush format(.sbr)
 
-### Setup
+### Setup local build
 
+First clone the repository
 
-to set it up you have to first run 
+```
+npm clone https://github.com/JuanLPalacios/Scribbles.git
+```
+
+to set it up you have to first install the dependencies. run 
 
 ```
 npm install
@@ -37,6 +60,9 @@ npm start
 - React
 - TypeScript
 - CSS
+- ABR-JS
+- JSZip
+- file-saver
 
 ## Author
 
@@ -62,7 +88,7 @@ Give a ⭐️ if you like this project!
 - [TurboColors](https://instagram.com/turbocolors?igshid=ZDdkNTZiNTM=) for the logo original design
 - [Michaelampr](https://github.com/michaelampr/jam?ref=svgrepo.com) Vectors and icons in MIT License via [SVG Repo](https://www.svgrepo.com/)
 - [Css.gg](https://github.com/astrit/css.gg?ref=svgrepo.com) Vectors and icons in MIT License via [SVG Repo](https://www.svgrepo.com/)
-
+- [Boxicons](https://github.com/atisawd/boxicons?ref=svgrepo.com) Vectors and icons in CC Attribution (CC-BY) License via [SVG Repo](https://www.svgrepo.com/)
 
 ## 📝 License
 

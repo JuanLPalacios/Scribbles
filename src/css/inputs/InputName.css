@@ -1,6 +1,14 @@
 .InputName {
   position: relative;
   min-width: 1em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.InputName > input + .text {
+  color: transparent;
 }
 
 .InputName > input {

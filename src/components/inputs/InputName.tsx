@@ -46,6 +46,8 @@ export const InputName = ({ name, onChange, style, value, validate=()=>[] }:Para
     }, [value]);
     return <span className='InputName' style={style} onClick={onClick}  data-tip={editing?error:undefined}>
         {editing&&<input type="text" name={name} value={valueBuffer} onChange={onBufferChange} onFocus={onFocus} onBlur={onBlur} />}
-        {valueBuffer}
+        <span className='text'>
+            {valueBuffer}
+        </span>
     </span>;
 };

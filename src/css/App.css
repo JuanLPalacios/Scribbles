@@ -12,6 +12,7 @@
   padding: 10px;
   margin: auto;
   font-size: 1.5rem;
+  max-width: calc(100vw - var(--button-diameter)* 9);
 }
 
 .App .side-menu {
@@ -88,10 +89,14 @@
 }
 
 @media screen and (orientation:portrait) { 
-
+  
   .App {
     height: calc(100vw);
     max-height: 100vw;
+  }
+  
+  .App .filename {
+    max-width: calc(100svh - var(--button-diameter)* 9);
   }
   
   .App .side-menu {

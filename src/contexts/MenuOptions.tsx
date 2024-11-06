@@ -3,6 +3,7 @@ import { ToolButton } from '../types/ToolButton';
 import { BrushesOptionsContextProvider, BrushOptions } from './BrushesOptionsContext';
 import { ToolOptionsContextProvider } from './ToolOptionsContext';
 import { LoadingOverlayContextProvider } from './LoadingOverlayContext';
+import { ColorPickingContextProvider } from './ColorPickingContext';
 
 export type ToolOptions = {
     tools:ToolButton[],
@@ -27,7 +28,8 @@ export const MenuContextProvider = (props: { children: ReactNode }) => {
     const providers = [
         LoadingOverlayContextProvider,
         BrushesOptionsContextProvider,
-        ToolOptionsContextProvider
+        ToolOptionsContextProvider,
+        ColorPickingContextProvider
     ];
     return providers.reverse().reduce((children, Provider)=><Provider>{children}</Provider>, props.children);
 };

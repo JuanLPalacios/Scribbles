@@ -9,8 +9,9 @@ import { TopMenuPortal } from './portals/TopMenu';
 import { InputName } from './inputs/InputName';
 import { validateFileName } from '../lib/Validations';
 import { uid } from '../lib/uid';
+import { PrioritizeColorPick } from '../hoc/PrioritizeColorPick';
 
-export function Canvas() {
+export const Canvas = PrioritizeColorPick(()=>{
     const [drawing, { setTransform, rename }] = useDrawing();
     const { width, height, layers } = drawing.data;
     const { selectedLayer, layers: editorLayers, handles, buffer, transform } = drawing.editorState;
@@ -327,5 +328,5 @@ export function Canvas() {
                 </div>
             </div>
         </div>);
-}
+});
 

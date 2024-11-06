@@ -3,8 +3,6 @@ import { ToolFunctions, ToolContext, Tool } from '../contexts/ToolContext';
 import { useDrawing } from '../hooks/useDrawing';
 import { createDrawable } from '../generators/createDrawable';
 import { Drawable } from '../components/Drawable';
-import { useColorPicker } from '../hooks/useColorPicker';
-import { rgbToHex } from '../lib/rgbToHex';
 
 const LOOKING_GLASS_DIAMETER = 9;
 const LOOKING_GLASS_SCALE = 10;
@@ -12,7 +10,6 @@ const LOOKING_GLASS_RADIUS = (LOOKING_GLASS_DIAMETER-1)/2;
 
 export const ColorPicker = ({ children }: ToolFunctions) => {
     const [drawing] = useDrawing();
-    const [, { changeColor }] = useColorPicker();
     const lookingGlassUpscale = useMemo(()=>createDrawable({ size: [LOOKING_GLASS_DIAMETER*LOOKING_GLASS_SCALE, LOOKING_GLASS_DIAMETER*LOOKING_GLASS_SCALE] }), []);
     const lookingGlassSelection = useMemo(()=>createDrawable({ size: [LOOKING_GLASS_DIAMETER, LOOKING_GLASS_DIAMETER], options: { willReadFrequently: true } }), []);
     const [point, setPoint] = useState<DOMPoint>(new DOMPoint());
@@ -83,8 +80,8 @@ export const ColorPicker = ({ children }: ToolFunctions) => {
             },
             click: () => {
                 const [r, g, b] = lookingGlassSelection.ctx.getImageData(LOOKING_GLASS_RADIUS, LOOKING_GLASS_RADIUS, 1, 1).data;
-                const color = rgbToHex([r, g, b]);
-                changeColor(color);
+                const color = `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+                console.log(color);
             },
             mouseDown({ point }){
                 setSelecting(true);
@@ -104,7 +101,7 @@ export const ColorPicker = ({ children }: ToolFunctions) => {
                 upscale();
             },
         };
-    }, [changeColor, drawing.data, drawing.editorState, lookingGlassSelection, lookingGlassUpscale]);
+    }, [drawing.data, drawing.editorState, lookingGlassSelection, lookingGlassUpscale]);
     useEffect(()=>{
         r.setup();
         return ()=>{

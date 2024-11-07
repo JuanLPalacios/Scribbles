@@ -1,3 +1,4 @@
+import { mergeLayers } from '../lib/Graphics';
 import { LayerState2 } from '../types/LayerState';
 
 export type DrawingState = {
@@ -10,8 +11,10 @@ export type DrawingAction =
     WorkLayer |
     LoadLayer |
     AddLayer |
+    ReplaceLayer |
     RemoveLayer |
     MoveLayer |
+    MergeDownLayer |
     Load |
     UpdateLayer;
 
@@ -44,6 +47,18 @@ type RemoveLayer = {
     type: 'drawing/removeLayer';
     payload: number;
 };
+type ReplaceLayer = {
+    type: 'drawing/replaceLayer';
+    payload: {
+        from: number;
+        to: number;
+        with: LayerState2[];
+    };
+};
+type MergeDownLayer = {
+    type: 'drawing/mergeDownLayer';
+    payload: number;
+};
 type MoveLayer = {
     type: 'drawing/moveLayer';
     payload: {
@@ -66,6 +81,10 @@ export const invertDrawingAction = (drawing: DrawingState, action: DrawingAction
         return { type: 'drawing/removeLayer', payload: action.payload.at };
     case 'drawing/removeLayer':
         return { type: 'drawing/addLayer', payload: { at: action.payload, layer: layers[action.payload] } };
+    case 'drawing/replaceLayer':
+        return { type: 'drawing/replaceLayer', payload: { from: action.payload.from, to: action.payload.from+action.payload.with.length, with: drawing.layers.slice(action.payload.from, action.payload.to) } };
+    case 'drawing/mergeDownLayer':
+        return { type: 'drawing/replaceLayer', payload: { from: action.payload-1, to: action.payload, with: drawing.layers.slice(action.payload-1, action.payload+1) } };
     case 'drawing/moveLayer':
         return { type: 'drawing/moveLayer', payload: { at: action.payload.to, to: action.payload.at } };
     case 'drawing/updateLayer':
@@ -102,15 +121,31 @@ export const drawingReducer = (drawing: DrawingState, action: DrawingAction): Dr
             ...drawing,
             layers: layers.filter((_x, i) => action.payload !== i)
         };
+    case 'drawing/replaceLayer':
+        return drawing && {
+            ...drawing,
+            layers: [...layers.slice(0, action.payload.from),
+                ...action.payload.with,
+                ...layers.slice(action.payload.to)
+            ]
+        };
+    case 'drawing/mergeDownLayer':
+        return drawing && {
+            ...drawing,
+            layers: [...layers.slice(0, action.payload-1),
+                mergeLayers(layers[action.payload], layers[action.payload-1]),
+                ...layers.slice(action.payload+1)
+            ]
+        };
     case 'drawing/moveLayer':
         return drawing &&
-            {
-                ...drawing,
-                layers: [...layers.slice(0, action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((_x, i) => action.payload.at !== i),
-                    layers[action.payload.at],
-                    ...layers.slice(action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((_x, i) => action.payload.at !== (i + action.payload.to))
-                ]
-            };
+                        {
+                            ...drawing,
+                            layers: [...layers.slice(0, action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((_x, i) => action.payload.at !== i),
+                                layers[action.payload.at],
+                                ...layers.slice(action.payload.to + (action.payload.at < action.payload.to ? 1 : 0)).filter((_x, i) => action.payload.at !== (i + action.payload.to))
+                            ]
+                        };
     case 'drawing/updateLayer':
         return drawing && {
             ...drawing,

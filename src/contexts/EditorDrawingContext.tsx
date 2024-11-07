@@ -63,15 +63,27 @@ type Transform = {
     payload: DOMMatrix;
 };
 
-const updateLayers = (state:EditorDrawingState):EditorDrawingState => {
+const updateLayers = (state:EditorDrawingState, selectedLayerName:string):EditorDrawingState => {
     const { editorState, data: { layers } } = state;
     const { layers: editorLayers } = editorState;
-    if(layers.length<=editorLayers.length)return state;
+    let { selectedLayer } = editorState;
+    selectedLayer = Math.max(0, Math.min(layers.length-1, selectedLayer));
+    if(layers[selectedLayer].name!==selectedLayerName){
+        const index = layers.findIndex(x=>x.name==selectedLayerName);
+        if(index!=-1)selectedLayer=index;
+    }
+    if(layers.length<=editorLayers.length)return {
+        ...state,
+        editorState: {
+            ...editorState,
+            selectedLayer
+        } };
     return {
         ...state,
         editorState: {
             ...editorState,
             layers: state.data.layers.map((x, i)=>(i in editorLayers)?editorLayers[i]:createEditorLayer(x)),
+            selectedLayer
         }
     };
 };
@@ -79,20 +91,23 @@ const updateLayers = (state:EditorDrawingState):EditorDrawingState => {
 export const editorDrawingReducer = (state: EditorDrawingState|undefined, action: EditorDrawingAction): EditorDrawingState|undefined => {
     switch (action.type) {
     case 'editor-drawing/load':
-        return action.payload ? updateLayers({
-            ...state,
-            data: action.payload,
-            editorState: {
-                layers: [],
-                next: [],
-                prev: [],
-                handles: [],
-                selectedLayer: 0,
-                buffer: createDrawable({ size: [action.payload.width, action.payload.height], options: { willReadFrequently: true } }),
-                transform: new DOMMatrix()
-            }
+        return action.payload ? updateLayers(
+            {
+                ...state,
+                data: action.payload,
+                editorState: {
+                    layers: [],
+                    next: [],
+                    prev: [],
+                    handles: [],
+                    selectedLayer: 0,
+                    buffer: createDrawable({ size: [action.payload.width, action.payload.height], options: { willReadFrequently: true } }),
+                    transform: new DOMMatrix()
+                }
 
-        }):undefined;
+            },
+            ''
+        ):undefined;
     }
     if(!state) return state;
     const { editorState, data } = state || {};
@@ -100,15 +115,18 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
     //console.log(action.type, payload);
     switch (action.type) {
     case 'editor-drawing/do':
-        return state ? updateLayers({
-            ...state,
-            data: drawingReducer(data, action.payload),
-            editorState: {
-                ...editorState,
-                prev: [...prev, invertDrawingAction(data, action.payload)],
-                next: []
-            }
-        }) : undefined;
+        return state ? updateLayers(
+            {
+                ...state,
+                data: drawingReducer(data, action.payload),
+                editorState: {
+                    ...editorState,
+                    prev: [...prev, invertDrawingAction(data, action.payload)],
+                    next: []
+                }
+            },
+            state.data.layers[state.editorState.selectedLayer].name
+        ) : undefined;
     case 'editor-drawing/undo':
         return (prev.length > 0) ? updateLayers({
             ...state,
@@ -118,7 +136,8 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
                 prev: prev.slice(0, prev.length - 1),
                 next: [...next, invertDrawingAction(data, prev[prev.length - 1])],
             }
-        }) : state;
+        },
+        state.data.layers[state.editorState.selectedLayer].name) : state;
     case 'editor-drawing/redo':
         return (next.length > 0) ? updateLayers({
             ...state,
@@ -128,7 +147,8 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
                 next: next.slice(0, next.length - 1),
                 prev: [...prev, invertDrawingAction(data, next[next.length - 1])],
             }
-        }) : state;
+        },
+        state.data.layers[state.editorState.selectedLayer].name) : state;
     case 'editor-drawing/selectLayer':
         return {
             ...state,
@@ -154,12 +174,14 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
                 ...data,
                 name: action.payload
             },
-        });
+        },
+        state.data.layers[state.editorState.selectedLayer].name);
     case 'editor-drawing/forceUpdate':
         return updateLayers({
             ...state,
             ...action.payload
-        });
+        },
+        state.data.layers[state.editorState.selectedLayer].name);
     default:
         throw new Error();
     }

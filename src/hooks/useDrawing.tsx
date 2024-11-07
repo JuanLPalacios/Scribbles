@@ -57,6 +57,15 @@ export const useDrawing = () => {
                     }
                 });
             } : undefined,
+            mergeDownLayer: (0 <= selectedLayer - 1) ? () => {
+                editDrawing({
+                    type: 'editor-drawing/do',
+                    payload: {
+                        type: 'drawing/mergeDownLayer',
+                        payload: selectedLayer
+                    }
+                });
+            } : undefined,
             addLayer(layerName: string) {
                 editDrawing({
                     type: 'editor-drawing/do',
@@ -132,15 +141,6 @@ export const useDrawing = () => {
                     }
                 });
             },
-            mergeDownLayer: (0 <= selectedLayer - 1) ? () => {
-                editDrawing({
-                    type: 'editor-drawing/do',
-                    payload: {
-                        type: 'drawing/mergeDownLayer',
-                        payload: selectedLayer
-                    }
-                });
-            } : undefined,
             setTransform(payload: DOMMatrix) {
                 editDrawing({
                     type: 'editor-drawing/transform',

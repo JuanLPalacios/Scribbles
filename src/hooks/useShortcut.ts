@@ -1,9 +1,11 @@
 import { useCallback, useEffect } from 'react';
+import { useShortcutLock } from './useShortcutLock';
 
-export const useShortcut = (callback:()=>void, shorcuts:string[]) => {
+export const useShortcut = (callback:(shortcut?:string)=>void, shortcuts:string[]) => {
+    const [isLocked] = useShortcutLock();
     const handleKeyPress = useCallback((event:KeyboardEvent) => {
-        shorcuts.forEach((shorcut)=>{
-            const keys = shorcut.split('+');
+        shortcuts.forEach((shortcut)=>{
+            const keys = shortcut.split('+');
             for (let i = 0; i < keys.length; i++) {
                 const key = keys[i];
                 switch(key){
@@ -13,19 +15,23 @@ export const useShortcut = (callback:()=>void, shorcuts:string[]) => {
                 case('SHIFT'):
                     if(!event.shiftKey) return;
                     break;
+                case('ALT'):
+                    if(!event.altKey) return;
+                    break;
                 default:
                     if(event.key.toUpperCase() !== key) return;
                     break;
                 }
             }
-            callback();
+            callback(shortcut);
         });
-    }, shorcuts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [shortcuts]);
 
     useEffect(() => {
-        document.addEventListener('keydown', handleKeyPress);
+        if(!isLocked)document.addEventListener('keydown', handleKeyPress);
         return () => {
-            document.removeEventListener('keydown', handleKeyPress);
+            if(!isLocked)document.removeEventListener('keydown', handleKeyPress);
         };
-    }, [handleKeyPress]);
+    }, [handleKeyPress, isLocked]);
 };

@@ -7,8 +7,8 @@ import { createDrawable } from './createDrawable';
 export const createLayer = (name:string, rect:Rect):LayerState => {
     const { size } = rect;
     const [width, height] = size;
-    const canvas = createDrawable({ size });
-    const buffer = createDrawable({ size });
+    const canvas = createDrawable({ size, options: { willReadFrequently: true } });
+    const buffer = createDrawable({ size, options: { willReadFrequently: true } });
     const thumbnail = createDrawable({ size: [40, 40 * (height / width)] });
 
     // dummy context and canvas for creating initial imageData state

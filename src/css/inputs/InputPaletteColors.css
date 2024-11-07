@@ -1,0 +1,45 @@
+.InputPaletteColors {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.InputPaletteColors > .InputColor {
+    width: 100%;
+}
+
+.InputPaletteColors > .InputColor > .InputColor {
+    width: 100%;
+    opacity: 0;
+}
+
+.InputPaletteColors > ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    flex-wrap: wrap;
+    align-content: start;
+    overflow-y: scroll;
+}
+
+.InputPaletteColors > .color-list {
+    height: calc(100svh - 19rem);
+    flex: 1 1 auto;
+    margin: 0;
+}
+
+.InputPaletteColors > .color-list .color {
+    box-sizing: border-box;
+}
+
+.InputPaletteColors .selected .color {
+    border: solid 2px var(--text-color);
+}
+
+@media screen and (orientation:portrait) { 
+    .InputPaletteColors > .color-list {
+        height: calc(100vw - 19rem);
+    }
+  
+  }

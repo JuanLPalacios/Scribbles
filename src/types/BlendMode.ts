@@ -18,3 +18,7 @@ export const blendModes = [
 ] as const;
 
 export type BlendMode = typeof blendModes[number];
+
+export function isBlendMode(value: string): value is BlendMode {
+    return blendModes.includes(value as BlendMode);
+}

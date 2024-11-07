@@ -1,0 +1,17 @@
+.BrushPreview {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.BrushPreview > .name {
+    position: absolute;
+    top: 0;
+    opacity: .8;
+    text-shadow: var(--overlay-color) 1px 0 10px;
+    font-size: .8rem;
+}
+
+.BrushPreview canvas {
+    width: calc(var(--button-diameter) * 2.9);
+}

@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom/client';
 import ReactModal from 'react-modal';
 import App from './App';
@@ -17,5 +16,11 @@ root.render(
     <AppStateProvider>
         <App />
     </AppStateProvider>);
-
+window.addEventListener('wheel', e=>{
+    if (e.ctrlKey||e.deltaX !== 0)
+        e.preventDefault();
+}, { passive: false });
+window.addEventListener('keyup', e=>{
+    e.preventDefault();
+}, { passive: false });
 serviceWorkerRegistration.register();

@@ -3,8 +3,8 @@
   justify-content: center;
   align-items: center;
   position: relative;
-  height: calc(100vh - 21px);
-  max-height: 100vh;
+  height: calc(100svh);
+  max-height: 100svh;
   overflow: hidden;
 }
 
@@ -12,10 +12,25 @@
   padding: 10px;
   margin: auto;
   font-size: 1.5rem;
+  max-width: calc(100vw - var(--button-diameter) * 9);
 }
 
 .App .side-menu {
-  flex-direction: column;
+  display: flex;
+  flex-flow: column wrap;
+  position: absolute;
+  height: calc(100svh - 2 * var(--button-diameter));
+  top: var(--button-diameter);
+  justify-content: space-around;
+  z-index: 5;
+}
+
+.App .menu{
+  display: flex;
+  position: absolute;
+  width: calc(100% - 2 * var(--button-diameter));
+  left: var(--button-diameter);
+  z-index: 5;
 }
 
 .App .side-menu > label,
@@ -32,12 +47,14 @@
 
 .App .side-menu > label {
   writing-mode: vertical-lr;
+  align-items: stretch;
+  height: 37px;
 }
 
 .App .side-menu > input[type='range'],
 .App .side-menu > label > input[type='range'] {
   flex: 1 1 auto;
-  -webkit-appearance: slider-vertical;
+  appearance: slider-vertical;
   width: calc(var(--button-diameter) / 2);
 }
 
@@ -50,4 +67,42 @@
 .App > .content {
   flex: 1 1 auto;
   display: flex;
+}
+
+.LeftMenu.side-menu {
+  left: 0;
+  height: calc(100svh - var(--button-diameter));
+  top: calc(var(--button-diameter) / 2);
+}
+
+.RightMenu {
+  right: 0;
+}
+
+.TopMenu {
+  top: 0;
+}
+
+.BottomMenu {
+  bottom: 0;
+}
+
+@media screen and (orientation:portrait) { 
+  .App {
+    height: calc(100vw);
+    max-height: 100vw;
+  }
+  
+  .App .filename {
+    max-width: calc(100svh - var(--button-diameter) * 9);
+  }
+  
+  .App .side-menu {
+    height: calc(100vw - 2 * var(--button-diameter));
+  }
+  
+  .App .menu{
+    width: calc(100svh - 2 * var(--button-diameter));
+  }
+
 }

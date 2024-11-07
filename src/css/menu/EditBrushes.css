@@ -1,0 +1,26 @@
+.import-brush {
+  margin: 0;
+  padding: 0;
+}
+
+.import-brush .brush-props label {
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+}
+
+.import-brush .brush-props {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-inline: 0.5rem;
+}
+
+.brush-props label > div {
+  flex: 1 1 100%;
+}
+
+.brush-props label > input {
+  flex: 0 0 auto;
+}

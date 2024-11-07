@@ -1,10 +1,11 @@
 import '../css/Menu.css';
 import fileIcon from '../icons/file-svgrepo-com.svg';
 import { NewFile } from './menu/NewFile';
-import { ExportPNG } from './menu/ExportPNG';
-import { Properties } from './menu/Properties';
+import { SaveFile } from './menu/SaveFile';
+import { Config } from './menu/Config';
 import { Undo } from './menu/Undo';
 import { Redo } from './menu/Redo';
+import { LoadFile } from './menu/LoadFile';
 
 function Menu() {
     return (
@@ -15,8 +16,9 @@ function Menu() {
                 </button>
                 <ul>
                     <NewFile />
-                    <ExportPNG />
-                    <Properties />
+                    <LoadFile />
+                    <SaveFile />
+                    <Config />
                 </ul>
             </li>
             <Undo />

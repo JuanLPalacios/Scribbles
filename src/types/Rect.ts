@@ -1,4 +1,4 @@
-import { Point } from './Point';
+import { Point } from '../lib/Vectors2d';
 
 export type Rect = {
     position:Point,

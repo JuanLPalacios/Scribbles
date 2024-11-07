@@ -1,15 +1,13 @@
-import { useContext } from 'react';
-import { MenuContext } from '../contexts/MenuOptions';
 import '../css/Toolbar.css';
+import { useShortcut } from '../hooks/useShortcut';
+import { useToolOptions } from '../hooks/useToolOptions';
 
 function Toolbar() {
-    const menuContext = useContext(MenuContext);
-    const [options, onChange] = menuContext;
-    const {
-        tools, selectedTool
-    } = options;
-    const  onSelect= (selectedTool: number)=>onChange({ ...options, selectedTool });
-    const { Tool } = tools[selectedTool];
+    const [{ selectedTool, tools }, setToolOptions] = useToolOptions();
+    const  onSelect= (selectedTool: number)=>setToolOptions({ selectedTool, tools });
+    useShortcut((shortcut)=>{ onSelect(tools.findIndex(x=>x.shortcut==shortcut)); }, (tools.filter(x=>x.shortcut!==undefined).map(x=>x.shortcut) as string[]));
+    //const { Tool } = tools[selectedTool];
+    //<Tool.Menu config={options} onChange={onChange}/>
     return (
         <div className="Toolbar">
             {tools.map(({ key, icon, name }, i) => (
@@ -17,7 +15,6 @@ function Toolbar() {
                     <img src={icon} alt={name} />
                 </button>
             ))}
-            <Tool.Menu config={options} onChange={onChange}/>
         </div>
     );
 }

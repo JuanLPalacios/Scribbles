@@ -1,0 +1,13 @@
+.h-center {
+    width: 100vw;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+@media screen and (orientation:portrait) { 
+    .h-center {
+        width: 100svh;
+    }
+
+}

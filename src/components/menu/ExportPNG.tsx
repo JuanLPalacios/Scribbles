@@ -1,15 +1,15 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import '../../css/Menu.css';
 import exportIcon from '../../icons/external-svgrepo-com.svg';
 import { createLayer } from '../../generators/createLayer';
-import { EditorContext } from '../../contexts/DrawingState';
 import { mergeLayers } from '../../lib/Graphics';
+import { useEditor } from '../../hooks/useEditor';
 
 export const ExportPNG = () => {
-    const [editor] = useContext(EditorContext);
+    const [editor] = useEditor();
     const exportPng = useCallback(() => {
         if(!editor.drawing) return false;
-        const { drawing: { layers, width, height }, name } = editor;
+        const { data: { layers, width, height, name } } = editor.drawing;
         const mergged = createLayer('', { position: [0, 0], size: [width, height] });
         layers.forEach((layer) => mergeLayers(layer, mergged));
         const url = mergged.canvas.canvas.toDataURL();

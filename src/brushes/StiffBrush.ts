@@ -1,18 +1,31 @@
 import Brush from '../abstracts/Brush';
 import { createDrawable } from '../generators/createDrawable';
+import { BrushList } from '../lib/BrushList';
 import { scalePoint } from '../lib/DOMMath';
+import { parseSerializedJSON, serializeJSON } from '../lib/serializeJSON';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
+import { CompressedJSON } from './CompressedOject';
+
+export type SerializedStiffBrush ={
+    scribbleBrushType: BrushList.Stiff,
+    name:string
+    fibers: CompressedJSON[]
+}
 
 export default class StiffBrush extends Brush {
     buffer:DrawableState = createDrawable({ size: [1, 1] });
     fibers: { position: DOMPoint, width: number, alpha:number }[];
     scaledFibers: { position: DOMPoint, width: number, alpha:number }[];
 
-    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[]){
+    constructor()
+    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[])
+    constructor(fibers: { position: DOMPoint, width: number, alpha:number }[], name:string)
+    constructor(fibers?: { position: DOMPoint, width: number, alpha:number }[], name?:string){
         super();
-        this.fibers = fibers;
-        this.scaledFibers = fibers;
+        this.name = name || '';
+        this.fibers = fibers||[];
+        this.scaledFibers = fibers||[];
     }
 
     startStroke(drawable:DrawableState, point:Point, color:string, alpha:number, width:number) {
@@ -68,4 +81,21 @@ export default class StiffBrush extends Brush {
         canvas.width = 0;
         canvas.height = 0;
     }
+
+    toObj(): SerializedStiffBrush {
+        const { fibers, name } =this;
+        return { scribbleBrushType: BrushList.Stiff, fibers: fibers.map(serializeJSON), name };
+    }
+
+    loadObj({ name='', fibers=[] }:SerializedStiffBrush) {
+        this.name = name;
+        this.fibers = fibers.map(parseSerializedJSON);
+    }
+
+    static formObj(data:SerializedStiffBrush):StiffBrush {
+        const brush = new StiffBrush();
+        brush.loadObj(data);
+        return brush;
+    }
 }
+

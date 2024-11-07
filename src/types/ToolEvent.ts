@@ -1,7 +1,7 @@
-import { EditorAction, EditorState } from '../contexts/DrawingState';
+import { EditorState } from '../contexts/EditorContext';
 import { StatePair } from './StatePair';
 
 export type ToolEvent<O> = {
-    editorContext:[EditorState, React.Dispatch<EditorAction>];
+    editorContext:readonly [EditorState, { openFile(file: File): void; newFile({ name, width, height }: { name: string; width: number; height: number; }): void; }];
     menuContext:StatePair<O>;
 }

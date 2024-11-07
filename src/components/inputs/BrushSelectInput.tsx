@@ -1,52 +1,53 @@
 import '../../css/inputs/BrushSelectInput.css';
-import demoStroke from '../../demo/strokePreview.json';
-import { Dispatch, SetStateAction, useEffect, useState, CSSProperties } from 'react';
-import { AlphaOptions, BrushOptions } from '../../contexts/MenuOptions';
-import { createDrawable } from '../../generators/createDrawable';
+import { useState, CSSProperties, useMemo, useEffect } from 'react';
 import { uid } from '../../lib/uid';
-import { DrawableState } from '../../types/DrawableState';
-import { Drawable } from '../Drawable';
-import { LeftMenuPortal } from '../portals/LeftMenu';
 import { TopMenuPortal } from '../portals/TopMenu';
+import { BrushPreview } from '../components/BrushPreview';
+import { DrawableState } from '../../types/DrawableState';
+import { Brush } from '../../abstracts/Brush';
+import { useBrushesOptions } from '../../hooks/useBrushesOptions';
+import { SerializedBrush } from '../../lib/Serialization';
+import { BrushWidthInput } from './BrushWidthInput';
 
 const style:CSSProperties = {
     display: 'flex',
     flexDirection: 'column'
 };
 
-export const BrushSelectInput = (props:BrushOptions & AlphaOptions & {onChange:Dispatch<SetStateAction<BrushOptions & AlphaOptions>>}) => {
-    const { brushes, selectedBrush, brushWidth, onChange } = props;
-    const [{ previews, selectedPreview }, setPreviews] = useState<{previews:DrawableState[], selectedPreview:DrawableState}>({ previews: [], selectedPreview: createPreview() });
+export const BrushSelectInput = () => {
+    const [{ brushesPacks, selectedBrush, brushWidth }, onChange] = useBrushesOptions();
+    const [currentSelectedBrush, setCurrentSelectedBrush] = useState<{
+        brush: SerializedBrush;
+        preview?: DrawableState;
+    }>({ brush: brushesPacks[selectedBrush].brush });
+    const { preview } = currentSelectedBrush;
     const [id] = useState(uid());
+    const memoBrushes = useMemo(()=>brushesPacks.map((brush, i) => ({
+        key: id+'-'+i,
+        brush: brush,
+        selected: i===selectedBrush,
+        onMouseDown: ()=>onChange({ brushesPacks, brushWidth, selectedBrush: i })
+    })), [brushWidth, brushesPacks, id, onChange, selectedBrush]);
     useEffect(()=>{
-        setPreviews({ previews: brushes.map(() => createPreview()), selectedPreview });
-    }, [brushes, selectedPreview]);
-    useEffect(()=>{
-        previews.forEach((preview, i) => brushes[i].renderPreview(preview, demoStroke as any, '#ffffff', .5 || 1, 15));
-    }, [brushes, previews, selectedBrush]);
-    useEffect(()=>{
-        brushes[selectedBrush]?.renderPreview(selectedPreview, demoStroke as any, '#ffffff', .5 || 1, 15);
-    }, [brushes, selectedBrush, selectedPreview]);
+        setCurrentSelectedBrush({ brush: brushesPacks[selectedBrush].brush, preview });
+    }, [brushesPacks, preview, selectedBrush]);
     return <>
         <TopMenuPortal>
             <div style={style} className='brush dropdown'>
                 <button>
-                    <Drawable canvas={selectedPreview.canvas} />Brush
+                    <Brush brush={currentSelectedBrush.brush}>
+                        <BrushPreview brush={currentSelectedBrush} />Brush
+                    </Brush>
                 </button>
                 <ul>
-                    {previews.map(({ canvas }, i) => <li key={id+'-'+i}><Drawable canvas={canvas} className={i==selectedBrush ? 'selected' : ''} onMouseDown={()=>onChange({ ...props, selectedBrush: i })} /></li>)}
+                    {memoBrushes.map(({ brush, key, onMouseDown, selected }) => <li key={key}>
+                        <Brush brush={brush.brush}>
+                            <BrushPreview brush={brush} selected={selected} onMouseDown={onMouseDown} />
+                        </Brush>
+                    </li>)}
                 </ul>
             </div>
         </TopMenuPortal>
-        <LeftMenuPortal>
-            <label>
-                <div>
-                    brush width
-                </div>
-                <input {...{ orient: 'vertical' }} type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="16" onChange={(e) => onChange({ ...props, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} />
-            </label>
-        </LeftMenuPortal>
+        <BrushWidthInput/>
     </>;
 };
-
-const createPreview = () => createDrawable({ size: [150, 30] });

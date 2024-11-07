@@ -1,8 +1,12 @@
 :root {
   --doc-width: 200px;
   --doc-height: 200px;
-  --button-diameter: 50px;
+  --button-diameter: min(50px, calc((100svh - 20px) / 7), calc((100vw - 20px) / 7));
   --scroll-width: 10px;
+  --quick-start-width: 440px;
+  --quick-start-height: 260px;
+  --quick-start-padding: 20px;
+  --quick-start-gap: 10px;
   --main-color: #eb840f;
   --secondary-color: #636363;
   --background-color: #353535;
@@ -12,14 +16,26 @@
   --title-color: #ff7856;
 }
 
+html, body {
+  overscroll-behavior-x: none;
+  overflow: hidden;
+  height: 100svh;
+}
+
 body {
+  -webkit-touch-callout: none;
+  user-select: none;
   margin: 0;
   background: var(--background-color);
   color: var(--text-color);
 }
 
+:fullscreen, ::backdrop {
+  background: var(--background-color);
+}
+
 *::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px var(--overlay-color);
+  box-shadow: inset 0 0 6px var(--overlay-color);
   background-color: var(--background2-color);
 }
 
@@ -38,6 +54,31 @@ body {
   background-color: transparent;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5 {
+  margin-block: .2em;
+}
+
+@keyframes pulsating {
+  0% {
+    width: 150px;
+    opacity: 1;
+  }
+
+  50% {
+    width: 200px;
+    opacity: 0.5;
+  }
+
+  100% {
+    width: 150px;
+    opacity: 1;
+  }
+}
+
 input,
 select {
   background: var(--background2-color);
@@ -45,27 +86,36 @@ select {
   color: var(--text-color);
 }
 
+.btn,
 button {
   background: var(--secondary-color);
   border: none;
   color: var(--text-color);
 }
 
-input[type=range] {
+input[type="range"] {
   filter: grayscale(1) invert(0.9);
 }
 
-input[type=submit]:disabled,
-input[type=submit][disabled],
+input[type="checkbox"] {
+  filter: grayscale(1) invert(0.9);
+}
+
+.btn.disabled,
+input[type="submit"]:disabled,
+input[type="submit"][disabled],
 button:disabled,
 button[disabled] {
   opacity: 0.5;
 }
 
-button > img {
+button > img,
+.btn > img {
   filter: invert(1);
+  width: 24px;
 }
 
+.btn:focus,
 button:focus {
   filter: brightness(1.1);
 }
@@ -104,6 +154,10 @@ button:focus {
   gap: 10px;
 }
 
+.fields .actions.right {
+  justify-content: right;
+}
+
 .dropdown {
   display: flex;
   flex-direction: column;
@@ -132,10 +186,59 @@ button:focus {
   background: var(--overlay-color);
 }
 
+.select-list > ul {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
 .dropdown:focus-within > ul {
   overflow: visible;
 }
 
+.pulsating {
+  animation-name: pulsating;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
+  animation-direction: alternate;
+  filter: invert();
+}
+
 .ReactModal__Overlay {
   z-index: 10;
+}
+
+.select-list .selected {
+  background: var(--overlay-color);
+}
+
+.color {
+  width: calc(var(--button-diameter) / 2);
+  height: calc(var(--button-diameter) / 2);
+  border-radius: calc(var(--button-diameter) / 4);
+}
+
+@media screen and (orientation:portrait) { 
+  html, body {
+    height: 100vw;
+    width: 100svh;
+  }
+  
+  html {
+    position: absolute;
+  }
+
+  body {
+    position: relative;
+    transform-origin: top left;
+    transform: rotate(-90deg);
+    left: 0;
+    top: 100svh;
+  }
+
 }

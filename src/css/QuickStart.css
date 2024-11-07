@@ -1,0 +1,56 @@
+.QuickStart {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100svh - var(--button-diameter) * 2);
+  width: calc(100% - var(--button-diameter) * 2);
+}
+
+.QuickStart > .QuickStart-modal {
+  display: flex;
+  gap: var(--quick-start-gap);
+  width: var(--quick-start-width);
+  min-height: var(--quick-start-height);
+  background: var(--background2-color);
+  padding: var(--quick-start-padding);
+}
+
+.QuickStart > .QuickStart-modal h2 {
+  margin-block: .3em;
+}
+
+.QuickStart > .QuickStart-modal img {
+  display: inline-block;
+  vertical-align: bottom;
+  margin-right: 5px;
+  width: 22px;
+}
+
+.QuickStart > .QuickStart-modal > * {
+  width: calc((var(--quick-start-width) - var(--quick-start-padding) * 2 - var(--quick-start-gap)) / 2);
+}
+
+.QuickStart > .QuickStart-modal a,
+.QuickStart > .QuickStart-modal button {
+  display: block;
+  color: var(--main-color);
+  background: var(--background2-color);
+  max-width: calc((var(--quick-start-width) - var(--quick-start-padding) * 2 - var(--quick-start-gap)) / 2);
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 13px;
+  line-height: 22px;
+  margin-block: 0;
+  text-decoration: none;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media screen and (orientation:portrait) { 
+  .QuickStart {
+    height: calc(100% - var(--button-diameter) * 2);
+    width: calc(100svh - var(--button-diameter) * 2);
+  }
+
+}

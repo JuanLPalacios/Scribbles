@@ -1,0 +1,70 @@
+.EditPalettes {
+  width: 400px;
+}
+
+.palette-props {
+  width: 165px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.EditPalettes > .cols {
+  display: flex;
+  gap: 10px;
+  align-content: stretch;
+}
+
+.EditPalettes > .cols > * {
+  width: 195px;
+}
+
+.palette-list {
+  height: calc(100svh - 11rem);
+  overflow-y: auto;
+}
+
+.palette-list ul.palettes {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  list-style: none;
+  padding: 2px 0;
+}
+
+
+.EditPalettes .import-palette .palette-props label {
+  font-size: 12px;
+  display: flex;
+  flex-direction: row;
+}
+
+.EditPalettes .import-palette .palette-props {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-inline: 0.5rem;
+}
+
+
+.palette-props label > div {
+  flex: 1 1 auto;
+}
+
+.palette-props label > input {
+  flex: 0 0 auto;
+  min-width: 80px;
+}
+
+.palette-props .InputPaletteColors {
+  flex: 1 1 auto;
+}
+
+
+@media screen and (orientation:portrait) { 
+  .palette-list {
+    height: calc(100vw - 11rem);
+  }
+
+}

@@ -1,27 +1,82 @@
 .Canvas {
-  overflow: auto;
-  height: calc(100vh - var(--button-diameter) * 2 - 21px);
-  width: calc(100% - var(--button-diameter) * 2);
-  scroll-padding: 100px;
-  scroll-snap-type: both mandatory;
-  box-sizing: border-box;
-  background: var(--background-color);
-}
-
-.Canvas > * {
-  width: var(--doc-width);
-  padding: max(calc(50vh - ((var(--doc-height)/2) + 23px)), 100px) max(calc(50% - (var(--doc-width)/2)), 100px);
-}
-
-.Canvas > * > * {
-  background: url(Transparency10.png);
+  overflow: hidden;
+  height: calc(100svh - var(--button-diameter) * 2);
+  width: calc(100vw - var(--button-diameter) * 2);
+  background: var(--background2-color);
   position: relative;
 }
 
-.Canvas > * > * > * {
+.Canvas > .viewport {
+  overflow: hidden;
+  height: calc(100svh - var(--button-diameter) * 2 - var(--scroll-width));
+  width: calc(100vw - var(--button-diameter) * 2 - var(--scroll-width));
+  background: var(--background2-color);
+  position: relative;
+}
+
+.Canvas > .viewport > * {
+  width: var(--doc-width);
+}
+
+.Canvas > .v-bar,
+.Canvas > .h-bar {
+    background: var(--background2-color);
+    z-index: 3;
+    position: absolute;
+}
+
+.Canvas > .v-bar > .handle,
+.Canvas > .h-bar > .handle {
+    background: var(--secondary-color);
+    position: absolute;
+}
+
+.Canvas > .v-bar {
+    right: 0;
+    width: var(--scroll-width);
+    height: 100%;
+}
+
+.Canvas > .h-bar {
+    bottom: 0;
+    width: 100%;
+    height: var(--scroll-width);
+}
+
+.Canvas > .v-bar > .handle {
+    width: var(--scroll-width);
+    height: 200px;
+}
+
+.Canvas > .h-bar > .handle {
+    width: 200px;
+    height: var(--scroll-width);
+}
+
+.Canvas > .viewport > * > * {
+  background: url("Transparency10.png");
+  position: relative;
+}
+
+.Canvas > .viewport > * > * > * {
   position: absolute;
 }
 
-.Canvas > * > * > * > * {
+.Canvas > .viewport > * > * > * > * {
   position: absolute;
+}
+
+
+@media screen and (orientation:portrait) { 
+  .Canvas {
+    transform: rotate(90deg);
+    width: calc(100vw - var(--button-diameter) * 2);
+    height: calc(100svh - var(--button-diameter) * 2);
+  }
+  
+  .Canvas > .viewport {
+    width: calc(100vw - var(--button-diameter) * 2 - var(--scroll-width));
+    height: calc(100svh - var(--button-diameter) * 2 - var(--scroll-width));
+  }
+
 }

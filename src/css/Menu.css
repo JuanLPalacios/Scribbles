@@ -3,7 +3,7 @@
   padding: 0;
   margin: 0;
   display: flex;
-  gap: 5px;
+  gap: 3px;
 }
 
 .Menu > li {
@@ -12,8 +12,7 @@
 }
 
 .Menu > li > ul {
-  gap: 5px;
-  margin-top: 5px;
+  gap: 3px;
 }
 
 .Menu .dropdown ul > li {
@@ -44,4 +43,38 @@
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
+}
+
+.import-brush input {
+  min-width: 1rem;
+}
+
+.brush-list {
+  height: calc(100svh - 15rem);
+  overflow-y: auto;
+}
+
+.brush-list .selected {
+  background: var(--overlay-color);
+}
+
+.brush-list ul.brushes {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  list-style: none;
+  padding: 2px 0;
+}
+
+ul.brushes li > div {
+  display: flex;
+  justify-content: center;
+  padding: 2px 0;
+}
+
+@media screen and (orientation:portrait) { 
+  .brush-list {
+    height: calc(100vw - 15rem);
+  }
+
 }

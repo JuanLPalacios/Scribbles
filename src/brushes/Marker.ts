@@ -1,9 +1,16 @@
 import Brush from '../abstracts/Brush';
 import { createDrawable } from '../generators/createDrawable';
+import { BrushList } from '../lib/BrushList';
 import { DrawableState } from '../types/DrawableState';
 import { Point } from '../types/Point';
 
+export type SerializedMarkerBrush ={
+    scribbleBrushType: BrushList.Marker
+    name:string;
+}
+
 export default class Marker extends Brush {
+    name = 'Marker';
     prevToLastPoint: Point = [0, 0];
     lastPoint: Point = [0, 0];
     buffer:DrawableState = createDrawable({ size: [1, 1] });
@@ -76,5 +83,20 @@ export default class Marker extends Brush {
         canvas2.width = 0;
         canvas2.height = 0;
         canvas.style.filter = 'none';
+    }
+
+    toObj(): SerializedMarkerBrush {
+        const { name } = this;
+        return { scribbleBrushType: BrushList.Marker, name };
+    }
+
+    loadObj({ name='' }:SerializedMarkerBrush) {
+        this.name = name;
+    }
+
+    static formObj(data:SerializedMarkerBrush):Marker {
+        const brush = new Marker();
+        brush.loadObj(data);
+        return brush;
     }
 }

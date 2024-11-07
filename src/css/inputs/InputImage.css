@@ -1,0 +1,17 @@
+.InputImage {
+  width: 20px;
+  height: 20px;
+  padding: 5px;
+  background: var(--background2-color);
+  display: flex;
+  justify-content: center;
+}
+
+.InputImage > div {
+  display: flex;
+  justify-content: center;
+}
+
+.InputImage canvas {
+  filter: brightness(0) invert(1);
+}

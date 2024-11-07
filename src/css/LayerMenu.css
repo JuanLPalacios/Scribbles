@@ -1,4 +1,6 @@
 .LayerMenu {
+  position: absolute;
+  bottom: calc(0px - var(--button-diameter));
   flex: 1 1 auto;
   display: flex;
   align-items: flex-end;
@@ -7,13 +9,13 @@
 .layer-options {
   flex: 1 1 auto;
   display: flex;
-  height: 90vh;
+  height: 90svh;
 }
 
 .layer-options .menu {
   flex: 1 1 auto;
-  width: 200px;
-  right: -200px;
+  width: 240px;
+  right: -240px;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -55,9 +57,17 @@
 
 .layer-options .menu .layer > .thumbnail {
   display: flex;
-  background: url(Transparency10.png), linear-gradient(0deg, #fff, #fff);
+  background: url("Transparency10.png"), linear-gradient(0deg, #fff, #fff);
 }
 
 .layer-options .menu .list .selected {
   background: var(--secondary-color);
+}
+
+
+@media screen and (orientation:portrait) { 
+  .layer-options {
+    height: 90vw;
+  }
+
 }

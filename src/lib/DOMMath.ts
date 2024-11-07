@@ -13,3 +13,4 @@ export const translateMatrix = (matrix:DOMMatrix, vec:DOMPoint|number, y = 0, z 
         matrix.translate(vec, y, z)
         : matrix.translate(vec.x, vec.y, vec.z);
 };
+

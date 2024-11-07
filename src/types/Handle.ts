@@ -1,9 +1,9 @@
 import { CanvasEvent } from './CanvasEvent';
 
-export interface Handle<O = any> {
+export interface Handle {
     key: number
     icon: string
     position: DOMPoint
     rotation: DOMMatrix
-    onMouseDown:(point:CanvasEvent<O>)=>void
+    onMouseDown:(point:CanvasEvent)=>void
 }

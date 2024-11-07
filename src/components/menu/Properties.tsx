@@ -1,12 +1,14 @@
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useState } from 'react';
 import '../../css/Menu.css';
 import optionsIcon from '../../icons/options-svgrepo-com.svg';
-import { EditorContext } from '../../contexts/DrawingState';
 import ReactModal from 'react-modal';
+import { useDrawing } from '../../hooks/useDrawing';
+import { DrawingRequired } from '../../hoc/DrawingRequired';
 
-export const Properties = () => {
-    const [editor, editorDispatch] = useContext(EditorContext);
+export const Properties = DrawingRequired(() => {
+    const [drawing, editorDispatch] = useDrawing();
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600 });
+    const { forceUpdate } = editorDispatch||{};
     const { isOpen, name } = state;
     const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
         let value;
@@ -24,16 +26,16 @@ export const Properties = () => {
         setState({ ...state, isOpen: false });
     }, [state]);
     const openModal = useCallback(() => {
-        if(!editor.name) return;
-        const { name } = editor;
+        if(!drawing) return;
+        const { name } = drawing.data;
         setState({ ...state, isOpen: true, name });
-    }, [editor, state]);
+    }, [drawing, state]);
     const updateFile = useCallback(() => {
-        if(editor)editorDispatch({ type: 'editor/forceUpdate', payload: { ...editor,
+        if(forceUpdate)forceUpdate({ data: {
             name
         } });
         close();
-    }, [close, editor, name, editorDispatch]);
+    }, [forceUpdate, name, close]);
     return <>
         <li>
             <button className='round-btn' onClick={openModal}>
@@ -55,5 +57,5 @@ export const Properties = () => {
             </div>
         </ReactModal>
     </>;
-};
+});
 

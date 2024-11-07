@@ -1,6 +1,7 @@
 .InputColor {
   writing-mode: initial;
 }
+
 .InputColor > .body {
   height: 21px;
 }

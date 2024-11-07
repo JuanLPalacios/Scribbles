@@ -2,6 +2,13 @@
   width: 400px;
 }
 
+.palette-props {
+  width: 165px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
 .EditPalettes > .cols {
   display: flex;
   gap: 10px;
@@ -40,12 +47,6 @@
   padding-inline: 0.5rem;
 }
 
-.palette-props {
-  width: 165px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
 
 .palette-props label > div {
   flex: 1 1 auto;
@@ -62,7 +63,6 @@
 
 
 @media screen and (orientation:portrait) { 
-
   .palette-list {
     height: calc(100vw - 11rem);
   }

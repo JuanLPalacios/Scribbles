@@ -24,10 +24,6 @@ html, body {
 
 body {
   -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
   margin: 0;
   background: var(--background-color);
@@ -39,7 +35,7 @@ body {
 }
 
 *::-webkit-scrollbar-track {
-  -webkit-box-shadow: inset 0 0 6px var(--overlay-color);
+  box-shadow: inset 0 0 6px var(--overlay-color);
   background-color: var(--background2-color);
 }
 
@@ -97,24 +93,24 @@ button {
   color: var(--text-color);
 }
 
-input[type=range] {
+input[type="range"] {
   filter: grayscale(1) invert(0.9);
 }
 
-input[type=checkbox] {
+input[type="checkbox"] {
   filter: grayscale(1) invert(0.9);
 }
 
 .btn.disabled,
-input[type=submit]:disabled,
-input[type=submit][disabled],
+input[type="submit"]:disabled,
+input[type="submit"][disabled],
 button:disabled,
 button[disabled] {
   opacity: 0.5;
 }
 
-.btn > img,
-button > img {
+button > img,
+.btn > img {
   filter: invert(1);
   width: 24px;
 }
@@ -190,6 +186,16 @@ button:focus {
   background: var(--overlay-color);
 }
 
+.select-list > ul {
+  display: flex;
+  flex-direction: column;
+  background: var(--background-color);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
 .dropdown:focus-within > ul {
   overflow: visible;
 }
@@ -207,16 +213,6 @@ button:focus {
   z-index: 10;
 }
 
-.select-list > ul {
-  display: flex;
-  flex-direction: column;
-  background: var(--background-color);
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  overflow: hidden;
-}
-
 .select-list .selected {
   background: var(--overlay-color);
 }
@@ -228,7 +224,6 @@ button:focus {
 }
 
 @media screen and (orientation:portrait) { 
-
   html, body {
     height: 100vw;
     width: 100svh;

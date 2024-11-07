@@ -38,7 +38,6 @@
 }
 
 @media screen and (orientation:portrait) { 
-
     .InputPaletteColors > .color-list {
         height: calc(100vw - 19rem);
     }

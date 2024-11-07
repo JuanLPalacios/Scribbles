@@ -5,7 +5,6 @@
   height: calc(100svh - var(--button-diameter) * 2);
   width: calc(100% - var(--button-diameter) * 2);
 }
-
 .QuickStart > .QuickStart-modal {
   display: flex;
   gap: var(--quick-start-gap);
@@ -40,7 +39,7 @@
   font-family: Arial, Helvetica, sans-serif;
   font-size: 13px;
   line-height: 22px;
-  margin-block: 0;
+  margin-block: 0px;
   text-decoration: none;
   overflow: hidden;
   white-space: nowrap;
@@ -48,6 +47,7 @@
 }
 
 @media screen and (orientation:portrait) { 
+
   .QuickStart {
     height: calc(100% - var(--button-diameter) * 2);
     width: calc(100svh - var(--button-diameter) * 2);

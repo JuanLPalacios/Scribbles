@@ -54,7 +54,7 @@
 }
 
 .Canvas > .viewport > * > * {
-  background: url("Transparency10.png");
+  background: url(Transparency10.png);
   position: relative;
 }
 
@@ -68,6 +68,7 @@
 
 
 @media screen and (orientation:portrait) { 
+
   .Canvas {
     transform: rotate(90deg);
     width: calc(100vw - var(--button-diameter) * 2);

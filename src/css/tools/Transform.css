@@ -6,6 +6,7 @@
 }
 
 @media screen and (orientation:portrait) { 
+
     .h-center {
         width: 100svh;
     }

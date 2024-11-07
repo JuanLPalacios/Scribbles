@@ -10,7 +10,7 @@ export const useColorPicker = ()=>{
         stopColorPicker(){
             setState({ ...state, active: false });
         },
-        changeColor(color:string){
+        changeColor(color?:string){
             console.log(color);
             setState({ color, active: false });
         }

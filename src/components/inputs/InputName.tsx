@@ -1,6 +1,7 @@
 import '../../css/inputs/InputName.css';
 import { ChangeEventHandler, CSSProperties, useEffect, useState } from 'react';
 import { useConfig } from '../../hooks/useConfig';
+import { useShortcutLock } from '../../hooks/useShortcutLock';
 
 type Params = {
     name?: string;
@@ -11,6 +12,7 @@ type Params = {
 };
 
 export const InputName = ({ name, onChange, style, value, validate=()=>[] }:Params)=>{
+    const [, setLocked] = useShortcutLock();
     const [{ doubleClickTimeOut }] = useConfig();
     const [valueBuffer, setValueBuffer] = useState(value);
     const [error, setError] = useState<string>();
@@ -32,6 +34,7 @@ export const InputName = ({ name, onChange, style, value, validate=()=>[] }:Para
     }
     function onFocus(){
         if(t)clearTimeout(t);
+        setLocked(true);
     }
     function onBlur(e:React.FocusEvent<HTMLInputElement>){
         if((!error)&&onChange)onChange(e);
@@ -40,6 +43,7 @@ export const InputName = ({ name, onChange, style, value, validate=()=>[] }:Para
             setError(undefined);
         }
         setEditing(false);
+        setLocked(false);
     }
     useEffect(()=>{
         setValueBuffer(value);

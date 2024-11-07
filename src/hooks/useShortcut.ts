@@ -1,6 +1,8 @@
 import { useCallback, useEffect } from 'react';
+import { useShortcutLock } from './useShortcutLock';
 
 export const useShortcut = (callback:(shortcut?:string)=>void, shortcuts:string[]) => {
+    const [isLocked] = useShortcutLock();
     const handleKeyPress = useCallback((event:KeyboardEvent) => {
         shortcuts.forEach((shortcut)=>{
             const keys = shortcut.split('+');
@@ -27,9 +29,9 @@ export const useShortcut = (callback:(shortcut?:string)=>void, shortcuts:string[
     }, [shortcuts]);
 
     useEffect(() => {
-        document.addEventListener('keydown', handleKeyPress);
+        if(!isLocked)document.addEventListener('keydown', handleKeyPress);
         return () => {
-            document.removeEventListener('keydown', handleKeyPress);
+            if(!isLocked)document.removeEventListener('keydown', handleKeyPress);
         };
-    }, [handleKeyPress]);
+    }, [handleKeyPress, isLocked]);
 };

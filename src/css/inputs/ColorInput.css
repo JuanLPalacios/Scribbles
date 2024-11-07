@@ -10,9 +10,14 @@
   align-items: center;
 }
 
-.ColorInput input[type="color"] {
-  opacity: 0;
+.ColorInput .InputColor {
   position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.ColorInput .InputColor > .body {
+  opacity: 0;
   height: 100%;
 }
 

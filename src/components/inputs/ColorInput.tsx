@@ -4,6 +4,7 @@ import { useColorOptions } from '../../hooks/useColorOptions';
 import { uid } from '../../lib/uid';
 import { useMemo } from 'react';
 import { usePalette } from '../../hooks/usePalette';
+import { InputColor } from './InputColor';
 
 export const ColorInput = () => {
     const [props, onChange] = useColorOptions();
@@ -25,7 +26,7 @@ export const ColorInput = () => {
                 <li>
                     <div className='color'>
                         +
-                        <input type="color" value={color} onMouseDown={(e)=>{ e.currentTarget.click(); }} onChange={(e) => onChange({ color: e.target.value })} onBlur={()=>addColor(color)} />
+                        <InputColor value={color} onChange={e=>{ onChange({ color: e.target.value }); }}  onBlur={(e)=>{ addColor(e.target.value); onChange({ color: e.target.value }); }} />
                     </div>
                 </li>
             </ul>

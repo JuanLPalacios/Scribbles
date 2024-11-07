@@ -90,6 +90,7 @@ select {
   color: var(--text-color);
 }
 
+.btn,
 button {
   background: var(--secondary-color);
   border: none;
@@ -104,6 +105,7 @@ input[type=checkbox] {
   filter: grayscale(1) invert(0.9);
 }
 
+.btn.disabled,
 input[type=submit]:disabled,
 input[type=submit][disabled],
 button:disabled,
@@ -111,11 +113,13 @@ button[disabled] {
   opacity: 0.5;
 }
 
+.btn > img,
 button > img {
   filter: invert(1);
   width: 24px;
 }
 
+.btn:focus,
 button:focus {
   filter: brightness(1.1);
 }

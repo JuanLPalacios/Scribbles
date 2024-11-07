@@ -5,6 +5,7 @@ import { useState, useRef } from 'react';
 import { SerializedValue } from '../../lib/Serialization';
 import { uid } from '../../lib/uid';
 import { CustomInput } from '../../types/CustomInput';
+import { InputColor } from './InputColor';
 
 export function InputPaletteColors({ value, name, className, onChange }: {
     value: string[];
@@ -47,10 +48,8 @@ export function InputPaletteColors({ value, name, className, onChange }: {
         setPalette([...value, color]);
     }
     const [id] = useState(uid());
-    return <div className={'InputPaletteColors ' + className}>
-        <div className='InputColor' style={{ background: color }}>
-            <input className='InputColor' type="color" onClick={(e)=>e.currentTarget.value = color} onChange={(e) => { setColor(e.target.value); setPalette(value.map((x, i)=>(i==selectedColor)?e.target.value:x)); }}/>
-        </div>
+    return <div className={'InputPaletteColors ' + className} tabIndex={-1}>
+        <InputColor value={color} dropper={false} onChange={(e) => { setColor(e.target.value); setPalette(value.map((x, i)=>(i==selectedColor)?e.target.value:x)); }}/>
         <div>
             <button onClick={()=>{ addColor(color); setSelectedColor(value.length); }}><img src={plusIcon} alt="Add Palette" /></button>
             <button onClick={()=>{ setPalette(value.filter((_e, i)=>i!=selectedColor));setSelectedColor(Math.min(selectedColor, value.length-2)); }}><img src={trashIcon} alt="Delete Palette" /></button>

@@ -5,7 +5,7 @@ import { useColorPicker } from '../../hooks/useColorPicker';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { hexToHsl, hslToHex } from '../../lib/rgbToHex';
 
-export function InputColor({ value='#000000', name, className, dropper=true, onChange, onBlur, onClick }: {
+export function InputColor({ value, name, className, dropper=true, onChange, onBlur, onClick }: {
     value?: string
     name?: string
     dropper?: boolean
@@ -14,12 +14,12 @@ export function InputColor({ value='#000000', name, className, dropper=true, onC
     onBlur?: (e: React.ChangeEvent<HTMLInputElement>) => void
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }) {
-    const [{ color, active }, { activateColorPicker, changeColor }] = useColorPicker();
+    const [{ color, active }, { activateColorPicker }] = useColorPicker();
     const ref2 = useRef<HTMLInputElement>(null);
     const [changing, setChanging] = useState(false);
     const [focus, setFocus] = useState(false);
     const [focus2, setFocus2] = useState(false);
-    const [h, s, l] = hexToHsl(color||value);
+    const [h, s, l] = hexToHsl(color);
     const [hue, setHue] = useState(h);
     const [rawX, setX] = useState(s);
     const [rawY, setY] = useState(l*(1+s/100));
@@ -88,7 +88,6 @@ export function InputColor({ value='#000000', name, className, dropper=true, onC
         if(active)return ()=>{};
         if(!color)return ()=>{};
         internalBlur(color);
-        changeColor(undefined);
     }, [active, color]);
     useEffect(()=>{
         console.log(focus, focus2);

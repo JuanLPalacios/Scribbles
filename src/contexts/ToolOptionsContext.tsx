@@ -22,11 +22,11 @@ export const ToolOptionsContext = createContext<StatePair<ToolOptions>>([
 export const ToolOptionsContextProvider = (props: { children: ReactNode; }) => {
     const value = useState<ToolOptions>({
         tools: [
-            { key: uid(), Tool: Draw, name: 'draw', icon: drawIcon },
-            { key: uid(), Tool: Erase, name: 'erase', icon: eraseIcon },
-            { key: uid(), Tool: Fill, name: 'fill', icon: fillIcon },
-            { key: uid(), Tool: Smear, name: 'smear', icon: smearIcon },
-            { key: uid(), Tool: Transform, name: 'transform', icon: transformIcon }
+            { key: uid(), Tool: Draw, name: 'draw', icon: drawIcon, shortcut: 'B' },
+            { key: uid(), Tool: Erase, name: 'erase', icon: eraseIcon, shortcut: 'E' },
+            { key: uid(), Tool: Fill, name: 'fill', icon: fillIcon, shortcut: 'F' },
+            { key: uid(), Tool: Smear, name: 'smear', icon: smearIcon, shortcut: 'S' },
+            { key: uid(), Tool: Transform, name: 'transform', icon: transformIcon, shortcut: 'C' }
         ],
         selectedTool: 0
     });

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import '../../css/Menu.css';
 import '../../css/menu/LoadFile.css';
 import folderIcon from '../../icons/folder-open-svgrepo-com.svg';
@@ -7,12 +7,14 @@ import ReactModal from 'react-modal';
 import { useOpenFile } from '../../hooks/useOpenFile';
 import { useResentScribbles } from '../../hooks/useResentScribbles';
 import { uid } from '../../lib/uid';
+import { useShortcut } from '../../hooks/useShortcut';
 
 export const LoadFile = () => {
     const [editor, { openFile, loadFile }] = useEditor();
     const [isOpen, setOpen] = useState(false);
     const [resentScribbles] = useResentScribbles();
     const id = useMemo(()=>uid(), []);
+    const openModal = useCallback(()=>setOpen(true), []);
     const openFileL = useOpenFile((files)=>{
         if(files.length==0)return;
         const file = files[0];
@@ -23,9 +25,11 @@ export const LoadFile = () => {
     useEffect(()=>{
         setOpen(false);
     }, [editor.drawing]);
+    useShortcut(openModal, ['CTRL+L', 'SHIFT+L']);
+    useShortcut(openFileL, ['CTRL+O', 'SHIFT+O']);
     return <>
         <li>
-            <button className='round-btn' onClick={()=>setOpen(true)}>
+            <button className='round-btn' onClick={openModal}>
                 <img src={folderIcon} alt="Export to PNG" />
             </button>
             <div className="text">Load Scribble</div>

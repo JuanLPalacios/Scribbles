@@ -5,4 +5,5 @@ export type ToolButton = {
     Tool:(params:ToolFunctions)=>JSX.Element
     name:string
     icon:string
+    shortcut?:string
 }

@@ -4,6 +4,7 @@ import addFileIcon from '../../icons/file-add-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { useEditor } from '../../hooks/useEditor';
 import { validateFileName } from '../../lib/Validations';
+import { useShortcut } from '../../hooks/useShortcut';
 
 export const NewFile = () => {
     const [editor, { newFile }] = useEditor();
@@ -37,6 +38,7 @@ export const NewFile = () => {
         setState({ ...state, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [height, name, width]);
+    useShortcut(openModal, ['CTRL+N', 'SHIFT+N']);
     return <>
         <li>
             <button className='round-btn' onClick={openModal}>

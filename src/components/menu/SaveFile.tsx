@@ -4,6 +4,7 @@ import saveIcon from '../../icons/save-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { useDrawing } from '../../hooks/useDrawing';
 import { DrawingRequired } from '../../hoc/DrawingRequired';
+import { useShortcut } from '../../hooks/useShortcut';
 
 export const SaveFile = DrawingRequired(() => {
     const [drawing, { exportPNG, downloadFile, localSave }] = useDrawing();
@@ -24,6 +25,9 @@ export const SaveFile = DrawingRequired(() => {
     useEffect(()=>{
         if(drawing) setName(drawing.data.name.split('.')[0]);
     }, [drawing]);
+    useShortcut(downloadFile, ['CTRL+ALT+S', 'SHIFT+ALT+S']);
+    useShortcut(localSave, ['CTRL+S', 'SHIFT+S']);
+    useShortcut(exportPNG, ['CTRL+E', 'SHIFT+E']);
     return <>
         <li>
             <button className='round-btn' onClick={()=>setOpen(true)}>

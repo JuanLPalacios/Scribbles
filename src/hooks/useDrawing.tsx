@@ -22,6 +22,14 @@ export const useDrawing = () => {
         const { data, editorState: editor } = drawing;
         const { selectedLayer, next, prev } = editor;
         const { width, height, layers } = data;
+        function uniqueLayerName(name:string) {
+            if(!layers.find(x=>x.name==name))return name;
+            let num = 2;
+            while (layers.find(x=>x.name==name+` (${num})`)) {
+                num++;
+            }
+            return name+` (${num})`;
+        }
         return {
             undo: (prev.length > 0) ? () => { editDrawing({ type: 'editor-drawing/undo' }); } : undefined,
             redo: (next.length > 0) ? () => { editDrawing({ type: 'editor-drawing/redo' }); } : undefined,
@@ -56,7 +64,7 @@ export const useDrawing = () => {
                         type: 'drawing/addLayer',
                         payload: {
                             at: selectedLayer,
-                            layer: createLayer2(layerName, [width, height])
+                            layer: createLayer2(uniqueLayerName(layerName), [width, height])
                         }
                     }
                 });
@@ -91,6 +99,7 @@ export const useDrawing = () => {
             updateLayer(...[index, layer]:[number, Partial<LayerState2>]|[Partial<LayerState2>]) {
                 layer = layer || index as Partial<LayerState2>;
                 index = (typeof index == 'number')?index:selectedLayer;
+                if(layer.name!==undefined)layer.name = uniqueLayerName(layer.name);
                 editDrawing({
                     type: 'editor-drawing/do',
                     payload: {

@@ -61,8 +61,8 @@ export const QuickStart = () => {
                 <div>
                     <h2>More Resources</h2>
                     {(!isInstalledPWA)&&install&&<button onClick={install}><b>Install App</b></button>}
-                    <a href="http://">User Manual</a>
-                    <a href="http://">Community Brushes</a>
+                    <a href="https://github.com/JuanLPalacios/Scribbles/wiki">User Manual</a>
+                    <a href="https://github.com/JuanLPalacios/Scribbles/wiki/Community-Resources#community-brushes">Community Brushes</a>
                 </div>
             </div>
         </div>);

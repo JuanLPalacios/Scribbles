@@ -14,8 +14,8 @@
 
 .layer-options .menu {
   flex: 1 1 auto;
-  width: 200px;
-  right: -200px;
+  width: 240px;
+  right: -240px;
   overflow: auto;
   display: flex;
   flex-direction: column;

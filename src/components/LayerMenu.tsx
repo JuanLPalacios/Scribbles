@@ -2,7 +2,8 @@ import '../css/LayerMenu.css';
 import stackIcon from '../icons/stack-svgrepo-com.svg';
 import addIcon from '../icons/extension-add-svgrepo-com.svg';
 import trashIcon from '../icons/trash-svgrepo-com.svg';
-import pushUpIcon from '../icons/push-chevron-up-r-svgrepo-com.svg';
+import upIcon from '../icons/caret-up-svgrepo-com.svg';
+import downIcon from '../icons/caret-down-svgrepo-com.svg';
 import pushDownIcon from '../icons/push-chevron-down-r-svgrepo-com.svg';
 import eyeIcon from '../icons/eye-alt-svgrepo-com.svg';
 import { useState, useEffect, useMemo } from 'react';
@@ -33,7 +34,7 @@ const LayerMenu = DrawingRequired(()=>{
         setNewLayerPopup({ ...newLayerPopup, errors, isValid: Object.values(errors).reduce((total, value)=> total + value.length, 0) === 0 });
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [newLayerPopup.layerName]);
-    const { moveLayerDown, moveLayerUp } = drawingActions||{};
+    const { moveLayerDown, moveLayerUp, mergeDownLayer } = drawingActions||{};
     const { data, editorState: { layers: editorLayers, selectedLayer } } = drawing;
     const { layers } = data;
     const { onAddLayer, onModeChange, onOpacityChange, onOpacityChangePrev, onRemoveLayer, onSelect, onVisibilityChange, onNameChange } = useMemo(()=>{
@@ -142,8 +143,9 @@ const LayerMenu = DrawingRequired(()=>{
                                 <div className='actions'>
                                     <button onClick={() => setNewLayerPopup({ ...newLayerPopup, isOpen: true, layerName: 'Image' })}><img src={addIcon} alt="Add Layer" /></button>
                                     <button onClick={onRemoveLayer}><img src={trashIcon} alt="Delete Layer" /></button>
-                                    <button onClick={moveLayerUp} disabled={!moveLayerUp}><img src={pushUpIcon} alt="Move Up" /></button>
-                                    <button onClick={moveLayerDown} disabled={!moveLayerDown}><img src={pushDownIcon} alt="Move Down" /></button>
+                                    <button onClick={moveLayerUp} disabled={!moveLayerUp}><img src={upIcon} alt="Move Up" /></button>
+                                    <button onClick={moveLayerDown} disabled={!moveLayerDown}><img src={downIcon} alt="Move Down" /></button>
+                                    <button onClick={mergeDownLayer} disabled={!mergeDownLayer}><img src={pushDownIcon} alt="Merge Down" /></button>
                                 </div>
                             </div>
                         </div>

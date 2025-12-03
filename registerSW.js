@@ -1,1 +1,1 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Scribbles/sw.js', { scope: '/Scribbles/' })})}
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/Scribbles/service-worker.js', { scope: '/Scribbles/' })})}

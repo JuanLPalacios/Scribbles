@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import '../css/QuickStart.css';
 import fileIcon from '../icons/file-add-svgrepo-com.svg';
 import folderIcon from '../icons/folder-open-svgrepo-com.svg';
@@ -16,7 +16,7 @@ export const QuickStart = () => {
     const [{ autoSave }] = useConfig();
     const [, { newFile, loadFile, loadSession, openFile }] = useEditor();
     const id = useMemo(()=>uid(), []);
-    const [install, setReadyToInstall] = useState();
+    const [install, setReadyToInstall] = useState<(() => void) | undefined>();
     const quickNewFile = () => {
         newFile({
             name: 'new Scribble',
@@ -33,12 +33,22 @@ export const QuickStart = () => {
     );
     const isInstalledPWA = window.matchMedia('(display-mode: window-controls-overlay)').matches || window.matchMedia('(display-mode: standalone)').matches;
 
-    if(!isInstalledPWA){
-        window.addEventListener('beforeinstallprompt', (e:Event) => {
-            e.preventDefault();
-            setReadyToInstall(()=> { if(('prompt' in e)&&(typeof e.prompt == 'function'))e.prompt(); });
-        });
-    }
+    useEffect(() => {
+        if(!isInstalledPWA){
+            const handler = (e: Event) => {
+                e.preventDefault();
+                setReadyToInstall(()=> () => { 
+                    if(('prompt' in e)&&(typeof e.prompt == 'function')) {
+                        (e as any).prompt();
+                    }
+                });
+            };
+            window.addEventListener('beforeinstallprompt', handler);
+            return () => {
+                window.removeEventListener('beforeinstallprompt', handler);
+            };
+        }
+    }, [isInstalledPWA]);
 
     return (
         <div className="QuickStart">

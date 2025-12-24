@@ -7,6 +7,7 @@ import { SerializedTextureBrush } from '../brushes/Texture';
 import { SerializedStiffBrush } from '../brushes/Stiff';
 import { SerializedMarkerBrush } from '../brushes/Marker';
 import { SerializedPatternBrush } from '../brushes/Pattern';
+import { SerializedWaterColorBrush } from '../brushes/WaterColor';
 import { BRUSH_TYPE_LIST } from '../abstracts/Brush';
 
 export type SerializedBrush =
@@ -14,7 +15,8 @@ export type SerializedBrush =
 | SerializedTextureBrush
 | SerializedStiffBrush
 | SerializedMarkerBrush
-| SerializedPatternBrush;
+| SerializedPatternBrush
+| SerializedWaterColorBrush;
 
 export type Compressed = {[key:string]:CompressedValue};
 export type CompressedValue = number | string | boolean | Compressed | CompressedOject  | CompressedValue[];

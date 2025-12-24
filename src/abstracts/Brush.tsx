@@ -6,6 +6,7 @@ import { BrushMapper } from '../contexts/BrushMapper';
 import { Texture } from '../brushes/Texture';
 import { BrushPair } from '../contexts/BrushRendererContext';
 import { Pattern } from '../brushes/Pattern';
+import { WaterColor } from '../brushes/WaterColor';
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
@@ -64,6 +65,14 @@ export const BRUSH_TYPE_LIST:BrushPair<SerializedBrush>[] = [
         },
         hardness: 1,
         spacing: 30
+    }],
+    [WaterColor, {
+        scribbleBrushType: BrushList.WaterColor,
+        name: 'WaterColor',
+        spacing: 5,
+        layers: 50,
+        bleedRadius: 3,
+        variance: 2
     }]
 ];
 

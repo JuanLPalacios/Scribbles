@@ -101,5 +101,13 @@
       },
       "name": "Oil Paint",
       "spacing": 5
+    },
+    {
+      "scribbleBrushType": 4,
+      "name": "WaterColor",
+      "spacing": 5,
+      "layers": 5,
+      "bleedRadius": 3,
+      "variance": 2
     }
   ]

@@ -3,4 +3,5 @@ export enum BrushList {
     Texture,
     Marker,
     Pattern,
+    WaterColor,
 }

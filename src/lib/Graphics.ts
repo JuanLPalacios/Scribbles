@@ -1,5 +1,5 @@
 import { DrawableState } from '../types/DrawableState';
-import { LayerState2 } from '../types/LayerState';
+import { LayerState2, EditorLayerState } from '../types/LayerState';
 
 const CANVAS:HTMLCanvasElement = document.createElement('canvas');
 const CTX = CANVAS.getContext('2d');
@@ -37,6 +37,25 @@ export const renderThumbnail = (imageData:ImageData, thumbnail:DrawableState) =>
         thumbnail.ctx.globalCompositeOperation = 'copy';
         thumbnail.ctx.drawImage(CANVAS, 0, 0, thumbnail.canvas.width, thumbnail.canvas.height);
     }
+};
+
+export const renderDrawingThumbnail = (items:{layer:LayerState2, editorLayer:EditorLayerState}[], thumbnail:DrawableState) => {
+    if(!thumbnail?.ctx) return;
+    const ctx = thumbnail.ctx;
+    // clear target thumbnail
+    ctx.save();
+    ctx.clearRect(0, 0, thumbnail.canvas.width, thumbnail.canvas.height);
+    // draw each layer's thumbnail in order
+    for(const item of items){
+        const { layer, editorLayer } = item;
+        if(!layer.visible) continue;
+        const src = editorLayer.thumbnail?.canvas;
+        if(!src) continue;
+        ctx.globalCompositeOperation = layer.mixBlendMode == 'normal' ? 'source-over' : (layer.mixBlendMode as GlobalCompositeOperation);
+        ctx.globalAlpha = (typeof layer.opacity === 'number')? layer.opacity : 1;
+        ctx.drawImage(src, 0, 0, thumbnail.canvas.width, thumbnail.canvas.height);
+    }
+    ctx.restore();
 };
 
 export function parseColor(color: string): [number, number, number, number] {

@@ -53,9 +53,8 @@ export const EditorContextProvider = (props: { children: ReactNode; }) => {
         if(autoSave==0)return () => {};
         const autoSaveIntervalId = setInterval(() => {
             if(!drawingRef.current)return () => {};
-            const { data } = drawingRef.current;
-            const { name } = data;
-            saveLastSession(data, name);
+            const { data: { name } } = drawingRef.current;
+            saveLastSession(drawingRef.current, name);
         }, autoSave);
         return () => clearInterval(autoSaveIntervalId);
     }, [autoSave, saveLastSession]);

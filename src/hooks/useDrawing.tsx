@@ -156,15 +156,15 @@ export const useDrawing = () => {
             async downloadFile(){
                 setLoadingState(LoadingState.Saving);
                 const { data: { name } } = drawing;
-                saveDrawingState(data, name);
-                const blob = await SDRW.binary(data);
+                saveDrawingState(drawing, name);
+                const blob = await SDRW.binary(drawing.data);
                 saveAs(blob, `${name}.scribble`);
                 setLoadingState(LoadingState.None);
             },
             exportPNG(){
                 setLoadingState(LoadingState.Saving);
                 const { data: { layers, width, height, name } } = drawing;
-                saveDrawingState(data, name);
+                saveDrawingState(drawing, name);
                 let merged = createLayer2('', [width, height]);
                 layers.forEach((layer) => {
                     merged = mergeLayers(layer, merged);
@@ -180,7 +180,7 @@ export const useDrawing = () => {
             localSave(){
                 setLoadingState(LoadingState.Saving);
                 const { data: { name } } = drawing;
-                return saveDrawingState(data, name)
+                return saveDrawingState(drawing, name)
                     .catch(e=>console.error(e))
                     .finally(()=>setLoadingState(LoadingState.None));
             },

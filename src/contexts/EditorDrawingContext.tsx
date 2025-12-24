@@ -12,6 +12,7 @@ export type EditorDrawingState = {
         next: DrawingAction[];
         selectedLayer: number;
         buffer: DrawableState;
+        thumbnail: DrawableState;
         handles: Handle[];
         transform: DOMMatrix
     },
@@ -102,6 +103,7 @@ export const editorDrawingReducer = (state: EditorDrawingState|undefined, action
                     handles: [],
                     selectedLayer: 0,
                     buffer: createDrawable({ size: [action.payload.width, action.payload.height], options: { willReadFrequently: true } }),
+                    thumbnail: createDrawable({ size: [40, 40 * (action.payload.height / action.payload.width)] }),
                     transform: new DOMMatrix()
                 }
 

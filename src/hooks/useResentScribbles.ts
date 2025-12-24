@@ -4,12 +4,15 @@ import { useVersion } from './useVersion';
 import { DrawingState } from '../contexts/DrawingContext';
 import { uid } from '../lib/uid';
 import { SDRW } from '../lib/sdrw';
+import { renderDrawingThumbnail } from '../lib/Graphics';
+import { EditorDrawingState } from '../contexts/EditorDrawingContext';
 
 export type StoredFile = {
     key: number;
     path: string;
     name: string;
     chunks: number;
+    thumbnail?: string; // base64 data URL for thumbnail image
 };
 
 export const useStoredFiles = createStorageHook<StoredFile[]>('resent-files', 'local', []);
@@ -46,7 +49,9 @@ export function useResentScribbles() {
         }
         return {
             addFile,
-            saveDrawingState(drawing:DrawingState, name:string){
+            saveDrawingState(editorDrawing:EditorDrawingState, name?:string){
+                const { data: drawing, editorState: { layers: editorLayers, thumbnail: drawingThumbnail } } = editorDrawing;
+                name = name || drawing.name;
                 return SDRW.binary(drawing)
                     .then(blob=>new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
@@ -57,10 +62,23 @@ export function useResentScribbles() {
                     .then(dataURI=>{
                         const storedFile = getStoredFile(name, drawing);
                         const { key } = storedFile;
+                        let thumbnail: string | undefined;
+                        
+                        // Generate thumbnail if editor layers and thumbnail canvas are provided
+                        if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
+                            try {
+                                const items = drawing.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
+                                renderDrawingThumbnail(items, drawingThumbnail);
+                                thumbnail = drawingThumbnail.canvas.toDataURL('image/png');
+                            } catch (e) {
+                                console.warn('Failed to generate thumbnail:', e);
+                            }
+                        }
+                        
                         try {
                             removeFromLocalStorage(`file-${key}`, storedFile.chunks);
                             const chunks = saveInLocalStorage(`file-${key}`, dataURI);
-                            addFile({ ...storedFile, chunks });
+                            addFile({ ...storedFile, chunks, thumbnail });
                         } catch (error) {
                             for (let i = 0; i*chunkSize < dataURI.length; i++) {
                                 localStorage.removeItem(`file-${key}-${i}`);
@@ -69,7 +87,9 @@ export function useResentScribbles() {
                         }
                     });
             },
-            saveLastSession(drawing:DrawingState, name:string){
+            saveLastSession(editorDrawing:EditorDrawingState, name?:string){
+                const { data: drawing, editorState: { layers: editorLayers, thumbnail: drawingThumbnail } } = editorDrawing;
+                name = name || drawing.name;
                 SDRW.binary(drawing)
                     .then(blob=>new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
@@ -79,10 +99,23 @@ export function useResentScribbles() {
                     }))
                     .then(dataURI=>{
                         const storedFile = getStoredFile(name, drawing);
+                        let thumbnail: string | undefined;
+                        
+                        // Generate thumbnail if editor layers and thumbnail canvas are provided
+                        if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
+                            try {
+                                const items = drawing.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
+                                renderDrawingThumbnail(items, drawingThumbnail);
+                                thumbnail = drawingThumbnail.canvas.toDataURL('image/png');
+                            } catch (e) {
+                                console.warn('Failed to generate thumbnail:', e);
+                            }
+                        }
+                        
                         try {
                             removeFromLocalStorage('session', storedFile.chunks);
                             const chunks = saveInLocalStorage('session', dataURI);
-                            setLastSession({ ...storedFile, chunks });
+                            setLastSession({ ...storedFile, chunks, thumbnail });
                         } catch (error) {
                             for (let i = 0; i*chunkSize < dataURI.length; i++) {
                                 localStorage.removeItem(`session-${i}`);

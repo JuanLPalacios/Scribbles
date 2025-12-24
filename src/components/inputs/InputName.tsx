@@ -17,14 +17,14 @@ export const InputName = ({ name, onChange, style, value, validate=()=>[] }:Para
     const [valueBuffer, setValueBuffer] = useState(value);
     const [error, setError] = useState<string>();
     const [editing, setEditing] = useState(false);
-    const [t, setT] = useState<NodeJS.Timeout>();
+    const [t, setT] = useState<number>();
     function onClick(){
         if(editing)return;
         setEditing(true);
         setT(
             setTimeout(()=>{
                 setEditing(false);
-            }, doubleClickTimeOut)
+            }, doubleClickTimeOut) as any as number
         );
     }
     function onBufferChange(e:React.ChangeEvent<HTMLInputElement>){

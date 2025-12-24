@@ -106,7 +106,7 @@ export function InputColor({ value='#000000', name, className, dropper=true, onC
     }, [currentColor, value]);
     return <div className={'InputColor dropdown '+className}>
         <input type="color" name={name} ref={ref2} value={color || value} style={{ display: 'none' }} />
-        <button className='body' title={name} style={{ background: currentColor }}  onClick={(e)=>{
+        <button className='body' title={name} style={{ background: currentColor }}  onClick={()=>{
             if(onClick)onClick(()=>{});
         }}
         onPointerDown={(e)=>{
@@ -166,7 +166,7 @@ export function InputColor({ value='#000000', name, className, dropper=true, onC
                         setX(e.nativeEvent.offsetX);
                         setColor(hslToHex(hue, e.nativeEvent.offsetX, (100-e.nativeEvent.offsetY)/(1+e.nativeEvent.offsetX/100)));
                     }}
-                    onPointerLeave={e=>{
+                    onPointerLeave={()=>{
                         setChanging(false);
                     }}
                     onPointerMove={e=>{

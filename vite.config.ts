@@ -5,17 +5,21 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+    base: '/Scribbles/',
     plugins: [react(), svgr({}), VitePWA({
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'service-worker.ts',
         manifest: {
             screenshots: [
                 {
-                    src: '/screenshots/screenshot_mobile.png',
+                    src: 'screenshots/screenshot_mobile.png',
                     sizes: '360x740',
                     form_factor: 'narrow',
                     type: 'image/png'
                 },
                 {
-                    src: '/screenshots/screenshot_wide.png',
+                    src: 'screenshots/screenshot_wide.png',
                     sizes: '1440x900',
                     form_factor: 'wide',
                     type: 'image/png'
@@ -23,15 +27,17 @@ export default defineConfig({
             ],
             icons: [
                 {
-                    src: '/icons/logo512.png',
+                    src: 'logo512.png',
                     sizes: '512x512',
                     type: 'image/png',
                     purpose: 'any'
                 }
             ]
         },
-        includeAssets: ['/icons/favicon.webp'],
-        registerType: 'autoUpdate'
+        includeAssets: ['favicon.ico'],
+        injectManifest: {
+            globPatterns: ['**/*.{js,css,html,ico,png,svg,webp}']
+        }
     })],
     server: {
         host: true,

@@ -268,6 +268,30 @@ export const EditBrushes = () => {
                             <input type="number" name='spacing' value={currentBrushProxy.spacing} min={0} max={30} step={1} onChange={update} style={{ width: '5rem' }} />
                         </label>
                         }
+                        {('layers' in currentBrushProxy)&&(typeof currentBrushProxy.layers == 'number') &&
+                        <label>
+                            <div>
+                            Layers
+                            </div>
+                            <input type="number" name='layers' value={currentBrushProxy.layers} min={1} max={20} step={1} onChange={update} style={{ width: '5rem' }} />
+                        </label>
+                        }
+                        {('bleedRadius' in currentBrushProxy)&&(typeof currentBrushProxy.bleedRadius == 'number') &&
+                        <label>
+                            <div>
+                            Bleed radius
+                            </div>
+                            <input type="number" name='bleedRadius' value={currentBrushProxy.bleedRadius} min={0} max={50} step={0.5} onChange={update} style={{ width: '5rem' }} />
+                        </label>
+                        }
+                        {('variance' in currentBrushProxy)&&(typeof currentBrushProxy.variance == 'number') &&
+                        <label>
+                            <div>
+                            Variance
+                            </div>
+                            <input type="number" name='variance' value={currentBrushProxy.variance} min={0} max={10} step={0.1} onChange={update} style={{ width: '5rem' }} />
+                        </label>
+                        }
                         {('antiAliasing' in currentBrushProxy)&&(typeof currentBrushProxy.antiAliasing == 'boolean') &&
                         <label>
                             <div>

@@ -8,10 +8,17 @@ import { uid } from '../lib/uid';
 import { useLastSession, useResentScribbles } from '../hooks/useResentScribbles';
 import { useConfig } from '../hooks/useConfig';
 import { useOpenFile } from '../hooks/useOpenFile';
+import { createStorageHook } from '../generators/createStorageHook';
+
+type PromptEvent = Event & { prompt?: () => void };
+
+// Persistent view preference for QuickStart (list vs thumbnails)
+const useQuickStartView = createStorageHook<{ mode: 'list'|'thumbs' }>('quickstart-view', 'local', { mode: 'list' });
 
 export const QuickStart = () => {
     const [resentScribbles] = useResentScribbles();
     const [lastSession] = useLastSession();
+    const [quickStartView, setQuickStartView] = useQuickStartView();
 
     const [{ autoSave }] = useConfig();
     const [, { newFile, loadFile, loadSession, openFile }] = useEditor();
@@ -37,9 +44,10 @@ export const QuickStart = () => {
         if(!isInstalledPWA){
             const handler = (e: Event) => {
                 e.preventDefault();
-                setReadyToInstall(()=> () => { 
-                    if(('prompt' in e)&&(typeof e.prompt == 'function')) {
-                        (e as any).prompt();
+                setReadyToInstall(()=> () => {
+                    const promptEvent = e as PromptEvent;
+                    if(typeof promptEvent.prompt === 'function') {
+                        promptEvent.prompt();
                     }
                 });
             };
@@ -62,8 +70,28 @@ export const QuickStart = () => {
                     </div>
                     <div>
                         <h2>Recent Files</h2>
-                        {resentScribbles.slice(0, 5).map((resentScribble, i)=>
-                            <button key={`${id}-${i}`} onClick={()=>loadFile(resentScribble)}>{resentScribble.name}</button>
+                        <div className="actions right" style={{ display: 'flex', gap: 8 }}>
+                            <span>View:</span>
+                            <button onClick={()=>setQuickStartView({ mode: 'list' })} disabled={quickStartView.mode==='list'}>List</button>
+                            <button onClick={()=>setQuickStartView({ mode: 'thumbs' })} disabled={quickStartView.mode==='thumbs'}>Thumbnails</button>
+                        </div>
+                        {quickStartView.mode}
+                        {quickStartView.mode==='list' ? (
+                            resentScribbles.slice(0, 5).map((resentScribble, i)=>
+                                <button key={`${id}-${i}`} onClick={()=>loadFile(resentScribble)} className={resentScribble.thumbnail ? 'with-thumbnail' : ''}>
+                                    {resentScribble.thumbnail && <img src={resentScribble.thumbnail} alt="" className="file-thumbnail" />}
+                                    <span>{resentScribble.name}</span>
+                                </button>
+                            )
+                        ) : (
+                            <div className="thumbnails-grid">
+                                {resentScribbles.slice(0, 12).map((resentScribble, i)=>
+                                    <button key={`${id}-thumb-${i}`} onClick={()=>loadFile(resentScribble)} className="with-thumbnail">
+                                        {resentScribble.thumbnail && <img src={resentScribble.thumbnail} alt="" className="file-thumbnail" />}
+                                        <span>{resentScribble.name}</span>
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
 

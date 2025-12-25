@@ -52,7 +52,20 @@ export function useResentScribbles() {
             saveDrawingState(editorDrawing:EditorDrawingState, name?:string){
                 const { data: drawing, editorState: { layers: editorLayers, thumbnail: drawingThumbnail } } = editorDrawing;
                 name = name || drawing.name;
-                return SDRW.binary(drawing)
+                
+                // Generate thumbnail first
+                let thumbnailDataURL: string | undefined;
+                if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
+                    try {
+                        const items = drawing.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
+                        renderDrawingThumbnail(items, drawingThumbnail);
+                        thumbnailDataURL = drawingThumbnail.canvas.toDataURL('image/png');
+                    } catch (e) {
+                        console.warn('Failed to generate thumbnail:', e);
+                    }
+                }
+                
+                return SDRW.binary(drawing, thumbnailDataURL)
                     .then(blob=>new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result as string);
@@ -62,23 +75,11 @@ export function useResentScribbles() {
                     .then(dataURI=>{
                         const storedFile = getStoredFile(name, drawing);
                         const { key } = storedFile;
-                        let thumbnail: string | undefined;
-                        
-                        // Generate thumbnail if editor layers and thumbnail canvas are provided
-                        if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
-                            try {
-                                const items = drawing.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
-                                renderDrawingThumbnail(items, drawingThumbnail);
-                                thumbnail = drawingThumbnail.canvas.toDataURL('image/png');
-                            } catch (e) {
-                                console.warn('Failed to generate thumbnail:', e);
-                            }
-                        }
                         
                         try {
                             removeFromLocalStorage(`file-${key}`, storedFile.chunks);
                             const chunks = saveInLocalStorage(`file-${key}`, dataURI);
-                            addFile({ ...storedFile, chunks, thumbnail });
+                            addFile({ ...storedFile, chunks, thumbnail: thumbnailDataURL });
                         } catch (error) {
                             for (let i = 0; i*chunkSize < dataURI.length; i++) {
                                 localStorage.removeItem(`file-${key}-${i}`);
@@ -90,7 +91,20 @@ export function useResentScribbles() {
             saveLastSession(editorDrawing:EditorDrawingState, name?:string){
                 const { data: drawing, editorState: { layers: editorLayers, thumbnail: drawingThumbnail } } = editorDrawing;
                 name = name || drawing.name;
-                SDRW.binary(drawing)
+                
+                // Generate thumbnail first
+                let thumbnailDataURL: string | undefined;
+                if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
+                    try {
+                        const items = drawing.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
+                        renderDrawingThumbnail(items, drawingThumbnail);
+                        thumbnailDataURL = drawingThumbnail.canvas.toDataURL('image/png');
+                    } catch (e) {
+                        console.warn('Failed to generate thumbnail:', e);
+                    }
+                }
+                
+                SDRW.binary(drawing, thumbnailDataURL)
                     .then(blob=>new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
                         reader.onloadend = () => resolve(reader.result as string);
@@ -99,23 +113,11 @@ export function useResentScribbles() {
                     }))
                     .then(dataURI=>{
                         const storedFile = getStoredFile(name, drawing);
-                        let thumbnail: string | undefined;
-                        
-                        // Generate thumbnail if editor layers and thumbnail canvas are provided
-                        if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
-                            try {
-                                const items = drawing.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
-                                renderDrawingThumbnail(items, drawingThumbnail);
-                                thumbnail = drawingThumbnail.canvas.toDataURL('image/png');
-                            } catch (e) {
-                                console.warn('Failed to generate thumbnail:', e);
-                            }
-                        }
                         
                         try {
                             removeFromLocalStorage('session', storedFile.chunks);
                             const chunks = saveInLocalStorage('session', dataURI);
-                            setLastSession({ ...storedFile, chunks, thumbnail });
+                            setLastSession({ ...storedFile, chunks, thumbnail: thumbnailDataURL });
                         } catch (error) {
                             for (let i = 0; i*chunkSize < dataURI.length; i++) {
                                 localStorage.removeItem(`session-${i}`);

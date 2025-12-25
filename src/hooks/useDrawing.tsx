@@ -4,7 +4,7 @@ import { LayerState2 } from '../types/LayerState';
 import { DrawingState } from '../contexts/DrawingContext';
 import { useEditor } from './useEditor';
 import { EditorDrawingState } from '../contexts/EditorDrawingContext';
-import { getBlobFromLayer, mergeLayers } from '../lib/Graphics';
+import { getBlobFromLayer, mergeLayers, renderDrawingThumbnail } from '../lib/Graphics';
 import { saveAs } from 'file-saver';
 import { SDRW } from '../lib/sdrw';
 import { useResentScribbles } from './useResentScribbles';
@@ -155,16 +155,29 @@ export const useDrawing = () => {
             },
             async downloadFile(){
                 setLoadingState(LoadingState.Saving);
-                const { data: { name } } = drawing;
-                saveDrawingState(data, name);
-                const blob = await SDRW.binary(data);
+                const { data: { name }, editorState: { layers: editorLayers, thumbnail } } = drawing;
+                
+                // Generate thumbnail
+                let thumbnailDataURL: string | undefined;
+                if(editorLayers && editorLayers.length > 0 && thumbnail){
+                    try {
+                        const items = drawing.data.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
+                        renderDrawingThumbnail(items, thumbnail);
+                        thumbnailDataURL = thumbnail.canvas.toDataURL('image/png');
+                    } catch (e) {
+                        console.warn('Failed to generate thumbnail:', e);
+                    }
+                }
+                
+                saveDrawingState(drawing, name);
+                const blob = await SDRW.binary(drawing.data, thumbnailDataURL);
                 saveAs(blob, `${name}.scribble`);
                 setLoadingState(LoadingState.None);
             },
             exportPNG(){
                 setLoadingState(LoadingState.Saving);
                 const { data: { layers, width, height, name } } = drawing;
-                saveDrawingState(data, name);
+                saveDrawingState(drawing, name);
                 let merged = createLayer2('', [width, height]);
                 layers.forEach((layer) => {
                     merged = mergeLayers(layer, merged);
@@ -180,7 +193,7 @@ export const useDrawing = () => {
             localSave(){
                 setLoadingState(LoadingState.Saving);
                 const { data: { name } } = drawing;
-                return saveDrawingState(data, name)
+                return saveDrawingState(drawing, name)
                     .catch(e=>console.error(e))
                     .finally(()=>setLoadingState(LoadingState.None));
             },

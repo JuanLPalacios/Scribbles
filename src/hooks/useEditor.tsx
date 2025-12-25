@@ -10,7 +10,7 @@ import { LoadingState } from '../types/LoadingState';
 
 export const useEditor = () => {
     const [, setLoadingState] = useLoadingOverlay();
-    const [, { loadDrawingState, saveDrawingState, loadLastSession }] = useResentScribbles();
+    const [, { loadDrawingState, loadLastSession }] = useResentScribbles();
     const [editor, dispatch] = useContext(EditorContext);
     return [editor, useMemo(()=>({
         openFile(file:File){
@@ -22,7 +22,6 @@ export const useEditor = () => {
             case 'png':
                 loadImageAsDrawingState(file)
                     .then(payload=>{
-                        saveDrawingState(payload, payload.name);
                         dispatch({
                             type: 'editor/load',
                             payload
@@ -35,7 +34,6 @@ export const useEditor = () => {
             case 'scribble':
                 SDRW.jsonObj(file)
                     .then(payload=>{
-                        saveDrawingState(payload, payload.name);
                         dispatch({
                             type: 'editor/load',
                             payload
@@ -90,6 +88,6 @@ export const useEditor = () => {
                 })
                 .finally(()=>setLoadingState(LoadingState.None));
         },
-    }), [dispatch, loadDrawingState, loadLastSession, saveDrawingState, setLoadingState])] as const;
+    }), [dispatch, loadDrawingState, loadLastSession, setLoadingState])] as const;
 };
 

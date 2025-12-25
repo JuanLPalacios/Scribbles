@@ -1,21 +1,30 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import '../css/QuickStart.css';
+import '../css/components/FileList.css';
 import fileIcon from '../icons/file-add-svgrepo-com.svg';
 import folderIcon from '../icons/folder-open-svgrepo-com.svg';
 import syncIcon from '../icons/sync-svgrepo-com.svg';
+import listIcon from '../icons/layout-list-svgrepo-com.svg';
+import gridIcon from '../icons/layout-grid-svgrepo-com.svg';
 import { useEditor } from '../hooks/useEditor';
-import { uid } from '../lib/uid';
 import { useLastSession, useResentScribbles } from '../hooks/useResentScribbles';
 import { useConfig } from '../hooks/useConfig';
 import { useOpenFile } from '../hooks/useOpenFile';
+import { createStorageHook } from '../generators/createStorageHook';
+import { FileList } from './FileList';
+
+type PromptEvent = Event & { prompt?: () => void };
+
+// Persistent view preference for QuickStart (list vs thumbnails)
+const useQuickStartView = createStorageHook<{ mode: 'list'|'thumbs' }>('quickstart-view', 'local', { mode: 'list' });
 
 export const QuickStart = () => {
     const [resentScribbles] = useResentScribbles();
     const [lastSession] = useLastSession();
+    const [quickStartView, setQuickStartView] = useQuickStartView();
 
     const [{ autoSave }] = useConfig();
     const [, { newFile, loadFile, loadSession, openFile }] = useEditor();
-    const id = useMemo(()=>uid(), []);
     const [install, setReadyToInstall] = useState<(() => void) | undefined>();
     const quickNewFile = () => {
         newFile({
@@ -37,9 +46,10 @@ export const QuickStart = () => {
         if(!isInstalledPWA){
             const handler = (e: Event) => {
                 e.preventDefault();
-                setReadyToInstall(()=> () => { 
-                    if(('prompt' in e)&&(typeof e.prompt == 'function')) {
-                        (e as any).prompt();
+                setReadyToInstall(()=> () => {
+                    const promptEvent = e as PromptEvent;
+                    if(typeof promptEvent.prompt === 'function') {
+                        promptEvent.prompt();
                     }
                 });
             };
@@ -61,10 +71,20 @@ export const QuickStart = () => {
                         {(autoSave!==0)&&(lastSession)&&<button onClick={loadSession}><img src={syncIcon} alt="" />Recover last session</button>}
                     </div>
                     <div>
-                        <h2>Recent Files</h2>
-                        {resentScribbles.slice(0, 5).map((resentScribble, i)=>
-                            <button key={`${id}-${i}`} onClick={()=>loadFile(resentScribble)}>{resentScribble.name}</button>
-                        )}
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5em' }}>
+                            <h2>Recent Files</h2>
+                            <div className="FileList-viewToggle" style={{ display: 'flex', gap: 8 }}>
+                                <button onClick={()=>setQuickStartView({ mode: 'list' })} disabled={quickStartView.mode==='list'} title="List view"><img src={listIcon} alt="List view" /></button>
+                                <button onClick={()=>setQuickStartView({ mode: 'thumbs' })} disabled={quickStartView.mode==='thumbs'} title="Thumbnails view"><img src={gridIcon} alt="Thumbnails view" /></button>
+                            </div>
+                        </div>
+                        <FileList
+                            files={resentScribbles}
+                            mode={quickStartView.mode}
+                            onFileClick={loadFile}
+                            limit={quickStartView.mode === 'list' ? 5 : 12}
+                            variant="quickstart"
+                        />
                     </div>
 
                 </div>

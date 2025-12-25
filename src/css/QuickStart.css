@@ -26,7 +26,7 @@
 }
 
 .QuickStart > .QuickStart-modal > * {
-  width: calc((var(--quick-start-width) - var(--quick-start-padding) * 2 - var(--quick-start-gap)) / 2);
+  width: calc((var(--quick-start-width) - var(--quick-start-gap)) / 2);
 }
 
 .QuickStart > .QuickStart-modal a,

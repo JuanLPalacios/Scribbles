@@ -46,7 +46,7 @@ export const SDRW = {
             );
     },
 
-    async binary(state: DrawingState) {
+    async binary(state: DrawingState, thumbnail?: string) {
         const data = serializeDrawingState(state);
         const zip = new JSZip();
         const dir = zip.folder('img');
@@ -56,6 +56,14 @@ export const SDRW = {
             subVersion: 1
         };
         zip.file('version.json', JSON.stringify(version));
+
+        // Add thumbnail if provided
+        if(thumbnail) {
+            // thumbnail is a data URL, extract the base64 part
+            const base64Data = thumbnail.split(',')[1];
+            zip.file('thumbnail.png', base64Data, { base64: true });
+        }
+
         const context = { zip, types: { img: { dir, count: 0 } } };
         const zippedBrush:Compressed = {};
         for (const key in data) {

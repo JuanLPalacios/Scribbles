@@ -1,16 +1,1 @@
-.LoadFile .table {
-    display: grid;
-    grid-template-columns: auto min-content;
-    gap: 2px;
-    overflow-y: auto;
-    max-height: calc(100svh - 200px);
-    padding-right: 5px;
-}
-
-@media screen and (orientation:portrait) { 
-
-    .LoadFile .table {
-        max-height: calc(100vw - 200px);
-    }
-
-}
+/* LoadFile-specific styles - common FileList styles are in components/FileList.css */

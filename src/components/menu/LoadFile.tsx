@@ -1,19 +1,26 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import '../../css/Menu.css';
 import '../../css/menu/LoadFile.css';
+import '../../css/components/FileList.css';
 import folderIcon from '../../icons/folder-open-svgrepo-com.svg';
+import listIcon from '../../icons/layout-list-svgrepo-com.svg';
+import gridIcon from '../../icons/layout-grid-svgrepo-com.svg';
 import { useEditor } from '../../hooks/useEditor';
 import ReactModal from 'react-modal';
 import { useOpenFile } from '../../hooks/useOpenFile';
+import { createStorageHook } from '../../generators/createStorageHook';
 import { useResentScribbles } from '../../hooks/useResentScribbles';
-import { uid } from '../../lib/uid';
 import { useShortcut } from '../../hooks/useShortcut';
+import { FileList } from '../FileList';
+
+// Persistent view preference for Load modal (list vs thumbnails)
+const useLoadView = createStorageHook<{ mode: 'list'|'thumbs' }>('load-view', 'local', { mode: 'list' });
 
 export const LoadFile = () => {
     const [editor, { openFile, loadFile }] = useEditor();
     const [isOpen, setOpen] = useState(false);
     const [resentScribbles] = useResentScribbles();
-    const id = useMemo(()=>uid(), []);
+    const [loadView, setLoadView] = useLoadView();
     const openModal = useCallback(()=>setOpen(true), []);
     const openFileL = useOpenFile((files)=>{
         if(files.length==0)return;
@@ -40,15 +47,19 @@ export const LoadFile = () => {
                 <div className='actions right'>
                     <button onClick={openFileL}>Open File</button>
                 </div>
-                <h4>Local saves</h4>
-                <div className='table'>
-                    {resentScribbles.map((resentScribble, i)=><>
-                        <div key={`${id}-name-${i}`}>{resentScribble.name}</div>
-                        <button key={`${id}-button-${i}`} onClick={()=>loadFile(resentScribble)}>Load</button>
-
-                    </>
-                    )}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5em' }}>
+                    <h4>Local saves</h4>
+                    <div className="FileList-viewToggle" style={{ display: 'flex', gap: 8 }}>
+                        <button onClick={()=>setLoadView({ mode: 'list' })} disabled={loadView.mode==='list'} title="List view"><img src={listIcon} alt="List view" /></button>
+                        <button onClick={()=>setLoadView({ mode: 'thumbs' })} disabled={loadView.mode==='thumbs'} title="Thumbnails view"><img src={gridIcon} alt="Thumbnails view" /></button>
+                    </div>
                 </div>
+                <FileList
+                    files={resentScribbles}
+                    mode={loadView.mode}
+                    onFileClick={loadFile}
+                    variant="modal"
+                />
                 <div className='actions'>
                     <button onClick={()=>setOpen(false)}>cancel</button>
                 </div>

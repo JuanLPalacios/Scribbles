@@ -155,17 +155,6 @@ describe('Brush Format v0.3.0 - Import/Export', () => {
         ctx.fillStyle = '#FF0000';
         ctx.fillRect(0, 0, 32, 32);
 
-        const imageData = ctx.getImageData(0, 0, 32, 32);
-        const serializedImageData = {
-            type: 'imageData',
-            value: {
-                width: imageData.width,
-                height: imageData.height,
-                colorSpace: imageData.colorSpace,
-                data: Array.from(imageData.data)
-            }
-        };
-
         const brushes: Serialized[] = [
             {
                 type: 'json',

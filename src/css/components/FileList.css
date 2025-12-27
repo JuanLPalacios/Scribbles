@@ -78,7 +78,7 @@
   height: 100px;
   object-fit: cover;
   border-radius: 4px;
-  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3ggRDQENU0dyawAAACZJREFUGNNjPHXqDAMSMDY2ROYyMeAFNJVm/Pv3LzL/7Nnzg8VpAKebCGpIIxHBAAAAAElFTkSuQmCC),
+  background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAIAAAACUFjqAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3ggRDQENU0dyawAAACZJREFUGNNjPHXqDAMSMDY2ROYyMeAFNJVm/Pv3LzL/7Nnzg8VpAKebCGpIIxHBAAAAAElFTkSuQmCC"),
     linear-gradient(0deg, #fff, #fff);
   filter: none;
 }

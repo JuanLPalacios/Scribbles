@@ -138,8 +138,6 @@ describe('Drawing Tool - Smear', () => {
         ctx.fillStyle = '#FF0000';
         ctx.fillRect(0, 0, 200, 200);
 
-        const originalData = ctx.getImageData(0, 0, 200, 200);
-
         // Smear operation
         ctx.globalAlpha = 0.7;
         ctx.fillStyle = '#00FF00';

@@ -160,7 +160,6 @@ describe('Drawing Tool - Erase', () => {
         ctx.fillRect(0, 0, 200, 200);
 
         // Save layer 1 data
-        const layer1Data = ctx.getImageData(0, 0, 200, 200);
 
         // Erase some area
         ctx.clearRect(50, 50, 50, 50);

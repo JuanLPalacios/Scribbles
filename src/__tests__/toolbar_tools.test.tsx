@@ -25,16 +25,20 @@ Object.defineProperty(window, 'matchMedia', {
     }),
 });
 
-import { screen } from '@testing-library/react';
+import { screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { renderWithProviders } from './utils';
 
 it('toggles selected tool via toolbar buttons', async () => {
-    renderWithProviders(<App />);
+    await act(async () => {
+        renderWithProviders(<App />);
+    });
 
     const openBlank = await screen.findByRole('button', { name: /Open blank scribble/i });
-    await userEvent.click(openBlank);
+    await act(async () => {
+        await userEvent.click(openBlank);
+    });
 
     // Find all tool buttons
     const buttons = Array.from(document.querySelectorAll('.Toolbar .tool.round-btn')) as HTMLButtonElement[];
@@ -45,7 +49,9 @@ it('toggles selected tool via toolbar buttons', async () => {
 
     // Click each tool and expect selection to move
     for (let i = 1; i < buttons.length; i++) {
-        await userEvent.click(buttons[i]);
+        await act(async () => {
+            await userEvent.click(buttons[i]);
+        });
         expect(buttons[i].classList.contains('selected')).toBe(true);
         // previous should be unselected
         for (let j = 0; j < buttons.length; j++) {

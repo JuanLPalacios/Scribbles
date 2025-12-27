@@ -25,20 +25,24 @@ Object.defineProperty(window, 'matchMedia', {
     }),
 });
 
-import { screen } from '@testing-library/react';
+import { screen, waitFor, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import { renderWithProviders } from './utils';
 
 // Verify QuickStart opens a new scribble and Canvas appears
 it('opens blank scribble and renders Canvas', async () => {
-    renderWithProviders(<App />);
+    await act(async () => {
+        renderWithProviders(<App />);
+    });
 
     // Quick Start modal is visible
     expect(await screen.findByText(/Quick Start/i)).toBeInTheDocument();
 
     const openBlank = await screen.findByRole('button', { name: /Open blank scribble/i });
-    await userEvent.click(openBlank);
+    await act(async () => {
+        await userEvent.click(openBlank);
+    });
 
     // The Canvas container shows up
     const viewport = await new Promise<HTMLDivElement | null>((resolve) => {
@@ -57,11 +61,15 @@ it('opens blank scribble and renders Canvas', async () => {
     const y = top + height / 2;
 
     const pointerId = 1;
-    viewport?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y, buttons: 1, pointerId }));
-    viewport?.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: x + 5, clientY: y + 5, buttons: 1, pointerId }));
-    viewport?.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x + 10, clientY: y + 10, buttons: 0, pointerId }));
+    await act(async () => {
+        viewport?.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y, buttons: 1, pointerId }));
+        viewport?.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: x + 5, clientY: y + 5, buttons: 1, pointerId }));
+        viewport?.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x + 10, clientY: y + 10, buttons: 0, pointerId }));
+    });
 
     // After stroke, at least one canvas should be present
-    const canvases = document.querySelectorAll('canvas');
-    expect(canvases.length).toBeGreaterThan(0);
+    await waitFor(() => {
+        const canvases = document.querySelectorAll('canvas');
+        expect(canvases.length).toBeGreaterThan(0);
+    });
 });

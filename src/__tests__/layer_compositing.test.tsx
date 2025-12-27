@@ -1,17 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { mergeLayers } from '../lib/Graphics';
 import { createLayer2 } from '../generators/createLayer2';
 import { BlendMode } from '../types/BlendMode';
 
 describe('Layer Compositing - PNG Export', () => {
     let canvas: HTMLCanvasElement;
-    let ctx: CanvasRenderingContext2D;
 
     beforeEach(() => {
         canvas = document.createElement('canvas');
         canvas.width = 100;
         canvas.height = 100;
-        ctx = canvas.getContext('2d')!;
     });
 
     it('should merge two solid color layers with normal blend mode', () => {

@@ -1,12 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { ReactNode } from 'react';
-import { AppContext } from '../contexts/AppContext';
-import { createDrawable } from '../generators/createDrawable';
-import { createLayer2 } from '../generators/createLayer2';
-import { EditorDrawingState } from '../contexts/EditorDrawingContext';
-import { DrawingState } from '../contexts/DrawingContext';
 
 vi.mock('abr-js');
 vi.mock('../components/inputs/BrushSelectInput', () => ({

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createDrawable } from '../generators/createDrawable';
 
 vi.mock('abr-js');
 

@@ -138,9 +138,17 @@ if (typeof document !== 'undefined') {
 // Stub HTMLCanvasElement.toBlob to avoid blocking on native canvas work in tests
 // This returns a tiny PNG blob immediately instead of performing heavy serialization
 if (typeof HTMLCanvasElement !== 'undefined') {
-    const originalToBlob = HTMLCanvasElement.prototype.toBlob;
     HTMLCanvasElement.prototype.toBlob = function (callback: BlobCallback | null, _type?: string, _quality?: number) {
-        // Return a minimal PNG blob asynchronously to maintain the callback contract
-        callback?.(new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])], { type: 'image/png' }));
+        // Return a minimal PNG blob synchronously to maintain the callback contract
+        // IMPORTANT: Must provide a non-null blob to avoid hanging promises in sdrw.ts zipDataV1S1
+        if (callback) {
+            callback(new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])], { type: 'image/png' }));
+        }
+    };
+
+    // Stub toDataURL to avoid slow native PNG encoding in tests
+    HTMLCanvasElement.prototype.toDataURL = function (_type?: string, _quality?: number): string {
+        // Return a minimal 1x1 PNG data URL
+        return 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
     };
 }

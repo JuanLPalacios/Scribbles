@@ -164,7 +164,7 @@ describe('Layer Compositing - PNG Export', () => {
         expect(result.imageData.height).toBe(100);
     });
 
-    it('should export composited layers to PNG blob via canvas.toBlob', (done) => {
+    it('should export composited layers to PNG blob via canvas.toBlob', async () => {
         const layer = createLayer2('test', [100, 100]);
         const layerCtx = document.createElement('canvas').getContext('2d')!;
         layerCtx.canvas.width = 100;
@@ -179,12 +179,13 @@ describe('Layer Compositing - PNG Export', () => {
         const testCtx = testCanvas.getContext('2d')!;
         testCtx.putImageData(layer.imageData, 0, 0);
 
-        testCanvas.toBlob((blob) => {
-            expect(blob).toBeDefined();
-            expect(blob?.type).toBe('image/png');
-            expect(blob?.size).toBeGreaterThan(0);
-            done();
-        }, 'image/png');
+        const blob = await new Promise<Blob | null>((resolve) => {
+            testCanvas.toBlob(resolve, 'image/png');
+        });
+
+        expect(blob).toBeDefined();
+        expect(blob?.type).toBe('image/png');
+        expect(blob?.size).toBeGreaterThan(0);
     });
 
     it('should handle layers with transparent areas', () => {

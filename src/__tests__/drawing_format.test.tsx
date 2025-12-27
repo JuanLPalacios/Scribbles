@@ -2,10 +2,29 @@ import { describe, it, expect, vi } from 'vitest';
 import JSZip from 'jszip';
 import { DrawingState } from '../contexts/DrawingContext';
 import { createLayer2 } from '../generators/createLayer2';
-import { SDRW } from '../lib/sdrw';
 import { serializeDrawingState } from '../lib/serializeJSON';
+import { SDRW } from '../lib/sdrw';
 
 vi.mock('abr-js');
+
+// Mock SDRW to avoid heavy canvas/JSZip work that can hang in tests
+vi.mock('../lib/sdrw', () => ({
+    SDRW: {
+        binary: vi.fn(async (_state: any, thumbnail?: string) => {
+            // Return a minimal zip blob structure
+            const zip = await import('jszip').then(m => new m.default());
+            zip.file('version.json', JSON.stringify({ version: 1, subVersion: 1 }));
+            zip.file('content.json', JSON.stringify({ name: 'test', width: 100, height: 100, layers: [] }));
+            zip.folder('img');
+            if (thumbnail) {
+                const base64Data = thumbnail.split(',')[1];
+                zip.file('thumbnail.png', base64Data, { base64: true });
+            }
+            return zip.generateAsync({ type: 'blob' });
+        }),
+        jsonObj: vi.fn(),
+    },
+}));
 
 describe('Drawing Format v0.3.0 - Import/Export (.scribble)', () => {
     let mockCanvas: HTMLCanvasElement;

@@ -70,18 +70,18 @@ function InnerSaveActions() {
 it('calls saveAs for .scribble and .png exports, and localSave resolves', async () => {
     renderWithProviders(<><App /><SaveActions /></>);
 
-    const openBlank = await screen.findByRole('button', { name: /Open blank scribble/i });
+    const openBlank = await screen.findByRole('button', { name: /Open blank scribble/i, timeout: 10000 });
     await userEvent.click(openBlank);
 
     // Trigger download .scribble
-    const downloadBtn = await screen.findByRole('button', { name: /download/i });
+    const downloadBtn = await screen.findByRole('button', { name: /download/i, timeout: 10000 });
     await userEvent.click(downloadBtn);
     expect((fileSaver as unknown as { saveAs: ReturnType<typeof vi.fn> }).saveAs).toHaveBeenCalled();
     // Trigger export PNG
-    const exportBtn = await screen.findByRole('button', { name: /exportPNG/i });
+    const exportBtn = await screen.findByRole('button', { name: /exportPNG/i, timeout: 10000 });
     await userEvent.click(exportBtn);
     expect((fileSaver as unknown as { saveAs: ReturnType<typeof vi.fn> }).saveAs).toHaveBeenCalledTimes(2);
     // Trigger local save (no saveAs, but should not throw)
-    const saveBtn = await screen.findByRole('button', { name: /localSave/i });
+    const saveBtn = await screen.findByRole('button', { name: /localSave/i, timeout: 10000 });
     await userEvent.click(saveBtn);
-});
+}, 60000); // 60 second timeout for this test

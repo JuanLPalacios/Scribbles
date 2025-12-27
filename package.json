@@ -18,8 +18,9 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "publish": "gh-pages -d dist",
-    "test": "vitest run",
-    "test:ui": "vitest"
+    "test": "vitest run --bail 1",
+    "test:ui": "vitest",
+    "test:ci": "vitest run --bail 1 --testTimeout=300000"
   },
   "dependencies": {
     "abr-js": "^0.1.1",

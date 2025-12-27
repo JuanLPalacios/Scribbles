@@ -43,4 +43,15 @@ export default defineConfig({
         host: true,
         port: 3000,
     },
+    test: {
+        environment: 'jsdom',
+        setupFiles: ['./src/setupTests.ts'],
+        globals: true,
+        css: true,
+        // Cap any single test at max 5 minutes to prevent runaway hangs
+        testTimeout: 300000,
+        hookTimeout: 300000,
+        teardownTimeout: 300000,
+        bail: 1 // Stop on first timeout/failure
+    }
 });

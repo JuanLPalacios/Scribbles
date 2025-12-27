@@ -52,7 +52,7 @@ export function useResentScribbles() {
             saveDrawingState(editorDrawing:EditorDrawingState, name?:string){
                 const { data: drawing, editorState: { layers: editorLayers, thumbnail: drawingThumbnail } } = editorDrawing;
                 name = name || drawing.name;
-                
+
                 // Generate thumbnail first
                 let thumbnailDataURL: string | undefined;
                 if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
@@ -64,7 +64,7 @@ export function useResentScribbles() {
                         console.warn('Failed to generate thumbnail:', e);
                     }
                 }
-                
+
                 return SDRW.binary(drawing, thumbnailDataURL)
                     .then(blob=>new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
@@ -75,7 +75,7 @@ export function useResentScribbles() {
                     .then(dataURI=>{
                         const storedFile = getStoredFile(name, drawing);
                         const { key } = storedFile;
-                        
+
                         try {
                             removeFromLocalStorage(`file-${key}`, storedFile.chunks);
                             const chunks = saveInLocalStorage(`file-${key}`, dataURI);
@@ -91,7 +91,7 @@ export function useResentScribbles() {
             saveLastSession(editorDrawing:EditorDrawingState, name?:string){
                 const { data: drawing, editorState: { layers: editorLayers, thumbnail: drawingThumbnail } } = editorDrawing;
                 name = name || drawing.name;
-                
+
                 // Generate thumbnail first
                 let thumbnailDataURL: string | undefined;
                 if(editorLayers && editorLayers.length > 0 && drawingThumbnail){
@@ -103,7 +103,7 @@ export function useResentScribbles() {
                         console.warn('Failed to generate thumbnail:', e);
                     }
                 }
-                
+
                 SDRW.binary(drawing, thumbnailDataURL)
                     .then(blob=>new Promise<string>((resolve, reject) => {
                         const reader = new FileReader();
@@ -113,7 +113,7 @@ export function useResentScribbles() {
                     }))
                     .then(dataURI=>{
                         const storedFile = getStoredFile(name, drawing);
-                        
+
                         try {
                             removeFromLocalStorage('session', storedFile.chunks);
                             const chunks = saveInLocalStorage('session', dataURI);

@@ -156,7 +156,7 @@ export const useDrawing = () => {
             async downloadFile(){
                 setLoadingState(LoadingState.Saving);
                 const { data: { name }, editorState: { layers: editorLayers, thumbnail } } = drawing;
-                
+
                 // Generate thumbnail
                 let thumbnailDataURL: string | undefined;
                 if(editorLayers && editorLayers.length > 0 && thumbnail){
@@ -168,7 +168,7 @@ export const useDrawing = () => {
                         console.warn('Failed to generate thumbnail:', e);
                     }
                 }
-                
+
                 saveDrawingState(drawing, name);
                 const blob = await SDRW.binary(drawing.data, thumbnailDataURL);
                 saveAs(blob, `${name}.scribble`);

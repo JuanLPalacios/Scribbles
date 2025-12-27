@@ -34,13 +34,7 @@
   position: absolute;
 }
 
-.ColorInput.dropdown:focus-within > ul {
-  overflow-y: scroll;
-  position: absolute;
-}
-
 @media screen and (orientation:portrait) { 
-
   .ColorInput.dropdown > ul {
     max-width: 25svh;
     max-height: 25vw;

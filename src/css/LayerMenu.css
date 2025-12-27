@@ -57,7 +57,7 @@
 
 .layer-options .menu .layer > .thumbnail {
   display: flex;
-  background: url(Transparency10.png), linear-gradient(0deg, #fff, #fff);
+  background: url("Transparency10.png"), linear-gradient(0deg, #fff, #fff);
 }
 
 .layer-options .menu .list .selected {
@@ -66,7 +66,6 @@
 
 
 @media screen and (orientation:portrait) { 
-
   .layer-options {
     height: 90vw;
   }

@@ -3,6 +3,7 @@ import JSZip from 'jszip';
 import { DrawingState } from '../contexts/DrawingContext';
 import { createLayer2 } from '../generators/createLayer2';
 import { SDRW } from '../lib/sdrw';
+import { serializeDrawingState } from '../lib/serializeJSON';
 
 vi.mock('abr-js');
 
@@ -262,7 +263,7 @@ describe('Drawing Format v0.3.0 - Import/Export (.scribble)', () => {
         expect(blob.size).toBeGreaterThan(0);
     });
 
-    it('should preserve layer visibility flag', async () => {
+    it('should preserve layer visibility flag', () => {
         const layer = createLayer2('Hidden Layer', [100, 100]);
         layer.visible = false;
         layer.imageData = mockCtx.getImageData(0, 0, 100, 100);
@@ -274,8 +275,9 @@ describe('Drawing Format v0.3.0 - Import/Export (.scribble)', () => {
             layers: [layer]
         };
 
-        const blob = await SDRW.binary(drawing);
-        expect(blob.size).toBeGreaterThan(0);
+        const serialized = serializeDrawingState(drawing);
+        const layerOut = Array.isArray(serialized.layers) ? serialized.layers[0] : undefined;
+        expect(layerOut?.visible).toBe(false);
     });
 
     it('should handle large drawings', async () => {

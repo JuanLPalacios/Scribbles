@@ -196,8 +196,9 @@ describe('Drawing Tool - Draw', () => {
 
         const imageData = ctx.getImageData(0, 0, 200, 200);
         let hasStroke = false;
+        // Check all channels for any painted pixels
         for (let i = 0; i < imageData.data.length; i += 4) {
-            if (imageData.data[i] > 0) {
+            if (imageData.data[i + 3] > 0) { // Check alpha channel instead
                 hasStroke = true;
                 break;
             }

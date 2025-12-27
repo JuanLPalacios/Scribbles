@@ -134,3 +134,13 @@ if (!(globalThis as any).PointerEvent) {
 if (typeof document !== 'undefined') {
     Modal.setAppElement(document.body as unknown as HTMLElement);
 }
+
+// Stub HTMLCanvasElement.toBlob to avoid blocking on native canvas work in tests
+// This returns a tiny PNG blob immediately instead of performing heavy serialization
+if (typeof HTMLCanvasElement !== 'undefined') {
+    const originalToBlob = HTMLCanvasElement.prototype.toBlob;
+    HTMLCanvasElement.prototype.toBlob = function (callback: BlobCallback | null, _type?: string, _quality?: number) {
+        // Return a minimal PNG blob asynchronously to maintain the callback contract
+        callback?.(new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])], { type: 'image/png' }));
+    };
+}

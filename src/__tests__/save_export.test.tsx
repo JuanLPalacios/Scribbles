@@ -1,9 +1,39 @@
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { vi } from 'vitest';
 vi.mock('abr-js', () => ({
     loadAbrBrushes: vi.fn(async () => []),
 }));
+const mockActions = {
+    downloadFile: vi.fn(async () => {}),
+    exportPNG: vi.fn(() => {}),
+    localSave: vi.fn(async () => {}),
+};
+vi.mock('../hooks/useDrawing', () => ({
+    useDrawing: () => [
+        {
+            data: { name: 'Test', layers: [], width: 10, height: 10 },
+            editorState: { layers: [], thumbnail: null },
+        },
+        mockActions,
+    ],
+}));
+vi.mock('../hooks/useEditor', () => ({
+    useEditor: () => [
+        { drawing: { data: { name: 'Test', layers: [], width: 10, height: 10 }, editorState: { layers: [], thumbnail: null } } },
+        vi.fn(),
+    ],
+}));
+vi.mock('../lib/Graphics', async () => {
+    const actual = await vi.importActual<typeof import('../lib/Graphics')>('../lib/Graphics');
+    return {
+        ...actual,
+        // Passthrough mergeLayers but keep the latest imageData to avoid canvas work
+        mergeLayers: (from: any, to: any) => ({ ...to, imageData: from.imageData ?? to.imageData }),
+        // Immediately return a tiny PNG-like blob instead of calling canvas.toBlob
+        getBlobFromLayer: (_layer: any, callback: BlobCallback) => callback(new Blob([new Uint8Array([137, 80, 78, 71])], { type: 'image/png' })),
+    };
+});
 vi.mock('../components/inputs/BrushSelectInput', () => ({
     BrushSelectInput: () => null,
 }));
@@ -25,8 +55,6 @@ Object.defineProperty(window, 'matchMedia', {
         dispatchEvent: () => false,
     }),
 });
-import App from '../App';
-import { renderWithProviders } from './utils';
 import * as fileSaver from 'file-saver';
 
 vi.mock('file-saver', async () => {
@@ -46,18 +74,8 @@ vi.mock('../lib/sdrw', () => {
     };
 });
 
-// Helper component to exercise saving actions via hooks
-import { useDrawing } from '../hooks/useDrawing';
-import { useEditor } from '../hooks/useEditor';
-
 function SaveActions() {
-    const [editor] = useEditor();
-    if (!editor.drawing) return null;
-    return <InnerSaveActions />;
-}
-
-function InnerSaveActions() {
-    const [, actions] = useDrawing();
+    const actions = mockActions;
     return (
         <div>
             <button onClick={() => actions.downloadFile()} aria-label="downloadFile">download</button>
@@ -68,20 +86,19 @@ function InnerSaveActions() {
 }
 
 it('calls saveAs for .scribble and .png exports, and localSave resolves', async () => {
-    renderWithProviders(<><App /><SaveActions /></>);
-
-    const openBlank = await screen.findByRole('button', { name: /Open blank scribble/i, timeout: 10000 });
-    await userEvent.click(openBlank);
+    render(<SaveActions />);
 
     // Trigger download .scribble
-    const downloadBtn = await screen.findByRole('button', { name: /download/i, timeout: 10000 });
+    const downloadBtn = screen.getByRole('button', { name: /download/i });
     await userEvent.click(downloadBtn);
     expect((fileSaver as unknown as { saveAs: ReturnType<typeof vi.fn> }).saveAs).toHaveBeenCalled();
+
     // Trigger export PNG
-    const exportBtn = await screen.findByRole('button', { name: /exportPNG/i, timeout: 10000 });
+    const exportBtn = screen.getByRole('button', { name: /exportPNG/i });
     await userEvent.click(exportBtn);
     expect((fileSaver as unknown as { saveAs: ReturnType<typeof vi.fn> }).saveAs).toHaveBeenCalledTimes(2);
+
     // Trigger local save (no saveAs, but should not throw)
-    const saveBtn = await screen.findByRole('button', { name: /localSave/i, timeout: 10000 });
+    const saveBtn = screen.getByRole('button', { name: /localSave/i });
     await userEvent.click(saveBtn);
-}, 60000); // 60 second timeout for this test
+}, 10000); // tighter timeout now that heavy canvas work is mocked

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { DOMMatrix } from '../lib/DOMMath';
 
 vi.mock('abr-js');
 

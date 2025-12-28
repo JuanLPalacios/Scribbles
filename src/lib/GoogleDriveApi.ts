@@ -324,6 +324,125 @@ export async function downloadFileFromDrive(
 }
 
 /**
+ * Get file metadata from Google Drive
+ */
+export async function getFileMetadataFromDrive(
+    fileId: string,
+    accessToken: string
+): Promise<DriveFile> {
+    const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,mimeType,modifiedTime,size`,
+        {
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to get file metadata: ${response.statusText}`);
+    }
+
+    const result = await response.json() as DriveFile;
+    return result;
+}
+
+/**
+ * Rename a file on Google Drive
+ */
+export async function renameFileOnDrive(
+    fileId: string,
+    newName: string,
+    accessToken: string
+): Promise<DriveFile> {
+    const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}`,
+        {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ name: newName }),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to rename file: ${response.statusText}`);
+    }
+
+    const result = await response.json() as DriveFile;
+    return result;
+}
+
+/**
+ * Overwrite a file's content on Google Drive
+ */
+export async function updateFileContentOnDrive(
+    fileId: string,
+    fileContent: Blob,
+    accessToken: string,
+    mimeType: string = 'application/octet-stream'
+): Promise<DriveFile> {
+    const metadata = { mimeType };
+
+    const form = new FormData();
+    form.append(
+        'metadata',
+        new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+    );
+    form.append('file', fileContent);
+
+    const response = await fetch(
+        `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`,
+        {
+            method: 'PATCH',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: form,
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to update file content: ${response.statusText}`);
+    }
+
+    const result = await response.json() as DriveFile;
+    return result;
+}
+
+/**
+ * Copy a file on Google Drive
+ */
+export async function copyFileOnDrive(
+    fileId: string,
+    accessToken: string,
+    newName?: string
+): Promise<string> {
+    const response = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}/copy`,
+        {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(
+                newName ? { name: newName, parents: ['appDataFolder'] } : { parents: ['appDataFolder'] }
+            ),
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error(`Failed to copy file: ${response.statusText}`);
+    }
+
+    const result = await response.json() as { id: string };
+    return result.id;
+}
+
+/**
  * List files in Google Drive app data folder
  */
 export async function listFilesFromDrive(

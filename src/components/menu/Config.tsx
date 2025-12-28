@@ -4,8 +4,9 @@ import optionsIcon from '../../icons/options-svgrepo-com.svg';
 import ReactModal from 'react-modal';
 import { useConfig } from '../../hooks/useConfig';
 import { TimeDisplay } from '../components/TimeDisplay';
-import { EditPalettes } from './EditPalettes';
 import { EditBrushes } from './EditBrushes';
+import { EditPalettes } from './EditPalettes';
+import { GoogleDriveConfig } from './GoogleDriveConfig';
 
 export const Config = () => {
     const [config, setConfig] = useConfig();
@@ -56,6 +57,7 @@ export const Config = () => {
                     (<TimeDisplay value={doubleClickTimeOut}/>)
                 </label>
                 <input id='doubleClickTimeOut' type="range" name='doubleClickTimeOut' min='100' max='10000' step='100' value={doubleClickTimeOut} onChange={update} />
+                <GoogleDriveConfig />
                 <div className='actions'>
                     <EditBrushes />
                     <EditPalettes />

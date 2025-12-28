@@ -3,8 +3,6 @@ import { createStorageHook } from '../generators/createStorageHook';
 import { useVersion } from './useVersion';
 
 export type GoogleDriveConfig = {
-    clientId: string;
-    apiKey: string;
     enabled: boolean;
     accessToken?: string;
     refreshToken?: string;

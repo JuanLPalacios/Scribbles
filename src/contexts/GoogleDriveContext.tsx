@@ -30,7 +30,6 @@ export const GoogleDriveContextProvider = ({
     const clearAuth = () => {
         if (config) {
             onConfigUpdate({
-                ...config,
                 enabled: false,
                 accessToken: undefined,
                 refreshToken: undefined,

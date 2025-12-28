@@ -189,7 +189,7 @@ function loadGapiClientLibrary(
     script.onerror = () => {
         reject(new Error('Failed to load Google API client'));
     };
-    
+
     // Only add script if not already present
     if (!document.querySelector('script[src="https://apis.google.com/js/api.js"]')) {
         document.head.appendChild(script);
@@ -206,8 +206,6 @@ export async function signInToGoogleDrive(): Promise<{
     refreshToken?: string;
     tokenExpiry: number;
 }> {
-    const gisWindow = window as unknown as GisWindow;
-
     if (!tokenClient) {
         throw new Error('Google Identity Services not initialized');
     }

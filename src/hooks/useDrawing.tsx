@@ -10,11 +10,14 @@ import { SDRW } from '../lib/sdrw';
 import { useResentScribbles } from './useResentScribbles';
 import { LoadingState } from '../types/LoadingState';
 import { useLoadingOverlay } from './useLoadingOverlay';
+import { useGoogleDrive } from './useGoogleDrive';
+import { uploadFileToDrive } from '../lib/GoogleDriveApi';
 
 export const useDrawing = () => {
     const [, setLoadingState] = useLoadingOverlay();
     const [, { saveDrawingState }] = useResentScribbles();
     const [editorState, { editDrawing }] = useEditor();
+    const { isConnected, config } = useGoogleDrive();
     const { drawing } = editorState;
     if (!drawing) throw new Error('useDrawing should only be used inside components or hook where a drawing presence is guaranteed');
     const drawingActions = useMemo(() => {
@@ -197,7 +200,44 @@ export const useDrawing = () => {
                     .catch(e=>console.error(e))
                     .finally(()=>setLoadingState(LoadingState.None));
             },
+            async saveToGoogleDrive(){
+                if (!isConnected || !config?.accessToken) {
+                    throw new Error('Not connected to Google Drive');
+                }
+
+                setLoadingState(LoadingState.Saving);
+                try {
+                    const { data: { name }, editorState: { layers: editorLayers, thumbnail } } = drawing;
+
+                    // Generate thumbnail
+                    let thumbnailDataURL: string | undefined;
+                    if(editorLayers && editorLayers.length > 0 && thumbnail){
+                        try {
+                            const items = drawing.data.layers.map((layer, i) => ({ layer, editorLayer: editorLayers[i] }));
+                            renderDrawingThumbnail(items, thumbnail);
+                            thumbnailDataURL = thumbnail.canvas.toDataURL('image/png');
+                        } catch (e) {
+                            console.warn('Failed to generate thumbnail:', e);
+                        }
+                    }
+
+                    // Save locally too
+                    saveDrawingState(drawing, name);
+                    
+                    // Generate blob
+                    const blob = await SDRW.binary(drawing.data, thumbnailDataURL);
+                    
+                    // Upload to Google Drive
+                    const fileName = name.endsWith('.scribble') ? name : `${name}.scribble`;
+                    await uploadFileToDrive(fileName, blob, config.accessToken);
+                } catch (error) {
+                    console.error('Failed to save to Google Drive:', error);
+                    throw error;
+                } finally {
+                    setLoadingState(LoadingState.None);
+                }
+            },
         };
-    }, [drawing, editDrawing, saveDrawingState, setLoadingState]);
+    }, [drawing, editDrawing, saveDrawingState, setLoadingState, isConnected, config?.accessToken]);
     return [drawing, drawingActions] as const;
 };

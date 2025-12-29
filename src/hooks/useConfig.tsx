@@ -1,9 +1,18 @@
 import { useEffect, useMemo } from 'react';
 import { createStorageHook } from '../generators/createStorageHook';
 import { useVersion } from './useVersion';
+
+export type GoogleDriveConfig = {
+    enabled: boolean;
+    accessToken?: string;
+    refreshToken?: string;
+    tokenExpiry?: number;
+}
+
 type Config = {
     autoSave: number
     doubleClickTimeOut: number
+    googleDrive?: GoogleDriveConfig
 }
 
 export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000 });

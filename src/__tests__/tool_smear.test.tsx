@@ -56,7 +56,7 @@ describe('Drawing Tool - Smear', () => {
         if (!ctx) return;
         const hardnesses = [0, 0.5, 1.0];
 
-        hardnesses.forEach((hardness) => {
+        hardnesses.forEach((_hardness) => {
             const testCanvas = document.createElement('canvas');
             testCanvas.width = 200;
             testCanvas.height = 200;

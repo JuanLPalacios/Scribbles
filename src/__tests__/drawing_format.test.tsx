@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import JSZip from 'jszip';
 import { DrawingState } from '../contexts/DrawingContext';
 import { createLayer2 } from '../generators/createLayer2';
@@ -296,7 +296,7 @@ describe('Drawing Format v0.3.0 - Import/Export (.scribble)', () => {
 
         const serialized = serializeDrawingState(drawing);
         const layerOut = Array.isArray(serialized.layers) ? serialized.layers[0] : undefined;
-        expect(layerOut?.visible).toBe(false);
+        expect((layerOut as any)?.visible).toBe(false);
     });
 
     it('should handle large drawings', async () => {

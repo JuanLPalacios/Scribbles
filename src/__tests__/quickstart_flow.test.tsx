@@ -1,4 +1,4 @@
-import { vi } from 'vitest';
+import { vi, it, expect } from 'vitest';
 vi.mock('abr-js', () => ({
     loadAbrBrushes: vi.fn(async () => []),
 }));

@@ -5,12 +5,16 @@ import ReactModal from 'react-modal';
 import { useDrawing } from '../../hooks/useDrawing';
 import { DrawingRequired } from '../../hoc/DrawingRequired';
 import { useShortcut } from '../../hooks/useShortcut';
+import { useGoogleDrive } from '../../hooks/useGoogleDrive';
 
 export const SaveFile = DrawingRequired(() => {
-    const [drawing, { exportPNG, downloadFile, localSave }] = useDrawing();
+    const [drawing, { exportPNG, downloadFile, localSave, saveToGoogleDrive }] = useDrawing();
+    const { isConnected } = useGoogleDrive();
     const [isOpen, setOpen] = useState(false);
     const [name, setName] = useState('');
     const [extension, setExtension] = useState('png');
+    const [isSavingToDrive, setIsSavingToDrive] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const download = useCallback(async () => {
         switch (extension) {
         case 'png':
@@ -22,6 +26,20 @@ export const SaveFile = DrawingRequired(() => {
         }
     }, [downloadFile, exportPNG, extension]);
     const close = useCallback(()=>setOpen(false), []);
+    const handleSaveToGoogleDrive = useCallback(async () => {
+        setSaveError(null);
+        setIsSavingToDrive(true);
+        try {
+            await saveToGoogleDrive();
+            close();
+        } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            setSaveError(errorMsg);
+            console.error('Save to Google Drive error:', error);
+        } finally {
+            setIsSavingToDrive(false);
+        }
+    }, [saveToGoogleDrive, close]);
     useEffect(()=>{
         if(drawing) setName(drawing.data.name.split('.')[0]);
     }, [drawing]);
@@ -46,8 +64,18 @@ export const SaveFile = DrawingRequired(() => {
                     </select>
                     <button onClick={download}>download</button>
                 </div>
+                {saveError && (
+                    <div style={{ padding: '0.5rem', marginBottom: '0.5rem', backgroundColor: '#ffe0e0', color: '#d32f2f', borderRadius: '4px', fontSize: '0.9rem' }}>
+                        {saveError}
+                    </div>
+                )}
                 <div className='actions'>
                     <button onClick={()=>localSave().then(close)}>save locally</button>
+                    {isConnected && (
+                        <button onClick={handleSaveToGoogleDrive} disabled={isSavingToDrive}>
+                            {isSavingToDrive ? 'saving...' : 'save to drive'}
+                        </button>
+                    )}
                     <button onClick={()=>setOpen(false)}>cancel</button>
                 </div>
             </div>

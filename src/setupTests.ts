@@ -40,6 +40,12 @@ if (!(globalThis as any).DOMPoint) {
             this.z = z;
             this.w = w;
         }
+        matrixTransform(matrix: any) {
+            // Simple identity transform if matrix is not a valid DOMMatrix
+            if (!matrix) return new (globalThis as any).DOMPoint(this.x, this.y, this.z, this.w);
+            // Return new point without actual transformation for tests
+            return new (globalThis as any).DOMPoint(this.x, this.y, this.z, this.w);
+        }
     };
 }
 

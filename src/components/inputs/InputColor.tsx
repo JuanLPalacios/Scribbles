@@ -105,7 +105,7 @@ export function InputColor({ value='#000000', name, className, dropper=true, onC
         setY(l*(1+s/100));
     }, [currentColor, value]);
     return <div className={'InputColor dropdown '+className}>
-        <input type="color" name={name} ref={ref2} value={color || value} style={{ display: 'none' }} />
+        <input type="color" name={name} ref={ref2} value={color || value} readOnly style={{ display: 'none' }} />
         <button className='body' title={name} style={{ background: currentColor }}  onClick={()=>{
             if(onClick)onClick(()=>{});
         }}

@@ -11,7 +11,10 @@ ReactModal.defaultStyles = {
     overlay: { ...ReactModal.defaultStyles.overlay, ...overlay }
 };
 
-const root = ReactDOM.createRoot(document.getElementById('root') || document.body);
+const appElement = document.getElementById('root') || document.body;
+ReactModal.setAppElement(appElement);
+
+const root = ReactDOM.createRoot(appElement);
 root.render(
     <AppStateProvider>
         <App />

@@ -87,7 +87,7 @@ describe('Drawing Tool - Color Picker', () => {
         });
 
         // Sample each color
-        positions.forEach((pos, i) => {
+        positions.forEach((pos, _i) => {
             const imageData = ctx!.getImageData(pos.x + 25, pos.y + 25, 1, 1);
             expect(imageData.data).toBeDefined();
         });
@@ -124,7 +124,7 @@ describe('Drawing Tool - Color Picker', () => {
         ctx.globalAlpha = 1.0;
 
         // Sample each opacity level
-        alphas.forEach((alpha, i) => {
+        alphas.forEach((_alpha, i) => {
             const imageData = ctx!.getImageData(i * 50 + 25, 25, 1, 1);
             expect(imageData.data[3]).toBeLessThanOrEqual(255);
         });

@@ -189,7 +189,7 @@ describe('Drawing Tool - Fill', () => {
         // Create gradient of similar colors
         const tolerances = [0, 10, 20, 50];
 
-        tolerances.forEach((tolerance) => {
+        tolerances.forEach((_tolerance) => {
             const testCanvas = document.createElement('canvas');
             testCanvas.width = 200;
             testCanvas.height = 200;

@@ -65,8 +65,10 @@ interface TokenClient {
 
 interface GapiWindow {
     gapi?: {
+        load?: (api: string, callback: () => void) => void;
         client?: {
             setToken: (token: { access_token: string }) => void;
+            init?: (config: { apiKey: string; discoveryDocs: readonly string[] }) => Promise<void>;
             drive?: {
                 files?: {
                     list: (config: Record<string, unknown>) => Promise<{ result: { files: DriveFile[] } }>;
@@ -163,7 +165,7 @@ function loadGapiClientLibrary(
             return;
         }
 
-        gapi.load('client', () => {
+        gapi.load!('client', () => {
             const apiKey = GOOGLE_API_KEY?.trim();
             if (!apiKey) {
                 reject(
@@ -174,15 +176,14 @@ function loadGapiClientLibrary(
                 return;
             }
 
-            gapi.client
-                ?.init({
-                    apiKey,
-                    discoveryDocs: GOOGLE_DRIVE_API_CONFIG.discoveryDocs,
-                })
+            gapi.client!.init!({
+                apiKey,
+                discoveryDocs: GOOGLE_DRIVE_API_CONFIG.discoveryDocs,
+            })
                 .then(() => resolve())
-                .catch((error) => {
+                .catch((error: unknown) => {
                     console.error('gapi.client.init error:', error);
-                    reject(error);
+                    reject(error instanceof Error ? error : new Error(String(error)));
                 });
         });
     };
@@ -212,7 +213,7 @@ export async function signInToGoogleDrive(): Promise<{
 
     return new Promise((resolve, reject) => {
         try {
-            tokenClient.callback = (tokenResponse) => {
+            tokenClient!.callback = (tokenResponse) => {
                 if (tokenResponse.error) {
                     reject(new Error(tokenResponse.error));
                     return;
@@ -231,7 +232,7 @@ export async function signInToGoogleDrive(): Promise<{
                 });
             };
 
-            tokenClient.requestAccessToken({ prompt: 'consent' });
+            tokenClient!.requestAccessToken({ prompt: 'consent' });
         } catch (error) {
             reject(error instanceof Error ? error : new Error(String(error)));
         }

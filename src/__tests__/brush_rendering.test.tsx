@@ -198,7 +198,7 @@ describe('Brush Stroke Rendering', () => {
     it('should preserve stroke color through rendering', () => {
         const colors = ['#FF0000', '#00FF00', '#0000FF'];
 
-        colors.forEach((color, index) => {
+        colors.forEach((color, _index) => {
             const testCanvas = createDrawable({ size: [100, 100] });
             testCanvas.ctx.fillStyle = color;
             testCanvas.ctx.fillRect(0, 0, 100, 100);

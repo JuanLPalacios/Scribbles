@@ -23,7 +23,7 @@ export const LoadFile = () => {
     const { isConnected, config } = useGoogleDrive();
     const { files: driveFiles, loading: driveLoading, error: driveError, loadFiles } = useGoogleDriveFileList();
     const [isOpen, setOpen] = useState(false);
-    const [resentScribbles] = useResentScribbles();
+    const [resentScribbles, { saveDriveThumbnail, getDriveThumbnail, getThumbnail }] = useResentScribbles();
     const [loadView, setLoadView] = useLoadView();
     const [, setLoadingDriveFileId] = useState<string | null>(null);
     const openModal = useCallback(() => setOpen(true), []);
@@ -55,6 +55,17 @@ export const LoadFile = () => {
         setLoadingDriveFileId(fileId);
         try {
             const blob = await downloadFileFromDrive(fileId, config.accessToken);
+
+            // If image and no cached thumbnail, generate and cache dataURL
+            if (!getDriveThumbnail(fileId) && blob.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const dataUrl = reader.result as string;
+                    saveDriveThumbnail(fileId, fileName, dataUrl);
+                };
+                reader.readAsDataURL(blob);
+            }
+
             const file = new File([blob], fileName, { type: blob.type });
             openFile(file);
         } catch (err) {
@@ -63,7 +74,7 @@ export const LoadFile = () => {
         } finally {
             setLoadingDriveFileId(null);
         }
-    }, [config?.accessToken, openFile]);
+    }, [config?.accessToken, openFile, getDriveThumbnail, saveDriveThumbnail]);
 
     // Build merged file list with sync indicators
     const mergedFiles: StoredFile[] = useMemo(() => {
@@ -78,18 +89,19 @@ export const LoadFile = () => {
                 path: `drive:${df.id}`,
                 name: displayName,
                 chunks: 0,
+                thumbnail: getDriveThumbnail(df.id),
             };
         });
 
         const localMapped: StoredFile[] = resentScribbles.map(sf => {
             const isSynced = driveFiles.some(df => df.name === sf.name);
             const displayName = isSynced ? `${sf.name} (synced)` : sf.name;
-            return { ...sf, name: displayName };
+            return { ...sf, name: displayName, thumbnail: getThumbnail(sf) };
         });
 
         // Prefer showing local first, then drive
         return [...localMapped, ...driveMapped];
-    }, [resentScribbles, driveFiles]);
+    }, [resentScribbles, driveFiles, getDriveThumbnail, getThumbnail]);
 
     const handleMergedClick = useCallback((file: StoredFile) => {
         if (file.path?.startsWith('drive:')) {

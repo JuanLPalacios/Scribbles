@@ -15,7 +15,7 @@ import { uploadFileToDrive } from '../lib/GoogleDriveApi';
 
 export const useDrawing = () => {
     const [, setLoadingState] = useLoadingOverlay();
-    const [, { saveDrawingState }] = useResentScribbles();
+    const [, { saveDrawingState, saveDriveThumbnail }] = useResentScribbles();
     const [editorState, { editDrawing }] = useEditor();
     const { isConnected, config } = useGoogleDrive();
     const { drawing } = editorState;
@@ -223,13 +223,18 @@ export const useDrawing = () => {
 
                     // Save locally too
                     saveDrawingState(drawing, name);
-                    
+
                     // Generate blob
                     const blob = await SDRW.binary(drawing.data, thumbnailDataURL);
-                    
+
                     // Upload to Google Drive
                     const fileName = name.endsWith('.scribble') ? name : `${name}.scribble`;
-                    await uploadFileToDrive(fileName, blob, config.accessToken);
+                    const fileId = await uploadFileToDrive(fileName, blob, config.accessToken);
+
+                    // Cache thumbnail locally for Drive listing
+                    if (thumbnailDataURL && fileId) {
+                        saveDriveThumbnail(fileId, fileName, thumbnailDataURL);
+                    }
                 } catch (error) {
                     console.error('Failed to save to Google Drive:', error);
                     throw error;
@@ -238,6 +243,6 @@ export const useDrawing = () => {
                 }
             },
         };
-    }, [drawing, editDrawing, saveDrawingState, setLoadingState, isConnected, config?.accessToken]);
+    }, [drawing, editDrawing, saveDrawingState, setLoadingState, isConnected, config?.accessToken, saveDriveThumbnail]);
     return [drawing, drawingActions] as const;
 };

@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { createStorageHook } from '../generators/createStorageHook';
 import { useVersion } from './useVersion';
+import { detectSystemStabilization } from '../lib/detectSystemStabilization';
 
 export type GoogleDriveConfig = {
     enabled: boolean;
@@ -19,9 +20,10 @@ type Config = {
         b: number
         a: number
     }
+    strokeStabilization?: number
 }
 
-export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000, canvasColor: { r: 255, g: 255, b: 255, a: 1 } });
+export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000, canvasColor: { r: 255, g: 255, b: 255, a: 1 }, strokeStabilization: detectSystemStabilization() });
 
 export const useConfig = ()=>{
     const [config, setConfig] = useStoredConfig();

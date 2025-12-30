@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import '../../css/Config.css';
 import optionsIcon from '../../icons/options-svgrepo-com.svg';
 import ReactModal from 'react-modal';
@@ -7,13 +7,33 @@ import { TimeDisplay } from '../components/TimeDisplay';
 import { EditBrushes } from './EditBrushes';
 import { EditPalettes } from './EditPalettes';
 import { GoogleDriveConfig } from './GoogleDriveConfig';
+import { InputColor } from '../inputs/InputColor';
 
 export const Config = () => {
     const [config, setConfig] = useConfig();
     const [configCopy, setConfigCopy] = useState(config);
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600 });
     const { autoSave, doubleClickTimeOut } = configCopy;
+    const canvasColor = useMemo(() => configCopy?.canvasColor || { r: 255, g: 255, b: 255, a: 1 }, [configCopy]);
     const { isOpen, name } = state;
+
+    const rgbaToHex = (r: number, g: number, b: number) => {
+        return '#' + [r, g, b]
+            .map(x => x.toString(16).padStart(2, '0')
+                .toUpperCase())
+            .join('');
+    };
+
+    const hexToRgb = (hex: string) => {
+        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+        if (!result) return null;
+        return {
+            r: parseInt(result[1], 16),
+            g: parseInt(result[2], 16),
+            b: parseInt(result[3], 16)
+        };
+    };
+
     const update = useCallback((e:React.ChangeEvent<HTMLInputElement>) => {
         let value;
         switch (e.target.type){
@@ -27,6 +47,32 @@ export const Config = () => {
         }
         setConfigCopy({ ...configCopy, [e.target?.name]: value });
     }, [configCopy, setConfigCopy]);
+
+    const handleColorChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const hex = e.target.value;
+        const rgb = hexToRgb(hex);
+        if (rgb) {
+            setConfigCopy({
+                ...configCopy,
+                canvasColor: {
+                    ...canvasColor,
+                    ...rgb
+                }
+            });
+        }
+    }, [configCopy, canvasColor]);
+
+    const handleAlphaChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const alpha = parseFloat(e.target.value);
+        setConfigCopy({
+            ...configCopy,
+            canvasColor: {
+                ...canvasColor,
+                a: alpha
+            }
+        });
+    }, [configCopy, canvasColor]);
+
     const close = useCallback(() => {
         setState({ ...state, isOpen: false });
     }, [state]);
@@ -58,6 +104,31 @@ export const Config = () => {
                 </label>
                 <input id='doubleClickTimeOut' type="range" name='doubleClickTimeOut' min='100' max='10000' step='100' value={doubleClickTimeOut} onChange={update} />
                 <GoogleDriveConfig />
+                <fieldset>
+                    <legend>New Image Background Color</legend>
+                    <label htmlFor='canvasColor'>
+                        Color
+                    </label>
+                    <InputColor
+                        value={rgbaToHex(canvasColor.r, canvasColor.g, canvasColor.b)}
+                        onChange={handleColorChange}
+                        dropper={false}
+                    />
+                    <label htmlFor='canvasAlpha'>
+                        Opacity
+                        ({Math.round(canvasColor.a * 100)}%)
+                    </label>
+                    <input
+                        id='canvasAlpha'
+                        type="range"
+                        name='canvasAlpha'
+                        min='0'
+                        max='1'
+                        step='0.01'
+                        value={canvasColor.a}
+                        onChange={handleAlphaChange}
+                    />
+                </fieldset>
                 <div className='actions'>
                     <EditBrushes />
                     <EditPalettes />

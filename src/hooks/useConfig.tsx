@@ -13,9 +13,15 @@ type Config = {
     autoSave: number
     doubleClickTimeOut: number
     googleDrive?: GoogleDriveConfig
+    canvasColor?: {
+        r: number
+        g: number
+        b: number
+        a: number
+    }
 }
 
-export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000 });
+export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000, canvasColor: { r: 255, g: 255, b: 255, a: 1 } });
 
 export const useConfig = ()=>{
     const [config, setConfig] = useStoredConfig();

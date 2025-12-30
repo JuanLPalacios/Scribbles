@@ -7,11 +7,13 @@ import { loadImageAsDrawingState } from '../generators/loadImageAsDrawingState';
 import { createLayer2 } from '../generators/createLayer2';
 import { useLoadingOverlay } from './useLoadingOverlay';
 import { LoadingState } from '../types/LoadingState';
+import { useConfig } from './useConfig';
 
 export const useEditor = () => {
     const [, setLoadingState] = useLoadingOverlay();
     const [, { loadDrawingState, loadLastSession }] = useResentScribbles();
     const [editor, dispatch] = useContext(EditorContext);
+    const [config] = useConfig();
     return [editor, useMemo(()=>({
         openFile(file:File){
             setLoadingState(LoadingState.Loading);
@@ -65,7 +67,8 @@ export const useEditor = () => {
                     layers: [
                         createLayer2(
                             'layer 1',
-                            [width, height]
+                            [width, height],
+                            config?.canvasColor
                         )
                     ]
                 }
@@ -88,6 +91,6 @@ export const useEditor = () => {
                 })
                 .finally(()=>setLoadingState(LoadingState.None));
         },
-    }), [dispatch, loadDrawingState, loadLastSession, setLoadingState])] as const;
+    }), [dispatch, loadDrawingState, loadLastSession, setLoadingState, config])] as const;
 };
 

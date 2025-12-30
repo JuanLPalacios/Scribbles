@@ -19,9 +19,10 @@ type Config = {
         b: number
         a: number
     }
+    strokeStabilization?: number
 }
 
-export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000, canvasColor: { r: 255, g: 255, b: 255, a: 1 } });
+export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000, canvasColor: { r: 255, g: 255, b: 255, a: 1 }, strokeStabilization: 1 });
 
 export const useConfig = ()=>{
     const [config, setConfig] = useStoredConfig();

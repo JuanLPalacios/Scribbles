@@ -3,9 +3,12 @@ import { BrushRenderer, BrushRendererContext, NonRenderBrushFunctions } from '..
 import { createDrawable } from '../generators/createDrawable';
 import { difference, dotProduct2D, length, createBezier, bezierArcLength, Point } from '../lib/Vectors2d';
 import { DrawableState } from '../types/DrawableState';
+import { useConfig } from '../hooks/useConfig';
 
 export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacing: number; name: string; scribbleBrushType: number; }>>({ brush, children, renderer: { drawBezier, drawLine, setup } }: S) {
     const buffer = createDrawable({ size: [1, 1], options: { willReadFrequently: true } });
+    const [config] = useConfig();
+    const stabilizationFactor = config?.strokeStabilization || 1;
     const r = useMemo<BrushRenderer>(() => {
         let lastPoint: Point = [0, 0];
         let lastVector: Point = [0, 0];
@@ -15,6 +18,7 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
         let currentLength = 0;
         let lastStrokeLength = 0;
         let { spacing } = brush;
+        spacing = spacing * stabilizationFactor;
         let previewData:ImageData;
 
         const startStroke = (drawable: DrawableState, point: Point, color: string, alpha: number, width: number) => {
@@ -117,7 +121,7 @@ export function AbstractSmoothSpacing<S extends NonRenderBrushFunctions<{ spacin
             // FIXME: draw tip shape to create the illusion of the more complex brush
         };
         return { drawStroke, endStroke, startStroke };
-    }, [brush, buffer, drawBezier, drawLine, setup]);
+    }, [brush, buffer, drawBezier, drawLine, setup, stabilizationFactor]);
     return <BrushRendererContext.Provider value={r}>
         {children}
     </BrushRendererContext.Provider>;

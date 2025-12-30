@@ -13,7 +13,7 @@ export const Config = () => {
     const [config, setConfig] = useConfig();
     const [configCopy, setConfigCopy] = useState(config);
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600 });
-    const { autoSave, doubleClickTimeOut } = configCopy;
+    const { autoSave, doubleClickTimeOut, strokeStabilization } = configCopy;
     const canvasColor = useMemo(() => configCopy?.canvasColor || { r: 255, g: 255, b: 255, a: 1 }, [configCopy]);
     const { isOpen, name } = state;
 
@@ -129,6 +129,11 @@ export const Config = () => {
                         onChange={handleAlphaChange}
                     />
                 </fieldset>
+                <label htmlFor='strokeStabilization'>
+                    Stroke Stabilization
+                    ({Math.round((strokeStabilization || 1) * 100)}%)
+                </label>
+                <input id='strokeStabilization' type="range" name='strokeStabilization' min='0' max='5' step='0.1' value={strokeStabilization || 1} onChange={update} />
                 <div className='actions'>
                     <EditBrushes />
                     <EditPalettes />

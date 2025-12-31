@@ -21,9 +21,10 @@ type Config = {
         a: number
     }
     strokeStabilization?: number
+    brushSizeInput?: 'slider'|'list'
 }
 
-export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000, canvasColor: { r: 255, g: 255, b: 255, a: 1 }, strokeStabilization: detectSystemStabilization() });
+export const useStoredConfig = createStorageHook<Config>('config', 'local', { autoSave: 300000, doubleClickTimeOut: 1000, canvasColor: { r: 255, g: 255, b: 255, a: 1 }, strokeStabilization: detectSystemStabilization(), brushSizeInput: 'slider' });
 
 export const useConfig = ()=>{
     const [config, setConfig] = useStoredConfig();

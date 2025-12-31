@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react';
 import { useBrushesOptions } from '../../hooks/useBrushesOptions';
 import { useEditor } from '../../hooks/useEditor';
 import { LeftMenuPortal } from '../portals/LeftMenu';
+import { useConfig } from '../../hooks/useConfig';
 
 export const BrushWidthInput = () => {
     const [brushesOptions, setBrushesOptions] = useBrushesOptions();
     const { brushWidth } = brushesOptions;
     const [{ drawing }] = useEditor();
+    const [config] = useConfig();
+    const sizeInputMode = config?.brushSizeInput ?? 'slider';
     const { editorState: { transform } } = drawing || { editorState: { transform: new DOMMatrix() } };
     const [refState, setRefState] = useState<'hidden'|'vanishing'|'visible'>('hidden');
     useEffect(()=>{
@@ -23,16 +26,28 @@ export const BrushWidthInput = () => {
         };
     }, [brushWidth]);
     return <LeftMenuPortal>
-        <label className='BrushWidthInput'>
+        <label className={`BrushWidthInput display-${sizeInputMode}`}>
             <div>
                     brush width
             </div>
-            <input {...{ orient: 'vertical' }} type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="16" onChange={(e) => setBrushesOptions({ ...brushesOptions, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} />
-            <div className={`brush-reference ${refState}`} style={{
+            {sizeInputMode === 'slider' && <><input {...{ orient: 'vertical' }} type="range" value={Math.sqrt(brushWidth)} step="0.1" min="1" max="16" onChange={(e) => setBrushesOptions({ ...brushesOptions, brushWidth: Math.pow(parseFloat(e.target.value), 2) })} /><div className={`brush-reference ${refState}`} style={{
                 borderRadius: `${brushWidth*transform.a/2}px`,
                 width: `${brushWidth*transform.a}px`,
                 height: `${brushWidth*transform.a}px`,
-                left: `max(var(--button-diameter), calc(2 * var(--button-diameter) - ${brushWidth*transform.a/2}px))` }}></div>
+                left: `max(var(--button-diameter), calc(2 * var(--button-diameter) - ${brushWidth*transform.a/2}px))` }}></div></>}
+            {sizeInputMode === 'list' && <select value={brushWidth} onChange={(e)=>setBrushesOptions({ ...brushesOptions, brushWidth: parseFloat(e.target.value) })} size={9}>
+                {[2, 4, 6, 8, 12, 16, 24, 32].map(value =>
+                    <option
+                        key={value}
+                        value={value}
+                        style={{
+                            fontSize: `${value*transform.a*1.28}px`,
+                            height: `max(${value*transform.a}px, var(--button-diameter)) !important`,
+                            paddingInline: 'var(--button-diameter)',
+                        }}>
+                        ⬤
+                    </option>)}
+            </select>}
         </label>
     </LeftMenuPortal>;
 };

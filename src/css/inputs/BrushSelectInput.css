@@ -23,6 +23,15 @@
   padding: 2px 0;
 }
 
+.BrushWidthInput.display-list {
+  writing-mode: unset !important;
+}
+
+.BrushWidthInput.display-list option {
+  justify-self: center;
+  align-content: center;
+}
+
 .BrushWidthInput > .brush-reference {
   position: absolute;
   border: 1px dashed #fff;

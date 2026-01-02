@@ -13,7 +13,7 @@ export const Config = () => {
     const [config, setConfig] = useConfig();
     const [configCopy, setConfigCopy] = useState(config);
     const [state, setState] = useState({ isOpen: false, name: '', width: 600, height: 600 });
-    const { autoSave, doubleClickTimeOut, strokeStabilization, brushSizeInput = 'slider' } = configCopy;
+    const { autoSave, doubleClickTimeOut, strokeStabilization, brushSizeInput = 'slider', alphaInput = 'slider' } = configCopy;
     const canvasColor = useMemo(() => configCopy?.canvasColor || { r: 255, g: 255, b: 255, a: 1 }, [configCopy]);
     const { isOpen, name } = state;
 
@@ -138,6 +138,13 @@ export const Config = () => {
                     Brush Size Control
                 </label>
                 <select id='brushSizeInput' name='brushSizeInput' value={brushSizeInput} onChange={(e)=>setConfigCopy({ ...configCopy, brushSizeInput: e.target.value as 'slider'|'list' })}>
+                    <option value='slider'>Slider</option>
+                    <option value='list'>List</option>
+                </select>
+                <label htmlFor='alphaInput'>
+                    Alpha Control
+                </label>
+                <select id='alphaInput' name='alphaInput' value={alphaInput} onChange={(e)=>setConfigCopy({ ...configCopy, alphaInput: e.target.value as 'slider'|'list' })}>
                     <option value='slider'>Slider</option>
                     <option value='list'>List</option>
                 </select>

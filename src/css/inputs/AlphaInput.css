@@ -1,0 +1,8 @@
+.AlphaInput.display-list {
+  writing-mode: unset !important;
+}
+
+.AlphaInput.display-list option {
+  justify-self: center;
+  align-content: center;
+}

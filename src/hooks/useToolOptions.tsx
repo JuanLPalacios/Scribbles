@@ -1,4 +1,5 @@
 import { useContext } from 'react';
 import { ToolOptionsContext } from '../contexts/ToolOptionsContext';
+import { RecordableHOC } from '../hoc/Recordable';
 
-export const useToolOptions = () => useContext(ToolOptionsContext);
+export const useToolOptions = RecordableHOC(() => useContext(ToolOptionsContext));

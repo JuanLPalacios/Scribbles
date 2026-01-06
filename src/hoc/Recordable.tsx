@@ -3,62 +3,68 @@
  */
 
 import { useEffect, useMemo } from 'react';
-import { Tool } from '../contexts/ToolContext';
-import { CanvasEvent } from '../types/CanvasEvent';
-import { useDemoRecorder } from '../hooks/useDemoRecorder';
 import { DemoEvent } from '../types/DemoEvent';
-import { StatePair } from '../types/StatePair';
-import { ToolOptions } from '../contexts/MenuOptions';
-import { BrushOptions } from '../contexts/BrushesOptionsContext';
+import { useDemoRecorder } from '../hooks/useDemoRecorder';
 
 /**
  * Generic higher-order component for recording and playback
  * Wraps any hook and automatically records/replays all function calls and state updates
  */
-export const RecordableHOC = <T,>(hookFn: () => T): (() => T) => {
+export const RecordableHOC = <T, >(hookFn: () => T): (() => T) => {
     return () => {
-        const result = hookFn();
-        const [demoState, demoActions] = useDemoRecorder();
-
-        // Playback effect - replays recorded events by calling methods/functions with stored data
-        useEffect(() => {
-            if (demoState.state !== 'playing' || demoState.events.length < 2) return;
-
-            let i = 1;
-            let timeout: number | null = null;
-
-            const playNext = () => {
-                const event = demoState.events[i];
-                if (!event) {
-                    demoActions.stopPlayback();
-                    return;
-                }
-
-                // Replay by calling the method/function with stored data
-                replayEvent(result, event);
-
-                if (i + 1 < demoState.events.length) {
-                    const delay = demoState.events[i + 1].timestamp - event.timestamp;
-                    i++;
-                    timeout = window.setTimeout(playNext, delay);
-                } else {
-                    demoActions.stopPlayback();
-                }
-            };
-
-            timeout = window.setTimeout(playNext, 0);
-
-            return () => {
-                if (timeout) clearTimeout(timeout);
-            };
-        }, [demoState.state, demoState.events, result, demoActions]);
-
-        // Record effect - wraps result with recording
-        return useMemo(() => {
-            return wrapForRecording(result, demoState, demoActions);
-        }, [result, demoState.state, demoActions]);
+        return RecordableHookImpl(hookFn);
     };
 };
+
+/**
+ * Internal hook version of RecordableHOC that properly uses React Hooks
+ */
+function RecordableHookImpl<T>(hookFn: () => T): T {
+    const result = hookFn();
+    const [demoState, demoActions] = useDemoRecorder();
+    //const [demoState, demoActions] = [{ state: '', events: [] }, { stopPlayback: ()=>{}, recordEvent: (e:DemoEvent)=>{} }];
+
+    // Record effect - wraps result with recording
+    const wrappedResult = useMemo(() => {
+        return wrapForRecording(result, demoState, demoActions);
+    }, [result, demoState.state, demoActions]);
+
+    // Playback effect - replays recorded events by calling methods/functions with stored data
+    useEffect(() => {
+        if (demoState.state !== 'playing' || demoState.events.length < 2) return;
+
+        let i = 1;
+        let timeout: number | null = null;
+
+        const playNext = () => {
+            const event = demoState.events[i];
+            if (!event) {
+                demoActions.stopPlayback();
+                return;
+            }
+
+            // Replay by calling the method/function with stored data
+            replayEvent(wrappedResult, event);
+
+            if (i + 1 < demoState.events.length) {
+                const delay = demoState.events[i + 1].timestamp - event.timestamp;
+                i++;
+                timeout = window.setTimeout(playNext, delay);
+            } else {
+                demoActions.stopPlayback();
+            }
+        };
+
+        timeout = window.setTimeout(playNext, 0);
+
+        return () => {
+            if (timeout) clearTimeout(timeout);
+        };
+    }, [demoState.state, demoState.events, wrappedResult, demoActions]);
+
+    return result;
+    //return wrappedResult;
+}
 
 /**
  * Wraps a result with recording capabilities
@@ -158,42 +164,3 @@ function replayEvent<T>(result: T, event: DemoEvent): void {
         }
     }
 }
-
-/**
- * Wraps useEditor to manage recording lifecycle with file operations
- */
-export const useRecordableEditor = () => {
-    const { useEditor } = require('../hooks/useEditor');
-    const editorResult = useEditor();
-    const [editor, editorActions] = editorResult;
-    const [, demoActions] = useDemoRecorder();
-
-    return useMemo(() => {
-        return [
-            editor,
-            {
-                ...editorActions,
-                newFile: (params: { name: string; width: number; height: number }) => {
-                    demoActions.startRecording();
-                    editorActions.newFile(params);
-                },
-                openFile: (file: File) => {
-                    demoActions.stopPlayback();
-                    editorActions.openFile(file);
-                    demoActions.startRecording();
-                },
-                loadFile: (fileRef: any) => {
-                    demoActions.stopPlayback();
-                    editorActions.loadFile(fileRef);
-                    demoActions.startRecording();
-                },
-                loadSession: () => {
-                    demoActions.stopPlayback();
-                    editorActions.loadSession();
-                    demoActions.startRecording();
-                },
-            }
-        ] as const;
-    }, [editor, editorActions, demoActions]);
-};
-

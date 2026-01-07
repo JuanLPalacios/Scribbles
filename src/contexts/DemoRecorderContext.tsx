@@ -4,9 +4,6 @@
 
 import { createContext, ReactNode, useCallback, useRef, useState } from 'react';
 import { DemoEvent, DemoFile, InitEvent } from '../types/DemoEvent';
-import { useEditor } from '../hooks/useEditor';
-import { useToolOptions } from '../hooks/useToolOptions';
-import { useBrushesOptions } from '../hooks/useBrushesOptions';
 
 export type RecordingState = 'idle' | 'recording' | 'playing';
 
@@ -19,7 +16,7 @@ export type DemoRecorderState = {
 };
 
 export type DemoRecorderActions = {
-    startRecording: () => void;
+    startRecording: (initEvent?: InitEvent) => void;
     stopRecording: () => DemoFile | null;
     recordEvent: (event: DemoEvent) => void;
     playDemo: (demo: DemoFile) => Promise<void>;
@@ -53,37 +50,19 @@ export const DemoRecorderProvider = (props: { children: ReactNode }) => {
     const [state, setState] = useState<DemoRecorderState>(initialState);
     const eventsRef = useRef<DemoEvent[]>([]);
     const playbackTimeoutRef = useRef<number | null>(null);
-    const [editor] = useEditor();
-    const [toolOptions] = useToolOptions();
-    const [brushesOptions] = useBrushesOptions();
 
-    const startRecording = useCallback(() => {
-        const drawing = editor.drawing;
-        if (!drawing) return;
-
-        const currentTool = toolOptions.tools[toolOptions.selectedTool];
-        const currentBrush = brushesOptions.brushesPacks[brushesOptions.selectedBrush];
-
-        const initEvent: InitEvent = {
-            timestamp: 0,
-            type: 'init',
-            data: {
-                drawing: drawing.data,
-                tool: currentTool.name || 'draw',
-                brushId: currentBrush?.brush?.name || 'solid',
-                color: '#000000', // TODO: Get from color context when available
-            },
-        };
-
-        eventsRef.current = [initEvent];
+    const startRecording = useCallback((initEvent?: InitEvent) => {
+        // Use provided initEvent or start with empty events list
+        const events = initEvent ? [initEvent] : [];
+        eventsRef.current = events;
         setState({
             state: 'recording',
-            events: [initEvent],
+            events,
             startTime: Date.now(),
             currentTime: 0,
             duration: 0,
         });
-    }, [editor, toolOptions, brushesOptions]);
+    }, []);
 
     const stopRecording = useCallback((): DemoFile | null => {
         if (state.state !== 'recording') return null;

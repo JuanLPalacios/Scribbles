@@ -27,7 +27,7 @@ function RecordableHookImpl<T>(hookFn: () => T): T {
     // Record effect - wraps result with recording
     const wrappedResult = useMemo(() => {
         return wrapForRecording(result, demoState, demoActions);
-    }, [result, demoState.state, demoActions]);
+    }, [result, demoState, demoActions]);
 
     // Playback effect - replays recorded events by calling methods/functions with stored data
     useEffect(() => {
@@ -62,8 +62,7 @@ function RecordableHookImpl<T>(hookFn: () => T): T {
         };
     }, [demoState.state, demoState.events, wrappedResult, demoActions]);
 
-    return result;
-    //return wrappedResult;
+    return wrappedResult;
 }
 
 /**
